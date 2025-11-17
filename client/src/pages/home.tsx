@@ -31,7 +31,6 @@ import {
   Mail,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import heroImage from "@assets/image_1763396949358.png";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 
 export default function Home() {
@@ -161,7 +160,7 @@ export default function Home() {
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${heroImage})`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763407837/Image_fx_i4qias.jpg')`,
         }}
         data-testid="section-hero"
       >
