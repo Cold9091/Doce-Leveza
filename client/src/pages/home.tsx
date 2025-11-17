@@ -230,30 +230,12 @@ export default function Home() {
       >
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center justify-center">
               <img
-                src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=600&fit=crop"
-                alt="Transformação 1"
-                className="rounded-lg w-full h-80 object-cover"
-                data-testid="img-transformation-1"
-              />
-              <img
-                src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=600&fit=crop"
-                alt="Transformação 2"
-                className="rounded-lg w-full h-80 object-cover"
-                data-testid="img-transformation-2"
-              />
-              <img
-                src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=600&fit=crop"
-                alt="Transformação 3"
-                className="rounded-lg w-full h-80 object-cover"
-                data-testid="img-transformation-3"
-              />
-              <img
-                src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=600&fit=crop"
-                alt="Transformação 4"
-                className="rounded-lg w-full h-80 object-cover"
-                data-testid="img-transformation-4"
+                src="https://res.cloudinary.com/dl90hjhoj/image/upload/v1763412969/Brown_Yellow_Modern_Museum_Presentation_hqusfp.svg"
+                alt="Transformações"
+                className="w-full max-w-lg"
+                data-testid="img-transformation"
               />
             </div>
 
