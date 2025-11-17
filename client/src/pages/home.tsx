@@ -169,10 +169,10 @@ export default function Home() {
             <ButterflyIcon />
             <div className="text-foreground">
               <span className="font-heading font-bold text-xl">
-                Metamorfose
+                DOCE
               </span>{" "}
               <span className="font-heading font-bold text-xl italic text-accent">
-                Vital
+                LEVEZA
               </span>
             </div>
           </div>
@@ -212,10 +212,10 @@ export default function Home() {
               >
                 <ButterflyIcon />
                 <span className="font-heading font-bold text-xs tracking-wide">
-                  Metamorfose
+                  DOCE
                 </span>
                 <span className="font-heading font-bold text-xs italic text-accent">
-                  Vital
+                  LEVEZA
                 </span>
               </div>
             ))}
@@ -241,8 +241,8 @@ export default function Home() {
 
             <div className="space-y-6">
               <h2 className="text-2xl lg:text-3xl font-semibold text-card-foreground">
-                Para quem <span className="text-accent">é</span> o metamorfose
-                Vital?
+                Para quem <span className="text-accent">é</span> o DOCE
+                LEVEZA?
               </h2>
 
               <div className="space-y-4">
@@ -402,7 +402,7 @@ export default function Home() {
             <Accordion type="single" collapsible className="space-y-3">
               {[
                 { title: "MÓDULO 01", subtitle: "Introdução" },
-                { title: "MÓDULO 02", subtitle: "Metamorfose Vital" },
+                { title: "MÓDULO 02", subtitle: "DOCE LEVEZA" },
                 {
                   title: "MÓDULO 03",
                   subtitle: "Plano alimentar personalizado",
@@ -544,8 +544,8 @@ export default function Home() {
               3 SEMANAS PARA TRANSFORMAR O SEU CORPO
             </Badge>
             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
-              <span className="text-accent">Como funciona</span> o metamorfose
-              Vital?
+              <span className="text-accent">Como funciona</span> o DOCE
+              LEVEZA?
             </h2>
           </div>
 
@@ -633,7 +633,7 @@ export default function Home() {
             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
               Já são{" "}
               <span className="text-accent">milhares de pessoas</span> que
-              mudaram de vida com o Metamorfose Vital:
+              mudaram de vida com o DOCE LEVEZA:
             </h2>
           </div>
 
@@ -712,10 +712,10 @@ export default function Home() {
                 <ButterflyIcon />
                 <div className="text-foreground">
                   <span className="font-heading font-bold text-lg">
-                    Metamorfose
+                    DOCE
                   </span>{" "}
                   <span className="font-heading font-bold text-lg italic text-accent">
-                    Vital
+                    LEVEZA
                   </span>
                 </div>
               </div>
@@ -858,10 +858,10 @@ export default function Home() {
                 <ButterflyIcon />
                 <div className="text-foreground">
                   <span className="font-heading font-bold text-lg">
-                    Metamorfose
+                    DOCE
                   </span>{" "}
                   <span className="font-heading font-bold text-lg italic text-accent">
-                    Vital
+                    LEVEZA
                   </span>
                 </div>
               </div>
@@ -885,7 +885,7 @@ export default function Home() {
                   Você tem, por lei, o direito de testar o produto durante 7
                   dias. Se dentro desse período você achar que o curso não é
                   pra você, basta enviar um e-mail para
-                  Suporte@metamorfosevital.com para solicitar o reembolso.
+                  Suporte@doceleveza.com para solicitar o reembolso.
                 </p>
               </div>
 
@@ -1036,7 +1036,7 @@ export default function Home() {
                       Atendimento por E-mail
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Mensagem para suporte@metamorfosevital.com
+                      Mensagem para suporte@doceleveza.com
                     </p>
                   </div>
                 </div>
@@ -1048,7 +1048,7 @@ export default function Home() {
                 {
                   question: "O curso é um plano de assinatura?",
                   answer:
-                    "Não, o Metamorfose Vital não é um plano de assinatura mensal, então não ocorre a cobrança automática. Os alunos do 3 semanas para transformar o seu corpo tem acesso ao curso por 06 meses e a partir da compra. Caso seja de interesse do aluno, após esse prazo, é possível a opção de renovação do curso por mais 12 meses.",
+                    "Não, o DOCE LEVEZA não é um plano de assinatura mensal, então não ocorre a cobrança automática. Os alunos do 3 semanas para transformar o seu corpo tem acesso ao curso por 06 meses e a partir da compra. Caso seja de interesse do aluno, após esse prazo, é possível a opção de renovação do curso por mais 12 meses.",
                 },
                 {
                   question: "Qual o tempo de acesso ao curso?",
@@ -1109,9 +1109,9 @@ export default function Home() {
           <div className="flex items-center justify-center gap-2">
             <ButterflyIcon />
             <div className="text-card-foreground text-center">
-              <span className="font-heading font-bold">Metamorfose</span>{" "}
+              <span className="font-heading font-bold">DOCE</span>{" "}
               <span className="font-heading font-bold italic text-accent">
-                Vital
+                LEVEZA
               </span>
               <p className="text-sm text-muted-foreground mt-2">
                 Dra. Priscila Canto

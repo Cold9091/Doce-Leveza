@@ -1,8 +1,8 @@
-# Metamorfose Vital Landing Page
+# DOCE LEVEZA Landing Page
 
 ## Overview
 
-This is a landing page for "Metamorfose Vital," a health and wellness program focused on weight loss and nutrition. The application is designed to capture leads through call-to-action buttons and showcase the program's features, benefits, and transformation results. The landing page follows a pixel-perfect design approach based on reference materials, featuring sections for hero content, target audience transformation photos, program pillars, course modules, and bonuses.
+This is a landing page for "DOCE LEVEZA," a health and wellness program focused on weight loss and nutrition. The application is designed to capture leads through call-to-action buttons and showcase the program's features, benefits, and transformation results. The landing page follows a pixel-perfect design approach based on reference materials, featuring sections for hero content, target audience transformation photos, program pillars, course modules, and bonuses.
 
 ## User Preferences
 

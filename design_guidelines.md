@@ -1,7 +1,7 @@
-# Design Guidelines: Metamorfose Vital Landing Page
+# Design Guidelines: DOCE LEVEZA Landing Page
 
 ## Design Approach
-**Reference-Based Exact Replication**: This project requires pixel-perfect recreation of the provided Metamorfose Vital design. Every visual element, spacing, and component must match the reference images precisely.
+**Reference-Based Exact Replication**: This project requires pixel-perfect recreation of the provided DOCE LEVEZA design. Every visual element, spacing, and component must match the reference images precisely.
 
 ## Typography System
 - **Headlines**: Bold, high-impact typography with generous letter spacing
@@ -22,7 +22,7 @@ Use Tailwind spacing units: **4, 6, 8, 12, 16, 24** for consistent rhythm
 
 ### 1. Hero Section
 - Full-width background image (kitchen/healthy food scene)
-- Logo positioned top-left: butterfly icon + "Metamorfose Vital" text
+- Logo positioned top-left: butterfly icon + "DOCE LEVEZA" text
 - Center-aligned content with headline emphasizing "5 kg em 3 semanas"
 - Right-aligned image: nutritionist holding green apple (circular crop)
 - Primary CTA button (blurred background overlay)

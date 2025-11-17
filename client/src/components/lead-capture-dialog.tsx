@@ -85,7 +85,7 @@ export function LeadCaptureDialog({
               </DialogTitle>
               <DialogDescription className="text-center">
                 Preencha seus dados abaixo e garanta seu acesso ao{" "}
-                <span className="text-accent font-bold">Metamorfose Vital</span>
+                <span className="text-accent font-bold">DOCE LEVEZA</span>
               </DialogDescription>
             </DialogHeader>
 
@@ -163,7 +163,7 @@ export function LeadCaptureDialog({
 
                 <p className="text-xs text-center text-muted-foreground">
                   Ao se inscrever, você concorda em receber comunicações sobre o
-                  Metamorfose Vital
+                  DOCE LEVEZA
                 </p>
               </form>
             </Form>
@@ -177,7 +177,7 @@ export function LeadCaptureDialog({
               Inscrição Confirmada!
             </DialogTitle>
             <DialogDescription className="text-base">
-              Obrigado por se inscrever no Metamorfose Vital!
+              Obrigado por se inscrever no DOCE LEVEZA!
               <br />
               Em breve você receberá um e-mail com todos os detalhes.
             </DialogDescription>
