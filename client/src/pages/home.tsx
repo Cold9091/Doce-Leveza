@@ -1005,7 +1005,7 @@ export default function Home() {
 
             <div className="relative">
               <img
-                src={heroImage}
+                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&h=600&fit=crop"
                 alt="Dra. Priscila Canto"
                 className="w-full rounded-lg shadow-xl"
                 data-testid="img-instructor"
