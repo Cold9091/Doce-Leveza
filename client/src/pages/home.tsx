@@ -179,14 +179,14 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center py-20">
-          <div className="space-y-6" data-testid="hero-content">
-            <h1 className="text-4xl lg:text-6xl font-heading font-extrabold text-white leading-tight">
+          <div className="space-y-4" data-testid="hero-content" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-snug">
               Emagreça até{" "}
               <span className="text-accent">5 kg em apenas 3 semanas</span> com
               um método rápido, comprovado e consistente!
             </h1>
 
-            <p className="text-lg text-gray-200 leading-relaxed">
+            <p className="text-sm lg:text-base text-gray-200 leading-relaxed">
               Um programa exclusivo de emagrecimento e desinflação, com
               acompanhamento online. Prepare-se para transformar sua saúde e
               alcançar resultados duradouros!
@@ -194,7 +194,7 @@ export default function Home() {
 
             <Button
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-lg px-8 py-6 rounded-lg uppercase"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm lg:text-base px-6 py-5 rounded-lg uppercase"
               onClick={() => setDialogOpen(true)}
               data-testid="button-cta-hero"
             >
