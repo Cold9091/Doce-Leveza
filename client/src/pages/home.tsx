@@ -179,7 +179,7 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-8 lg:px-16 grid lg:grid-cols-2 gap-12 items-center py-20">
-          <div className="space-y-4 pl-8 lg:pl-16" data-testid="hero-content" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <div className="space-y-4 pl-8 lg:pl-16" data-testid="hero-content">
             <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-snug">
               Emagreça até{" "}
               <span className="text-accent">5 kg em apenas 3 semanas</span> com
@@ -240,7 +240,7 @@ export default function Home() {
             </div>
 
             <div className="space-y-6">
-              <h2 className="text-3xl lg:text-4xl font-heading font-bold text-card-foreground">
+              <h2 className="text-2xl lg:text-3xl font-semibold text-card-foreground">
                 Para quem <span className="text-accent">é</span> o metamorfose
                 Vital?
               </h2>
