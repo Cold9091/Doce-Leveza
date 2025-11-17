@@ -203,12 +203,12 @@ export default function Home() {
         </div>
 
         {/* Infinite Ticker */}
-        <div className="absolute bottom-0 left-0 right-0 bg-foreground/90 backdrop-blur-sm py-4 overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 py-4 overflow-hidden">
           <div className="flex animate-scroll whitespace-nowrap" style={{ width: "max-content" }}>
             {[...Array(30)].map((_, i) => (
               <div
                 key={i}
-                className="inline-flex items-center gap-2 mx-6 text-background"
+                className="inline-flex items-center gap-2 mx-6 text-white"
               >
                 <ButterflyIcon />
                 <span className="font-heading font-bold text-sm tracking-wide">
