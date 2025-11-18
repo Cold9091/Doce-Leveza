@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
-import logoImage from "@assets/WhatsApp_Image_2025-11-18_at_15.36.26__2_-removebg-preview (1)_1763481521879.png";
+import logoImage from "@assets/Rectangle__1_-removebg-preview_1763494828422.png";
 
 export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false);
