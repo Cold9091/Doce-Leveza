@@ -173,14 +173,13 @@ export default function Home() {
 
         <div className="container mx-auto px-8 lg:px-16 grid lg:grid-cols-2 gap-12 items-center py-20">
           <div className="space-y-4 pl-8 lg:pl-16" data-testid="hero-content">
-            <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-snug">
+            <h1 className="text-3xl lg:text-4xl font-semibold text-white leading-snug">
               Cuida da tua saúde com orientação nutricional profissional
             </h1>
 
             <p className="text-sm lg:text-base text-gray-200 leading-relaxed">
-              Um programa exclusivo de emagrecimento e desinflação, com
-              acompanhamento online. Prepare-se para transformar sua saúde e
-              alcançar resultados duradouros!
+              Vídeos, aulas, ebooks e programas especializados para Diabetes, Emagrecimento,
+              Hipertensão e Gestantes — tudo num único lugar.
             </p>
 
             <Button
