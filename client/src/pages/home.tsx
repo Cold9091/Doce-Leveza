@@ -174,9 +174,7 @@ export default function Home() {
         <div className="container mx-auto px-8 lg:px-16 grid lg:grid-cols-2 gap-12 items-center py-20">
           <div className="space-y-4 pl-8 lg:pl-16" data-testid="hero-content">
             <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-snug">
-              Emagreça até{" "}
-              <span className="text-accent">5 kg em apenas 3 semanas</span> com
-              um método rápido, comprovado e consistente!
+              Cuida da tua saúde com orientação nutricional profissional
             </h1>
 
             <p className="text-sm lg:text-base text-gray-200 leading-relaxed">
