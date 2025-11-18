@@ -167,7 +167,7 @@ export default function Home() {
       >
         <div className="absolute top-8 left-8">
           <div className="flex items-center gap-2" data-testid="logo-header">
-            <img src={logoImage} alt="Doce Leveza" className="h-16 w-auto" />
+            <img src={logoImage} alt="Doce Leveza" className="h-28 w-auto" />
           </div>
         </div>
 
@@ -196,14 +196,14 @@ export default function Home() {
         </div>
 
         {/* Infinite Ticker */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 py-2 overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 py-3 overflow-hidden">
           <div className="flex animate-scroll whitespace-nowrap" style={{ width: "max-content" }}>
             {[...Array(30)].map((_, i) => (
               <div
                 key={i}
                 className="inline-flex items-center gap-2 mx-6"
               >
-                <img src={logoImage} alt="Doce Leveza" className="h-8 w-auto" />
+                <img src={logoImage} alt="Doce Leveza" className="h-14 w-auto" />
               </div>
             ))}
           </div>
@@ -1094,7 +1094,7 @@ export default function Home() {
       <footer className="py-8 bg-card border-t border-border">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-center gap-2">
-            <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
+            <img src={logoImage} alt="Doce Leveza" className="h-32 w-auto" />
             <p className="text-sm text-muted-foreground">
               Dra. Priscila Canto
             </p>
