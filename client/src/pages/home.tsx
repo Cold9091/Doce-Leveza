@@ -203,14 +203,14 @@ export default function Home() {
         </div>
 
         {/* Infinite Ticker */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 py-3 overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 py-1.5 overflow-hidden">
           <div className="flex animate-scroll whitespace-nowrap" style={{ width: "max-content" }}>
             {[...Array(30)].map((_, i) => (
               <div
                 key={i}
                 className="inline-flex items-center gap-2 mx-6"
               >
-                <img src={logoImage} alt="Doce Leveza" className="h-14 w-auto" />
+                <img src={logoImage} alt="Doce Leveza" className="h-10 w-auto" />
               </div>
             ))}
           </div>
