@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
+import logoImage from "@assets/WhatsApp_Image_2025-11-18_at_15.36.26__2_-removebg-preview (1)_1763481521879.png";
 
 export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -166,15 +167,7 @@ export default function Home() {
       >
         <div className="absolute top-8 left-8">
           <div className="flex items-center gap-2" data-testid="logo-header">
-            <ButterflyIcon />
-            <div className="text-foreground">
-              <span className="font-heading font-bold text-xl">
-                DOCE
-              </span>{" "}
-              <span className="font-heading font-bold text-xl italic text-accent">
-                LEVEZA
-              </span>
-            </div>
+            <img src={logoImage} alt="Doce Leveza" className="h-16 w-auto" />
           </div>
         </div>
 
@@ -208,15 +201,9 @@ export default function Home() {
             {[...Array(30)].map((_, i) => (
               <div
                 key={i}
-                className="inline-flex items-center gap-2 mx-6 text-white"
+                className="inline-flex items-center gap-2 mx-6"
               >
-                <ButterflyIcon />
-                <span className="font-heading font-bold text-xs tracking-wide">
-                  DOCE
-                </span>
-                <span className="font-heading font-bold text-xs italic text-accent">
-                  LEVEZA
-                </span>
+                <img src={logoImage} alt="Doce Leveza" className="h-8 w-auto" />
               </div>
             ))}
           </div>
@@ -1106,17 +1093,11 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-8 bg-card border-t border-border">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-2">
-            <ButterflyIcon />
-            <div className="text-card-foreground text-center">
-              <span className="font-heading font-bold">DOCE</span>{" "}
-              <span className="font-heading font-bold italic text-accent">
-                LEVEZA
-              </span>
-              <p className="text-sm text-muted-foreground mt-2">
-                Dra. Priscila Canto
-              </p>
-            </div>
+          <div className="flex flex-col items-center justify-center gap-2">
+            <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
+            <p className="text-sm text-muted-foreground">
+              Dra. Priscila Canto
+            </p>
           </div>
         </div>
       </footer>
