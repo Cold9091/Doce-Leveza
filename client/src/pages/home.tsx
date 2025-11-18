@@ -182,9 +182,9 @@ export default function Home() {
               Hipertensão e Gestantes — tudo num único lugar.
             </p>
 
-            <div className="flex flex-wrap gap-4 items-start">
+            <div className="flex gap-3 items-start">
               <Button
-                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-xs lg:text-sm px-6 py-3 rounded-full uppercase"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-xs px-5 py-2.5 rounded-full uppercase whitespace-nowrap"
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-cta-hero"
               >
@@ -192,7 +192,7 @@ export default function Home() {
               </Button>
               
               <Button
-                className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 font-semibold text-xs lg:text-sm px-6 py-3 rounded-full uppercase"
+                className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 font-semibold text-xs px-5 py-2.5 rounded-full uppercase whitespace-nowrap"
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-members-hero"
               >
