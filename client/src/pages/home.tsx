@@ -165,24 +165,27 @@ export default function Home() {
         }}
         data-testid="section-hero"
       >
-        <div className="container mx-auto px-8 lg:px-16 grid lg:grid-cols-2 gap-12 items-center py-20">
-          <div className="space-y-4 pl-8 lg:pl-16" data-testid="hero-content">
-            <div className="flex items-center gap-2" data-testid="logo-header">
-              <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
+        <div className="container mx-auto px-4 sm:px-8 lg:px-16 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-16 sm:py-20">
+          <div className="space-y-4 sm:space-y-5 pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
+            <div 
+              className="flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-700" 
+              data-testid="logo-header"
+            >
+              <img src={logoImage} alt="Doce Leveza" className="h-16 sm:h-20 lg:h-24 w-auto" />
             </div>
             
-            <h1 className="text-3xl lg:text-4xl font-semibold text-white leading-snug">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white leading-snug animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
               Cuida da tua saúde com orientação nutricional profissional
             </h1>
 
-            <p className="text-sm lg:text-base text-gray-200 leading-relaxed">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
               Vídeos, aulas, ebooks e programas especializados para Diabetes, Emagrecimento,
               Hipertensão e Gestantes — tudo num único lugar.
             </p>
 
-            <div className="flex gap-3 items-start">
+            <div className="flex flex-col sm:flex-row gap-3 items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
               <Button
-                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-xs px-5 py-2.5 rounded-full uppercase whitespace-nowrap"
+                className="bg-accent hover:bg-accent/90 hover:scale-105 transition-all duration-300 text-accent-foreground font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-cta-hero"
               >
@@ -190,7 +193,7 @@ export default function Home() {
               </Button>
               
               <Button
-                className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 font-semibold text-xs px-5 py-2.5 rounded-full uppercase whitespace-nowrap"
+                className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-members-hero"
               >
