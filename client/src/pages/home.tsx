@@ -182,13 +182,23 @@ export default function Home() {
               Hipertensão e Gestantes — tudo num único lugar.
             </p>
 
-            <Button
-              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-xs lg:text-sm px-6 py-3 rounded-full uppercase"
-              onClick={() => setDialogOpen(true)}
-              data-testid="button-cta-hero"
-            >
-              Quero começar agora
-            </Button>
+            <div className="flex flex-wrap gap-4">
+              <Button
+                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-xs lg:text-sm px-6 py-3 rounded-full uppercase"
+                onClick={() => setDialogOpen(true)}
+                data-testid="button-cta-hero"
+              >
+                Assinar Acesso Anual
+              </Button>
+              
+              <Button
+                className="backdrop-blur-md bg-white/10 border-2 border-accent text-accent hover:bg-white/20 font-semibold text-xs lg:text-sm px-6 py-3 rounded-full uppercase"
+                onClick={() => setDialogOpen(true)}
+                data-testid="button-members-hero"
+              >
+                Entrar na Área de Membros
+              </Button>
+            </div>
           </div>
         </div>
 
