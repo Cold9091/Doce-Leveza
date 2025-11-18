@@ -160,7 +160,7 @@ export default function Home() {
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480084/Brown_Yellow_Modern_Museum_Presentation_1_dgjdbz.svg')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480084/Brown_Yellow_Modern_Museum_Presentation_1_dgjdbz.svg')`,
         }}
         data-testid="section-hero"
       >
