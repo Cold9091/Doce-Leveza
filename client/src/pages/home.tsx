@@ -166,19 +166,19 @@ export default function Home() {
         data-testid="section-hero"
       >
         <div className="container mx-auto px-4 sm:px-8 lg:px-16 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-16 sm:py-20">
-          <div className="space-y-4 sm:space-y-5 pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
+          <div className="pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
             <div 
-              className="flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-700" 
+              className="flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-700 mb-3" 
               data-testid="logo-header"
             >
               <img src={logoImage} alt="Doce Leveza" className="h-16 sm:h-20 lg:h-24 w-auto" />
             </div>
             
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white leading-snug animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white leading-snug animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 mb-4 sm:mb-5">
               Cuida da tua saúde com orientação nutricional profissional
             </h1>
 
-            <p className="text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 mb-4 sm:mb-5">
               Vídeos, aulas, ebooks e programas especializados para Diabetes, Emagrecimento,
               Hipertensão e Gestantes — tudo num único lugar.
             </p>
