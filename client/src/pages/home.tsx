@@ -161,13 +161,13 @@ export default function Home() {
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480084/Brown_Yellow_Modern_Museum_Presentation_1_dgjdbz.svg')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480802/Brown_Yellow_Modern_Museum_Presentation_2_xizdht.svg')`,
         }}
         data-testid="section-hero"
       >
         <div className="absolute top-8 left-8">
           <div className="flex items-center gap-2" data-testid="logo-header">
-            <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
+            <img src={logoImage} alt="Doce Leveza" className="h-16 w-auto" />
           </div>
         </div>
 
@@ -1101,7 +1101,7 @@ export default function Home() {
       <footer className="py-8 bg-card border-t border-border">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-center gap-2">
-            <img src={logoImage} alt="Doce Leveza" className="h-24 w-auto" />
+            <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
             <p className="text-sm text-muted-foreground">
               Dra. Priscila Canto
             </p>
