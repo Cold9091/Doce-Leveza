@@ -161,7 +161,7 @@ export default function Home() {
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480084/Brown_Yellow_Modern_Museum_Presentation_1_dgjdbz.svg')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480084/Brown_Yellow_Modern_Museum_Presentation_1_dgjdbz.svg')`,
         }}
         data-testid="section-hero"
       >
@@ -182,7 +182,7 @@ export default function Home() {
               Hipertensão e Gestantes — tudo num único lugar.
             </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col gap-4 items-start">
               <Button
                 className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-xs lg:text-sm px-6 py-3 rounded-full uppercase"
                 onClick={() => setDialogOpen(true)}
