@@ -167,7 +167,7 @@ export default function Home() {
       >
         <div className="absolute top-8 left-8">
           <div className="flex items-center gap-2" data-testid="logo-header">
-            <img src={logoImage} alt="Doce Leveza" className="h-28 w-auto" />
+            <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
           </div>
         </div>
 
@@ -1101,7 +1101,7 @@ export default function Home() {
       <footer className="py-8 bg-card border-t border-border">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-center gap-2">
-            <img src={logoImage} alt="Doce Leveza" className="h-32 w-auto" />
+            <img src={logoImage} alt="Doce Leveza" className="h-24 w-auto" />
             <p className="text-sm text-muted-foreground">
               Dra. Priscila Canto
             </p>
