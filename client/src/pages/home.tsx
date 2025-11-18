@@ -166,9 +166,9 @@ export default function Home() {
         data-testid="section-hero"
       >
         <div className="container mx-auto px-8 lg:px-16 grid lg:grid-cols-2 gap-12 items-center py-20">
-          <div className="space-y-6 pl-8 lg:pl-16" data-testid="hero-content">
+          <div className="space-y-4 pl-8 lg:pl-16" data-testid="hero-content">
             <div className="flex items-center gap-2" data-testid="logo-header">
-              <img src={logoImage} alt="Doce Leveza" className="h-16 w-auto" />
+              <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
             </div>
             
             <h1 className="text-3xl lg:text-4xl font-semibold text-white leading-snug">
