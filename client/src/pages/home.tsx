@@ -287,9 +287,9 @@ export default function Home() {
                     {item.desc}
                   </p>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="text-xs text-white hover:text-white/90 p-0 h-auto self-start underline"
+                    className="text-xs text-white border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/40"
                     data-testid={`button-learn-more-${idx + 1}`}
                     onClick={() => setDialogOpen(true)}
                   >
