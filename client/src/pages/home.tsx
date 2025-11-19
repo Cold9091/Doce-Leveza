@@ -33,6 +33,10 @@ import {
 import { useState, useEffect } from "react";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 import logoImage from "@assets/Rectangle__1_-removebg-preview_1763494828422.png";
+import videoImg from "@assets/stock_images/professional_woman_w_b6a99b19.jpg";
+import ebookImg from "@assets/stock_images/person_reading_healt_ec03a133.jpg";
+import programsImg from "@assets/stock_images/healthcare_professio_d0adc441.jpg";
+import professionalImg from "@assets/stock_images/smiling_nutritionist_6abfbe04.jpg";
 
 export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -218,71 +222,76 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Para Quem É Section */}
+      {/* Como Podemos Ajudarte Section */}
       <section
         className="py-20 bg-background"
-        data-testid="section-target-audience"
+        data-testid="section-help"
       >
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="flex items-center justify-center">
-              <img
-                src="https://res.cloudinary.com/dl90hjhoj/image/upload/v1763412969/Brown_Yellow_Modern_Museum_Presentation_hqusfp.svg"
-                alt="Transformações"
-                className="w-full max-w-lg"
-                data-testid="img-transformation"
-              />
-            </div>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
+              Como podemos <span className="text-accent">ajudarte?</span>
+            </h2>
+          </div>
 
-            <div className="space-y-6">
-              <h2 className="text-2xl lg:text-3xl font-semibold text-card-foreground">
-                Para quem <span className="text-accent">é</span> o DOCE
-                LEVEZA?
-              </h2>
-
-              <div className="space-y-4">
-                {[
-                  {
-                    title: "Pessoas ocupadas",
-                    desc: "Ideal para quem tem uma agenda cheia e busca um método eficaz de emagrecimento.",
-                  },
-                  {
-                    title: "Quem busca resultados rápidos",
-                    desc: "Projetado para quem deseja perder peso de forma consistente e acelerada.",
-                  },
-                  {
-                    title: "Pessoas que querem uma vida saudável",
-                    desc: "Indicado para quem busca uma abordagem saudável e sustentável.",
-                  },
-                  {
-                    title: "Iniciantes e experientes",
-                    desc: "Tanto para você que está começando sua jornada de emagrecimento quanto já se tentou outras abordagens.",
-                  },
-                  {
-                    title: "Quem deseja apoio online",
-                    desc: "Se você valoriza o acompanhamento e suporte virtual, encontrará grande benefício aqui.",
-                  },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex gap-3"
-                    data-testid={`target-item-${idx + 1}`}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                title: "Aulas em Vídeo",
+                subtitle: "Bloco 1",
+                desc: "Conteúdos semanais sobre alimentação, hábitos saudáveis e prevenção.",
+                image: videoImg,
+              },
+              {
+                title: "Ebooks e Guias",
+                subtitle: "Bloco 2",
+                desc: "Materiais práticos para aplicares no dia a dia.",
+                image: ebookImg,
+              },
+              {
+                title: "Programas por Patologia",
+                subtitle: "Bloco 3",
+                desc: "Orientações específicas para Diabetes, Hipertensão, Emagrecimento e Gestantes.",
+                image: programsImg,
+              },
+              {
+                title: "Acompanhamento Profissional",
+                subtitle: "Bloco 4",
+                desc: "Conteúdos criados pela Dra. Angelina, com linguagem simples e prática.",
+                image: professionalImg,
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="relative overflow-hidden rounded-md group h-80"
+                data-testid={`help-card-${idx + 1}`}
+              >
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30"></div>
+                <div className="relative h-full flex flex-col justify-end p-6 text-white">
+                  <p className="text-sm font-medium text-white/80 mb-2">
+                    {item.subtitle}
+                  </p>
+                  <h3 className="text-xl font-bold mb-3">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-white/90 mb-4 line-clamp-3">
+                    {item.desc}
+                  </p>
+                  <button
+                    className="text-sm font-medium text-accent hover:text-accent/80 transition-colors self-start"
+                    data-testid={`button-learn-more-${idx + 1}`}
+                    onClick={() => setDialogOpen(true)}
                   >
-                    <div className="flex-shrink-0 mt-1">
-                      <ButterflyIcon />
-                    </div>
-                    <div>
-                      <h3 className="font-heading font-bold text-card-foreground">
-                        {item.title}:{" "}
-                        <span className="font-normal text-muted-foreground">
-                          {item.desc}
-                        </span>
-                      </h3>
-                    </div>
-                  </div>
-                ))}
+                    Saber mais
+                  </button>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
