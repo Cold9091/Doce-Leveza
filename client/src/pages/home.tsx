@@ -36,6 +36,11 @@ import {
   Play,
   BookOpen,
   FileText,
+  CreditCard,
+  FileHeart,
+  CalendarCheck,
+  Instagram,
+  Phone,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -969,6 +974,94 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Start Here Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
+              Começa a tua jornada <span className="text-accent">com leveza</span>
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <Card className="border-card-border bg-card hover-elevate" data-testid="card-start-subscription">
+              <CardContent className="p-8 text-center space-y-6">
+                <div className="flex justify-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <CreditCard className="w-8 h-8 text-accent" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <h3 className="font-heading font-bold text-xl text-foreground">
+                    Assinar Acesso Anual
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Conteúdos exclusivos e acompanhamento contínuo.
+                  </p>
+                </div>
+                <Button
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
+                  onClick={() => setDialogOpen(true)}
+                  data-testid="button-subscribe"
+                >
+                  Assinar Agora
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-card-border bg-card hover-elevate" data-testid="card-start-pathology">
+              <CardContent className="p-8 text-center space-y-6">
+                <div className="flex justify-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <FileHeart className="w-8 h-8 text-accent" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <h3 className="font-heading font-bold text-xl text-foreground">
+                    Ver Conteúdos por Patologia
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Aprende exatamente o que precisas para o teu caso.
+                  </p>
+                </div>
+                <Button
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
+                  onClick={() => setDialogOpen(true)}
+                  data-testid="button-pathology-content"
+                >
+                  Explorar Conteúdos
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-card-border bg-card hover-elevate" data-testid="card-start-appointment">
+              <CardContent className="p-8 text-center space-y-6">
+                <div className="flex justify-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <CalendarCheck className="w-8 h-8 text-accent" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <h3 className="font-heading font-bold text-xl text-foreground">
+                    Marcar Consulta
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Agenda atendimento direto com a Dra. Angelina.
+                  </p>
+                </div>
+                <Button
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
+                  onClick={() => setDialogOpen(true)}
+                  data-testid="button-book-appointment"
+                >
+                  Marcar Agora
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
@@ -1077,12 +1170,76 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 bg-card border-t border-border">
+      <footer className="py-12 bg-card border-t border-border">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-center gap-2">
-            <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
-            <p className="text-sm text-muted-foreground">
-              Dra. Angelina
+          <div className="flex flex-col items-center justify-center gap-6 max-w-4xl mx-auto">
+            <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" data-testid="img-footer-logo" />
+            
+            <p className="text-center text-muted-foreground">
+              Doce Leveza — Nutrição com leveza, clareza e ciência.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
+                data-testid="link-instagram"
+              >
+                <Instagram className="w-5 h-5" />
+                <span className="text-sm">Instagram</span>
+              </a>
+              
+              <a
+                href="https://wa.me/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
+                data-testid="link-whatsapp"
+              >
+                <Phone className="w-5 h-5" />
+                <span className="text-sm">WhatsApp</span>
+              </a>
+              
+              <a
+                href="mailto:contato@doceleveza.com"
+                className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
+                data-testid="link-email"
+              >
+                <Mail className="w-5 h-5" />
+                <span className="text-sm">Email</span>
+              </a>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
+              <a
+                href="#"
+                className="hover:text-accent transition-colors"
+                data-testid="link-privacy"
+              >
+                Política de Privacidade
+              </a>
+              <span>|</span>
+              <a
+                href="#"
+                className="hover:text-accent transition-colors"
+                data-testid="link-terms"
+              >
+                Termos de Uso
+              </a>
+              <span>|</span>
+              <a
+                href="#"
+                className="hover:text-accent transition-colors"
+                data-testid="link-support"
+              >
+                Suporte
+              </a>
+            </div>
+
+            <p className="text-xs text-muted-foreground text-center">
+              © {new Date().getFullYear()} Doce Leveza. Todos os direitos reservados.
             </p>
           </div>
         </div>
