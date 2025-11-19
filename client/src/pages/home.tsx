@@ -847,82 +847,86 @@ export default function Home() {
       {/* Testimonials Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge
-              variant="outline"
-              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted/30"
-            >
-              DEPOIMENTOS
-            </Badge>
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
-              Já são{" "}
-              <span className="text-accent">milhares de pessoas</span> que
-              mudaram de vida com o DOCE LEVEZA:
-            </h2>
-          </div>
+          <div className="grid lg:grid-cols-3 gap-12 items-center">
+            <div className="lg:col-span-1 space-y-6">
+              <Badge
+                variant="outline"
+                className="text-xs uppercase tracking-wide border-border bg-muted/30"
+              >
+                DEPOIMENTOS
+              </Badge>
+              
+              <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
+                Já são{" "}
+                <span className="text-accent">milhares de pessoas</span> que
+                mudaram de vida com o DOCE LEVEZA:
+              </h2>
 
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-4">
-              {testimonials.map((testimonial, idx) => (
-                <CarouselItem key={idx} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Card
-                    className="border-card-border bg-card p-6 h-full"
-                    data-testid={`testimonial-card-${idx + 1}`}
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <img
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        className="w-16 h-16 rounded-full object-cover"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-heading font-bold text-card-foreground">
-                          {testimonial.name}
-                        </h4>
-                        <div className="flex gap-1 mt-1">
-                          {[...Array(testimonial.rating)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className="w-4 h-4 fill-accent text-accent"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {testimonial.text}
-                    </p>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="flex justify-center gap-2 mt-8">
-              <CarouselPrevious
-                className="static translate-y-0"
-                data-testid="button-carousel-prev-testimonials"
-              />
-              <CarouselNext
-                className="static translate-y-0"
-                data-testid="button-carousel-next-testimonials"
-              />
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-lg uppercase"
+                onClick={() => setDialogOpen(true)}
+                data-testid="button-cta-testimonials"
+              >
+                Quero começar agora
+              </Button>
             </div>
-          </Carousel>
 
-          <div className="text-center mt-12">
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-lg uppercase"
-              onClick={() => setDialogOpen(true)}
-              data-testid="button-cta-testimonials"
-            >
-              Quero começar agora
-            </Button>
+            <div className="lg:col-span-2">
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-4">
+                  {testimonials.map((testimonial, idx) => (
+                    <CarouselItem key={idx} className="pl-4 md:basis-1/2 lg:basis-1/4">
+                      <Card
+                        className="border-card-border bg-card hover-elevate h-full"
+                        data-testid={`testimonial-card-${idx + 1}`}
+                      >
+                        <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                          <img
+                            src={testimonial.image}
+                            alt={testimonial.name}
+                            className="w-16 h-16 rounded-full object-cover"
+                          />
+                          
+                          <div className="flex gap-1">
+                            {[...Array(testimonial.rating)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className="w-4 h-4 fill-accent text-accent"
+                              />
+                            ))}
+                          </div>
+
+                          <h4 className="font-heading font-bold text-card-foreground">
+                            {testimonial.name}
+                          </h4>
+
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {testimonial.text}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="flex justify-center gap-2 mt-8">
+                  <CarouselPrevious
+                    className="static translate-y-0"
+                    data-testid="button-carousel-prev-testimonials"
+                  />
+                  <CarouselNext
+                    className="static translate-y-0"
+                    data-testid="button-carousel-next-testimonials"
+                  />
+                </div>
+              </Carousel>
+            </div>
           </div>
         </div>
       </section>
