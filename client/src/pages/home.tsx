@@ -33,6 +33,9 @@ import {
   TrendingDown,
   HeartPulse,
   Baby,
+  Play,
+  BookOpen,
+  FileText,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -646,79 +649,112 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Bonus Section */}
+      {/* Latest Content Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge
-              variant="outline"
-              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted/30"
-            >
-              BÔNUS
-            </Badge>
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
-              <span className="text-primary">+10 aulas bônus</span> especiais
-              com profissionais da nutrição
+            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
+              Últimos conteúdos <span className="text-accent">publicados</span>
             </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Aprende no teu ritmo com materiais preparados para transformar a tua saúde.
+            </p>
           </div>
 
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-4">
-              {professionalsList.map((prof, idx) => (
-                <CarouselItem
-                  key={idx}
-                  className="pl-4 md:basis-1/2 lg:basis-1/3"
-                >
-                  <Card
-                    className="overflow-hidden border-card-border bg-card hover-elevate"
-                    data-testid={`professional-card-${idx + 1}`}
-                  >
-                    <img
-                      src={prof.image}
-                      alt={prof.name}
-                      className="w-full h-64 object-cover"
-                    />
-                    <CardContent className="p-6 space-y-2">
-                      <h3 className="font-heading font-bold text-lg text-card-foreground">
-                        {prof.name}
-                      </h3>
-                      <p className="text-sm font-medium text-primary">
-                        {prof.role}
-                      </p>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {prof.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="flex justify-center gap-2 mt-8">
-              <CarouselPrevious
-                className="static translate-y-0"
-                data-testid="button-carousel-prev-bonus"
-              />
-              <CarouselNext
-                className="static translate-y-0"
-                data-testid="button-carousel-next-bonus"
-              />
-            </div>
-          </Carousel>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+            <Card className="overflow-hidden border-card-border bg-card hover-elevate" data-testid="content-card-1">
+              <CardContent className="p-0">
+                <div className="relative">
+                  <img
+                    src={videoImg}
+                    alt="Vídeo sobre glicemia"
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-full bg-accent/90 flex items-center justify-center">
+                      <Play className="w-6 h-6 text-white fill-white ml-1" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 space-y-3">
+                  <Badge variant="outline" className="text-xs uppercase">
+                    Vídeo
+                  </Badge>
+                  <h3 className="font-heading font-bold text-lg text-card-foreground">
+                    Como reduzir a glicemia depois das refeições
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Descobre técnicas práticas e baseadas em ciência para controlar os níveis de açúcar no sangue.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-          <div className="text-center mt-12">
+            <Card className="overflow-hidden border-card-border bg-card hover-elevate" data-testid="content-card-2">
+              <CardContent className="p-0">
+                <div className="relative">
+                  <img
+                    src={programsImg}
+                    alt="Aula sobre emagrecimento"
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-4 right-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
+                      <BookOpen className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 space-y-3">
+                  <Badge variant="outline" className="text-xs uppercase">
+                    Aula
+                  </Badge>
+                  <h3 className="font-heading font-bold text-lg text-card-foreground">
+                    Plano alimentar para emagrecimento sustentável
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Aprende a criar um plano alimentar equilibrado para resultados duradouros.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden border-card-border bg-card hover-elevate" data-testid="content-card-3">
+              <CardContent className="p-0">
+                <div className="relative">
+                  <img
+                    src={ebookImg}
+                    alt="Ebook sobre pressão arterial"
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-4 right-4">
+                    <div className="w-12 h-12 rounded-full bg-accent/90 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 space-y-3">
+                  <Badge variant="outline" className="text-xs uppercase">
+                    Ebook
+                  </Badge>
+                  <h3 className="font-heading font-bold text-lg text-card-foreground">
+                    Guia prático para controlar a pressão arterial
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Um guia completo com estratégias alimentares e lifestyle para manter a pressão saudável.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center">
             <Button
               size="lg"
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-lg uppercase"
               onClick={() => setDialogOpen(true)}
-              data-testid="button-cta-bonus"
+              data-testid="button-view-all-content"
             >
-              Quero começar agora
+              Ver todos os conteúdos
             </Button>
           </div>
         </div>
