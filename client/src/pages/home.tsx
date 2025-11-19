@@ -289,7 +289,7 @@ export default function Home() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs text-white border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/40"
+                    className="text-xs text-white border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/40 self-start"
                     data-testid={`button-learn-more-${idx + 1}`}
                     onClick={() => setDialogOpen(true)}
                   >
