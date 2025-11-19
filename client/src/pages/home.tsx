@@ -228,21 +228,20 @@ export default function Home() {
         data-testid="section-help"
       >
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <div className="lg:w-1/4 space-y-6">
-              <h2 className="text-3xl lg:text-4xl font-heading text-foreground">
-                Como podemos ajudarte?
-              </h2>
-              <Button
-                className="bg-accent text-accent-foreground hover:bg-accent/90 w-full lg:w-auto"
-                onClick={() => setDialogOpen(true)}
-                data-testid="button-contact-consultant"
-              >
-                Fale agora com um consultor
-              </Button>
-            </div>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <h2 className="text-3xl lg:text-4xl font-heading text-foreground">
+              Como podemos ajudarte?
+            </h2>
+            <Button
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              onClick={() => setDialogOpen(true)}
+              data-testid="button-contact-consultant"
+            >
+              Fale agora com um consultor
+            </Button>
+          </div>
 
-            <div className="lg:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
                 title: "Aulas em Vídeo",
@@ -297,7 +296,6 @@ export default function Home() {
                 </div>
               </div>
             ))}
-            </div>
           </div>
         </div>
       </section>
