@@ -411,11 +411,37 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
+
+          <div className="text-center mt-12">
+            <Button
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-full uppercase"
+              onClick={() => setDialogOpen(true)}
+              data-testid="button-cta-pathologies"
+            >
+              Assina agora
+            </Button>
+          </div>
+        </div>
+
+        {/* Wave Separator */}
+        <div className="relative h-24 mt-20">
+          <svg
+            className="absolute bottom-0 w-full h-24"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0,0 Q300,60 600,40 T1200,0 L1200,120 L0,120 Z"
+              fill="hsl(var(--card))"
+            />
+          </svg>
         </div>
       </section>
 
       {/* Módulos Section */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge
