@@ -424,9 +424,10 @@ export default function Home() {
         </div>
 
         {/* Wave Separator with Arrow */}
-        <div className="relative h-24 mt-20">
+        <div className="relative mt-20" style={{ height: '120px' }}>
           <svg
-            className="absolute bottom-0 w-full h-24"
+            className="absolute top-0 w-full"
+            style={{ height: '120px' }}
             viewBox="0 0 1200 120"
             preserveAspectRatio="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -437,8 +438,8 @@ export default function Home() {
             />
           </svg>
           {/* Arrow */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
-            <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center shadow-lg">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center shadow-lg border-2 border-white">
               <svg
                 width="20"
                 height="20"
@@ -461,7 +462,7 @@ export default function Home() {
       </section>
 
       {/* Módulos Section */}
-      <section className="py-20 bg-white light">
+      <section className="bg-white light" style={{ paddingTop: '0', paddingBottom: '80px' }}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge
