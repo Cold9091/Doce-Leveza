@@ -761,16 +761,8 @@ export default function Home() {
       </section>
 
       {/* Como Funciona Section */}
-      <section className="py-20 bg-background relative overflow-hidden">
-        <div className="absolute top-10 right-10 w-48 h-48 opacity-30">
-          <img
-            src="https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=200&h=200&fit=crop"
-            alt="Orange decoration"
-            className="w-full h-full object-cover rounded-full"
-          />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge
               variant="outline"
@@ -848,16 +840,8 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-background relative overflow-hidden">
-        <div className="absolute bottom-10 left-10 w-32 h-32 opacity-30">
-          <img
-            src="https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=200&h=200&fit=crop"
-            alt="Orange decoration"
-            className="w-full h-full object-cover rounded-full"
-          />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge
               variant="outline"
@@ -939,16 +923,8 @@ export default function Home() {
       </section>
 
       {/* Instructor Section */}
-      <section className="py-20 bg-background relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-48 h-48 opacity-20">
-          <img
-            src="https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=300&h=300&fit=crop"
-            alt="Kale decoration"
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div className="space-y-6">
               <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
