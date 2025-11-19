@@ -234,7 +234,7 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
                 title: "Aulas em Vídeo",
@@ -263,7 +263,7 @@ export default function Home() {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="relative overflow-hidden rounded-md group h-80"
+                className="relative overflow-hidden rounded-md group h-64"
                 data-testid={`help-card-${idx + 1}`}
               >
                 <img
@@ -271,19 +271,16 @@ export default function Home() {
                   alt={item.title}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30"></div>
-                <div className="relative h-full flex flex-col justify-end p-6 text-white">
-                  <p className="text-sm font-medium text-white/80 mb-2">
-                    {item.subtitle}
-                  </p>
-                  <h3 className="text-xl font-bold mb-3">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent"></div>
+                <div className="relative h-full flex flex-col justify-end p-5 text-white">
+                  <h3 className="text-lg font-bold mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-white/90 mb-4 line-clamp-3">
+                  <p className="text-xs text-white/90 mb-3 line-clamp-2">
                     {item.desc}
                   </p>
                   <button
-                    className="text-sm font-medium text-accent hover:text-accent/80 transition-colors self-start"
+                    className="text-xs font-medium text-white/90 hover:text-white transition-colors self-start underline"
                     data-testid={`button-learn-more-${idx + 1}`}
                     onClick={() => setDialogOpen(true)}
                   >
