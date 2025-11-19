@@ -422,6 +422,42 @@ export default function Home() {
             </Button>
           </div>
         </div>
+
+        {/* Wave Separator with Arrow */}
+        <div className="relative h-24 mt-20">
+          <svg
+            className="absolute bottom-0 w-full h-24"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0,0 Q300,60 600,40 T1200,0 L1200,120 L0,120 Z"
+              fill="white"
+            />
+          </svg>
+          {/* Arrow */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
+            <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center shadow-lg">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-foreground"
+              >
+                <path
+                  d="M7 10L12 15L17 10"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Módulos Section */}
