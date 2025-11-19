@@ -324,6 +324,12 @@ export default function Home() {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
+            <Badge
+              variant="outline"
+              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted/30"
+            >
+              PATOLOGIA
+            </Badge>
             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-3">
               Conteúdos por Patologia
             </h2>
