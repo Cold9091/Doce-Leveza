@@ -29,6 +29,10 @@ import {
   Star,
   MessageCircle,
   Mail,
+  Activity,
+  TrendingDown,
+  HeartPulse,
+  Baby,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -316,90 +320,90 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4 Pilares Section */}
-      <section className="py-20 bg-background relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-64 h-64 opacity-20">
-          <img
-            src="https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=300&h=300&fit=crop"
-            alt="Kale decoration"
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
+      {/* Patologias Section */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge
-              variant="outline"
-              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted/30"
-            >
-              OS PILARES
-            </Badge>
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
-              Os <span className="text-accent">4 principais pilares</span> que
-              irão transformar o seu corpo
+            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-3">
+              Conteúdos por Patologia
             </h2>
+            <p className="text-base text-muted-foreground">
+              Escolhe a categoria que corresponde às tuas necessidades.
+            </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                title: "Plano Alimentar Personalizado",
-                desc: "Um plano alimentar balanceado é essencial. Consulte um nutricionista para criar um cardápio adequado às suas necessidades, com foco na redução de calorias e escolhas saudáveis.",
-                image:
-                  "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=300&fit=crop",
+                title: "Diabetes",
+                desc: "Vídeos, planos e orientações para controlar a glicemia com segurança.",
+                image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=450&fit=crop",
+                icon: Activity,
               },
               {
-                title: "Exercícios Físicos Regularmente",
-                desc: "Combine atividades aeróbicas (como caminhada, corrida ou ciclismo) com treinamento de força (musculação). Isso ajuda a queimar calorias e manter a massa muscular.",
-                image:
-                  "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400&h=300&fit=crop",
+                title: "Emagrecimento",
+                desc: "Estratégias práticas para perder peso de forma saudável e sustentável.",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=450&fit=crop",
+                icon: TrendingDown,
               },
               {
-                title: "Descanso e Sono",
-                desc: "O descanso adequado é crucial para o emagrecimento. Durma bem para permitir a recuperação do corpo.",
-                image:
-                  "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&h=300&fit=crop",
+                title: "Hipertensão",
+                desc: "Dicas e planos para equilibrar a pressão arterial com alimentação adequada.",
+                image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&h=450&fit=crop",
+                icon: HeartPulse,
               },
               {
-                title: "Mudança de Mentalidade",
-                desc: "Cultive uma mentalidade positiva e focada. Acredite que é possível alcançar seus objetivos e mantenha-se motivado.",
-                image:
-                  "https://images.unsplash.com/photo-1599447292023-0598f79d8a4a?w=400&h=300&fit=crop",
+                title: "Gestantes",
+                desc: "Alimentação segura, prática e nutritiva para todas as fases da gestação.",
+                image: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=800&h=450&fit=crop",
+                icon: Baby,
               },
-            ].map((pillar, idx) => (
-              <Card
+            ].map((pathology, idx) => (
+              <motion.div
                 key={idx}
-                className="overflow-hidden border-card-border bg-card hover-elevate"
-                data-testid={`pillar-card-${idx + 1}`}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: idx * 0.1,
+                  ease: "easeOut"
+                }}
+                data-testid={`pathology-card-${idx + 1}`}
               >
-                <div className="flex gap-4 p-6">
-                  <img
-                    src={pillar.image}
-                    alt={pillar.title}
-                    className="w-32 h-32 object-cover rounded-lg flex-shrink-0"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-heading font-bold text-lg text-card-foreground mb-2">
-                      {pillar.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {pillar.desc}
-                    </p>
+                <Card className="overflow-hidden border-card-border bg-card hover-elevate h-full flex flex-col">
+                  <div className="relative aspect-video overflow-hidden">
+                    <img
+                      src={pathology.image}
+                      alt={pathology.title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                    <div className="absolute top-4 left-4">
+                      <div className="w-12 h-12 rounded-full bg-accent/90 flex items-center justify-center">
+                        <pathology.icon className="w-6 h-6 text-accent-foreground" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                  <CardContent className="p-6 flex-1 flex flex-col">
+                    <h3 className="font-heading font-bold text-lg text-card-foreground mb-2">
+                      {pathology.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
+                      {pathology.desc}
+                    </p>
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      onClick={() => setDialogOpen(true)}
+                      data-testid={`button-view-content-${idx + 1}`}
+                    >
+                      Ver Conteúdos
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
-
-          <div className="text-center">
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-lg uppercase"
-              onClick={() => setDialogOpen(true)}
-              data-testid="button-cta-pillars"
-            >
-              Quero começar agora
-            </Button>
           </div>
         </div>
       </section>
