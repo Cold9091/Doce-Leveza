@@ -165,7 +165,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dark">
       {/* Hero Section */}
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
@@ -433,24 +433,24 @@ export default function Home() {
           >
             <path
               d="M0,0 Q300,60 600,40 T1200,0 L1200,120 L0,120 Z"
-              fill="hsl(var(--card))"
+              fill="white"
             />
           </svg>
         </div>
       </section>
 
       {/* Módulos Section */}
-      <section className="py-20 bg-card">
+      <section className="py-20 bg-white light">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge
               variant="outline"
-              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted"
+              className="mb-4 text-xs uppercase tracking-wide border-gray-300 bg-gray-100 text-gray-700"
             >
               MÓDULOS
             </Badge>
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
-              <span className="text-foreground">
+            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-800">
+              <span className="text-gray-700">
                 6 módulos completos e direto ao ponto para te auxiliar a
               </span>{" "}
               <span className="text-primary">alcançar os seu objetivos</span>
@@ -473,20 +473,20 @@ export default function Home() {
                 <AccordionItem
                   key={idx}
                   value={`module-${idx + 1}`}
-                  className="border-border bg-muted/50 rounded-lg px-6"
+                  className="border-gray-200 bg-gray-50 rounded-lg px-6"
                   data-testid={`accordion-module-${idx + 1}`}
                 >
                   <AccordionTrigger className="hover:no-underline py-4">
                     <div className="flex items-center gap-3 text-left">
-                      <span className="font-heading font-bold text-sm text-muted-foreground">
+                      <span className="font-heading font-bold text-sm text-gray-500">
                         {module.title}
                       </span>
-                      <span className="text-sm text-foreground">
+                      <span className="text-sm text-gray-800">
                         {module.subtitle}
                       </span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground pb-4">
+                  <AccordionContent className="text-sm text-gray-600 pb-4">
                     Conteúdo detalhado sobre {module.subtitle.toLowerCase()}{" "}
                     será apresentado neste módulo do curso.
                   </AccordionContent>
