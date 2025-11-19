@@ -31,6 +31,7 @@ import {
   Mail,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 import logoImage from "@assets/Rectangle__1_-removebg-preview_1763494828422.png";
 import videoImg from "@assets/stock_images/professional_woman_w_b6a99b19.jpg";
@@ -268,8 +269,21 @@ export default function Home() {
                 image: professionalImg,
               },
             ].map((item, idx) => (
-              <div
+              <motion.div
                 key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: idx * 0.1,
+                  ease: "easeOut"
+                }}
+                whileHover={{ 
+                  scale: 1.03,
+                  y: -5,
+                  transition: { duration: 0.3 }
+                }}
                 className="relative overflow-hidden rounded-md group aspect-[2/3]"
                 data-testid={`help-card-${idx + 1}`}
               >
@@ -296,7 +310,7 @@ export default function Home() {
                     Saber mais
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
