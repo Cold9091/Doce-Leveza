@@ -414,8 +414,7 @@ export default function Home() {
 
           <div className="text-center mt-12">
             <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-full uppercase"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm px-12 py-2.5 rounded-full uppercase"
               onClick={() => setDialogOpen(true)}
               data-testid="button-cta-pathologies"
             >
