@@ -424,29 +424,29 @@ export default function Home() {
         </div>
 
         {/* Wave Separator with Arrow */}
-        <div className="relative mt-20" style={{ height: '120px' }}>
+        <div className="relative" style={{ height: '100px', marginTop: '80px' }}>
           <svg
             className="absolute top-0 w-full"
-            style={{ height: '120px' }}
-            viewBox="0 0 1200 120"
+            style={{ height: '100px' }}
+            viewBox="0 0 1440 100"
             preserveAspectRatio="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M0,0 Q300,60 600,40 T1200,0 L1200,120 L0,120 Z"
+              d="M0,0 C480,100 960,100 1440,0 L1440,100 L0,100 Z"
               fill="white"
             />
           </svg>
           {/* Arrow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 translate-y-8 z-10">
+            <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center">
               <svg
-                width="20"
-                height="20"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="text-foreground"
+                className="text-white"
               >
                 <path
                   d="M7 10L12 15L17 10"
@@ -462,7 +462,7 @@ export default function Home() {
       </section>
 
       {/* Módulos Section */}
-      <section className="bg-white light" style={{ paddingTop: '0', paddingBottom: '80px' }}>
+      <section className="bg-white light" style={{ paddingTop: '60px', paddingBottom: '80px' }}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge
