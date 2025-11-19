@@ -323,20 +323,45 @@ export default function Home() {
       {/* Patologias Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="mb-12">
-            <Badge
-              variant="outline"
-              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted text-white"
+          <motion.div 
+            className="mb-12"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
-              PATOLOGIA
-            </Badge>
-            <h2 className="text-3xl lg:text-4xl font-heading text-foreground mb-3">
+              <Badge
+                variant="outline"
+                className="mb-4 text-xs uppercase tracking-wide border-border bg-muted text-white"
+              >
+                PATOLOGIA
+              </Badge>
+            </motion.div>
+            <motion.h2 
+              className="text-3xl lg:text-4xl font-heading text-foreground mb-3"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
               Conteúdos por Patologia
-            </h2>
-            <p className="text-base text-muted-foreground">
+            </motion.h2>
+            <motion.p 
+              className="text-base text-muted-foreground"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
               Escolhe a categoria que corresponde às tuas necessidades.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -367,60 +392,99 @@ export default function Home() {
             ].map((pathology, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ 
-                  duration: 0.5, 
-                  delay: idx * 0.1,
-                  ease: "easeOut"
+                  duration: 0.6, 
+                  delay: idx * 0.15,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
+                whileHover={{ 
+                  y: -8,
+                  transition: { duration: 0.3 }
                 }}
                 data-testid={`pathology-card-${idx + 1}`}
               >
-                <Card className="overflow-hidden border-card-border bg-card hover-elevate h-full flex flex-col">
+                <Card className="overflow-hidden border-card-border bg-card h-full flex flex-col group">
                   <div className="relative aspect-video overflow-hidden">
-                    <img
+                    <motion.img
                       src={pathology.image}
                       alt={pathology.title}
                       className="absolute inset-0 w-full h-full object-cover"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.4 }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                     <div className="absolute top-4 left-4">
-                      <div className="w-12 h-12 rounded-full bg-accent/90 flex items-center justify-center">
+                      <motion.div 
+                        className="w-12 h-12 rounded-full bg-accent/90 flex items-center justify-center"
+                        whileHover={{ 
+                          scale: 1.15,
+                          rotate: 5,
+                          transition: { duration: 0.3 }
+                        }}
+                      >
                         <pathology.icon className="w-6 h-6 text-accent-foreground" />
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
                   <CardContent className="p-6 flex-1 flex flex-col">
-                    <h3 className="font-heading font-bold text-lg text-card-foreground mb-2">
-                      {pathology.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
-                      {pathology.desc}
-                    </p>
-                    <Button
-                      variant="default"
-                      className="w-full"
-                      onClick={() => setDialogOpen(true)}
-                      data-testid={`button-view-content-${idx + 1}`}
+                    <motion.h3 
+                      className="font-heading font-bold text-lg text-card-foreground mb-2"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ delay: idx * 0.15 + 0.3 }}
                     >
-                      Ver Conteúdos
-                    </Button>
+                      {pathology.title}
+                    </motion.h3>
+                    <motion.p 
+                      className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ delay: idx * 0.15 + 0.4 }}
+                    >
+                      {pathology.desc}
+                    </motion.p>
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Button
+                        variant="default"
+                        className="w-full"
+                        onClick={() => setDialogOpen(true)}
+                        data-testid={`button-view-content-${idx + 1}`}
+                      >
+                        Ver Conteúdos
+                      </Button>
+                    </motion.div>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
           </div>
 
-          <div className="text-center mt-12">
-            <Button
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm px-12 py-2.5 rounded-full uppercase"
-              onClick={() => setDialogOpen(true)}
-              data-testid="button-cta-pathologies"
+          <motion.div 
+            className="text-center mt-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Assina agora
-            </Button>
-          </div>
+              <Button
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm px-12 py-2.5 rounded-full uppercase"
+                onClick={() => setDialogOpen(true)}
+                data-testid="button-cta-pathologies"
+              >
+                Assina agora
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
