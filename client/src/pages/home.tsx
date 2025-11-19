@@ -488,69 +488,160 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Módulos Section */}
+      {/* Assinatura Anual Section */}
       <section className="py-20 bg-white light">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge
-              variant="outline"
-              className="mb-4 text-xs uppercase tracking-wide border-gray-300 bg-gray-100 text-gray-700"
+          <motion.div 
+            className="text-center mb-12 max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
-              MÓDULOS
-            </Badge>
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-800">
-              <span className="text-gray-700">
-                6 módulos completos e direto ao ponto para te auxiliar a
-              </span>{" "}
-              <span className="text-primary">alcançar os seu objetivos</span>
-            </h2>
-          </div>
+              <Badge
+                variant="outline"
+                className="mb-4 text-xs uppercase tracking-wide border-gray-300 bg-gray-100 text-gray-700"
+              >
+                ASSINATURA
+              </Badge>
+            </motion.div>
+            <motion.h2 
+              className="text-3xl lg:text-4xl font-heading font-bold text-gray-800 mb-6"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              Acesso Anual Doce Leveza
+            </motion.h2>
+            <motion.p 
+              className="text-base text-gray-600 leading-relaxed"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              Garantir uma vida mais saudável começa com informação confiável e orientação constante.
+            </motion.p>
+          </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <Accordion type="single" collapsible className="space-y-3">
-              {[
-                { title: "MÓDULO 01", subtitle: "Introdução" },
-                { title: "MÓDULO 02", subtitle: "DOCE LEVEZA" },
-                {
-                  title: "MÓDULO 03",
-                  subtitle: "Plano alimentar personalizado",
-                },
-                { title: "MÓDULO 04", subtitle: "Exercícios físicos" },
-                { title: "MÓDULO 05", subtitle: "Descanso e sono" },
-                { title: "MÓDULO 06", subtitle: "Mudança de mentalidade" },
-              ].map((module, idx) => (
-                <AccordionItem
-                  key={idx}
-                  value={`module-${idx + 1}`}
-                  className="border-gray-200 bg-gray-50 rounded-lg px-6"
-                  data-testid={`accordion-module-${idx + 1}`}
-                >
-                  <AccordionTrigger className="hover:no-underline py-4">
-                    <div className="flex items-center gap-3 text-left">
-                      <span className="font-heading font-bold text-sm text-gray-500">
-                        {module.title}
-                      </span>
-                      <span className="text-sm text-gray-800">
-                        {module.subtitle}
-                      </span>
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
+            <motion.div 
+              className="space-y-6"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <h3 className="text-xl font-heading font-bold text-gray-800 mb-4">
+                Com a Assinatura Anual tens acesso a:
+              </h3>
+              <div className="space-y-4">
+                {[
+                  "Aulas semanais",
+                  "Conteúdos exclusivos por patologia",
+                  "Consultas gravadas",
+                  "Biblioteca de ebooks",
+                  "Atualizações contínuas",
+                  "Acesso em qualquer dispositivo",
+                  "Área de membros simples e organizada",
+                ].map((benefit, idx) => (
+                  <motion.div
+                    key={idx}
+                    className="flex items-start gap-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.6 + idx * 0.1 }}
+                    data-testid={`benefit-${idx + 1}`}
+                  >
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
                     </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-sm text-gray-600 pb-4">
-                    Conteúdo detalhado sobre {module.subtitle.toLowerCase()}{" "}
-                    será apresentado neste módulo do curso.
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                    <span className="text-gray-700 text-base">{benefit}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
 
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop"
-                alt="Mockup do curso"
-                className="w-full rounded-lg shadow-xl"
-                data-testid="img-course-mockup"
-              />
-            </div>
+            <motion.div 
+              className="relative"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+            >
+              <Card className="bg-white border-gray-200 p-8 shadow-lg">
+                <div className="text-center mb-6">
+                  <motion.div
+                    initial={{ scale: 0.9 }}
+                    whileInView={{ scale: 1 }}
+                    transition={{ duration: 0.4, delay: 0.8 }}
+                  >
+                    <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 text-xs uppercase tracking-wide">
+                      Assinatura Anual
+                    </Badge>
+                  </motion.div>
+                  <motion.div 
+                    className="space-y-2"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.9 }}
+                  >
+                    <div className="text-6xl font-heading font-bold text-primary mb-2">
+                      25.000
+                    </div>
+                    <div className="text-xl text-gray-600 font-medium">
+                      Kwanzas/ano
+                    </div>
+                  </motion.div>
+                  <motion.p 
+                    className="text-sm text-gray-500 mt-4"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                  >
+                    Acesso completo por 12 meses
+                  </motion.p>
+                </div>
+
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Button
+                    size="lg"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base py-6 rounded-lg uppercase"
+                    onClick={() => setDialogOpen(true)}
+                    data-testid="button-cta-subscription"
+                  >
+                    Assinar Agora
+                  </Button>
+                </motion.div>
+
+                <motion.div 
+                  className="mt-6 text-center"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ delay: 1.1 }}
+                >
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                    <Shield className="w-4 h-4" />
+                    <span>Pagamento seguro e protegido</span>
+                  </div>
+                </motion.div>
+              </Card>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -807,144 +898,6 @@ export default function Home() {
             >
               Quero começar agora
             </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
-            <div className="space-y-6 text-center lg:text-left">
-              <div className="flex items-center gap-2 mb-4">
-                <ButterflyIcon />
-                <div className="text-foreground">
-                  <span className="font-heading font-bold text-lg">
-                    DOCE
-                  </span>{" "}
-                  <span className="font-heading font-bold text-lg italic text-accent">
-                    LEVEZA
-                  </span>
-                </div>
-              </div>
-
-              <h2 className="text-3xl font-heading font-bold text-foreground">
-                Quanto você precisará investir
-              </h2>
-
-              <p className="text-muted-foreground">
-                Torne-se um Editor de Vídeos de auto nível e construa uma
-                carreira sólida para o seu futuro!
-              </p>
-
-              <Card className="bg-card border-card-border p-8 max-w-md mx-auto lg:mx-0">
-                <div className="text-center mb-6">
-                  <Badge className="mb-4 bg-muted text-foreground">
-                    ASSINATURA ANUAL
-                  </Badge>
-                  <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground line-through">
-                      DE R$547,00
-                    </div>
-                    <div className="text-5xl font-heading font-bold text-primary">
-                      R$29,56
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      POR 12X DE
-                    </div>
-                    <div className="text-lg text-muted-foreground">
-                      OU R$297,00 À VISTA
-                    </div>
-                  </div>
-
-                  <div className="mt-6 p-4 bg-primary/10 rounded-lg">
-                    <div className="flex items-center justify-center gap-2 text-primary mb-2">
-                      <Clock className="w-5 h-5" />
-                      <span className="text-sm font-bold">ENCERRA EM:</span>
-                    </div>
-                    <div className="flex justify-center gap-2 text-2xl font-heading font-bold text-primary">
-                      <span>
-                        {String(timeLeft.hours).padStart(2, "0")}
-                      </span>
-                      :
-                      <span>
-                        {String(timeLeft.minutes).padStart(2, "0")}
-                      </span>
-                      :
-                      <span>
-                        {String(timeLeft.seconds).padStart(2, "0")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base py-6 rounded-lg uppercase mb-4"
-                  onClick={() => setDialogOpen(true)}
-                  data-testid="button-cta-pricing"
-                >
-                  Quero começar agora
-                </Button>
-
-                <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
-                  <span>💳 VISA</span>
-                  <span>ELO</span>
-                  <span>💳</span>
-                  <span>MASTERCARD</span>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <Badge className="bg-accent/10 text-accent-foreground border-accent/20">
-                    7 dias de garantia
-                  </Badge>
-                </div>
-              </Card>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                {
-                  icon: PlayCircle,
-                  text: "21 aulas científicas",
-                },
-                {
-                  icon: Users,
-                  text: "3 mentorias ao vivo no zoom",
-                },
-                {
-                  icon: Gift,
-                  text: "10 aulas bônus com nutricionistas",
-                },
-                {
-                  icon: ShoppingCart,
-                  text: "Plano alimentar especializado",
-                },
-                {
-                  icon: Badge,
-                  text: "Cupons de descontos para compras",
-                },
-                {
-                  icon: Calendar,
-                  text: "1 ano de acesso com atualizações",
-                },
-                {
-                  icon: Clock,
-                  text: "+ 32 horas de conteúdo e materiais",
-                },
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3"
-                  data-testid={`pricing-benefit-${idx + 1}`}
-                >
-                  <div className="flex-shrink-0">
-                    <item.icon className="w-6 h-6 text-accent" />
-                  </div>
-                  <span className="text-foreground">{item.text}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
