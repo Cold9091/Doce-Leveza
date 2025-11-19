@@ -165,7 +165,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
