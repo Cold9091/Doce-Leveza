@@ -326,7 +326,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <Badge
               variant="outline"
-              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted/30"
+              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted"
             >
               PATOLOGIA
             </Badge>
