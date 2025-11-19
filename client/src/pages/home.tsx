@@ -422,21 +422,6 @@ export default function Home() {
             </Button>
           </div>
         </div>
-
-        {/* Wave Separator */}
-        <div className="relative h-24 mt-20">
-          <svg
-            className="absolute bottom-0 w-full h-24"
-            viewBox="0 0 1200 120"
-            preserveAspectRatio="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M0,0 Q300,60 600,40 T1200,0 L1200,120 L0,120 Z"
-              fill="white"
-            />
-          </svg>
-        </div>
       </section>
 
       {/* Módulos Section */}
