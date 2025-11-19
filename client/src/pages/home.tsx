@@ -263,7 +263,7 @@ export default function Home() {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="relative overflow-hidden rounded-md group h-64"
+                className="relative overflow-hidden rounded-md group h-48"
                 data-testid={`help-card-${idx + 1}`}
               >
                 <img
