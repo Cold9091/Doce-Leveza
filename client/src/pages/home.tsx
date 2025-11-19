@@ -794,7 +794,7 @@ export default function Home() {
               {
                 icon: Users,
                 title: "3 mentorias ao vivo",
-                desc: "com Dr. Priscila Canto.",
+                desc: "com a Dra. Angelina.",
               },
               {
                 icon: Gift,
@@ -952,49 +952,39 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div className="space-y-6">
               <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
-                Quem vai te guiar nessa Jornada?
+                Sobre a <span className="text-accent">Dra. Angelina</span>
               </h2>
 
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  <span className="font-bold text-foreground">
-                    Dra. Priscila Canto
-                  </span>{" "}
-                  é uma profissional destacada na área de Nutrição interativa,
-                  especializada em Gastroenterologia e emagrecimento. Com uma
-                  vasta experiência que inclui o atendimento de mais de{" "}
-                  <span className="font-bold text-foreground">
-                    6 mil pacientes
-                  </span>{" "}
-                  em consultórios situados em São Paulo, Rio de Janeiro e em
-                  mais de{" "}
-                  <span className="font-bold text-foreground">
-                    7 países através
-                  </span>{" "}
-                  de consultas online, Priscila se destaca pela sua abordagem
-                  holística e focada na saúde intestinal e equilíbrio hormonal.
+                  A Dra. Angelina é nutricionista especializada em acompanhamento nutricional por patologia.
                 </p>
 
                 <p>
-                  Ela é uma firme defensora da{" "}
-                  <span className="font-bold text-foreground">
-                    alimentação natural
-                  </span>
-                  , incentivando seus pacientes a optarem por alimentos não
-                  processados e livres de aditivos prejudiciais à saúde. Sob a
-                  filosofia "desembrutune menos, desloque mais", Priscila
-                  orienta diariamente seus pacientes e participantes de seus
-                  cursos sobre a importância de combinar uma alimentação
-                  saudável com exercícios físicos, sono adequado e gestão do
-                  estresse para alcançar uma vida plena e feliz.
+                  A sua missão é oferecer orientação acessível, prática e segura, baseada em evidências
+                  científicas e adaptada à realidade dos pacientes.
+                </p>
+
+                <p>
+                  Através da Doce Leveza, ela concentra num único espaço conteúdos, aulas, ebooks e
+                  programas que ajudam cada paciente a melhorar a saúde com confiança e autonomia.
                 </p>
               </div>
+
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-lg uppercase"
+                onClick={() => setDialogOpen(true)}
+                data-testid="button-about-instructor"
+              >
+                Conhecer melhor
+              </Button>
             </div>
 
             <div className="relative">
               <img
                 src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&h=600&fit=crop"
-                alt="Dra. Priscila Canto"
+                alt="Dra. Angelina"
                 className="w-full rounded-lg shadow-xl"
                 data-testid="img-instructor"
               />
@@ -1116,7 +1106,7 @@ export default function Home() {
           <div className="flex flex-col items-center justify-center gap-2">
             <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" />
             <p className="text-sm text-muted-foreground">
-              Dra. Priscila Canto
+              Dra. Angelina
             </p>
           </div>
         </div>
