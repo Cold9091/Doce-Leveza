@@ -884,14 +884,14 @@ export default function Home() {
                   {testimonials.map((testimonial, idx) => (
                     <CarouselItem key={idx} className="pl-4 basis-[240px] lg:basis-[260px]">
                       <Card
-                        className="border-card-border bg-card hover-elevate max-h-[340px]"
+                        className="border-card-border bg-card hover-elevate max-h-[400px]"
                         data-testid={`testimonial-card-${idx + 1}`}
                       >
-                        <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                        <CardContent className="p-5 flex flex-col items-center text-center gap-4">
                           <img
                             src={testimonial.image}
                             alt={testimonial.name}
-                            className="w-14 h-14 rounded-full object-cover"
+                            className="w-16 h-16 rounded-full object-cover"
                           />
                           
                           <div className="flex gap-1">
@@ -907,7 +907,7 @@ export default function Home() {
                             {testimonial.name}
                           </h4>
 
-                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-6">
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-8">
                             {testimonial.text}
                           </p>
                         </CardContent>
