@@ -210,7 +210,7 @@ export default function Home() {
             <div className="pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
             {/* Logo acima do texto */}
             <div 
-              className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-4 duration-700" 
+              className="mb-3 sm:mb-4 animate-in fade-in slide-in-from-top-4 duration-700" 
               data-testid="logo-header"
             >
               <img src={logoImage} alt="Doce Leveza" className="h-12 sm:h-16 lg:h-20 w-auto" />
