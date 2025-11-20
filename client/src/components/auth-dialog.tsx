@@ -32,13 +32,17 @@ interface AuthDialogProps {
 
 const signupSchema = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
-  phone: z.string().min(9, "Telefone é obrigatório"),
+  phone: z.string()
+    .min(9, "Telefone é obrigatório")
+    .regex(/^(\+244)?[0-9]{9}$/, "Formato: +244 9XX XXX XXX"),
   address: z.string().min(5, "Endereço é obrigatório"),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
 const loginSchema = z.object({
-  phone: z.string().min(9, "Telefone é obrigatório"),
+  phone: z.string()
+    .min(9, "Telefone é obrigatório")
+    .regex(/^(\+244)?[0-9]{9}$/, "Formato: +244 9XX XXX XXX"),
   password: z.string().min(6, "Senha é obrigatória"),
 });
 
@@ -177,12 +181,22 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                         <FormItem>
                           <FormLabel>Telefone*</FormLabel>
                           <FormControl>
-                            <Input
-                              type="tel"
-                              placeholder="(00) 00000-0000"
-                              {...field}
-                              data-testid="input-signup-phone"
-                            />
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                +244
+                              </span>
+                              <Input
+                                type="tel"
+                                placeholder="9XX XXX XXX"
+                                {...field}
+                                className="pl-16"
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/\D/g, '');
+                                  field.onChange(value);
+                                }}
+                                data-testid="input-signup-phone"
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -251,12 +265,22 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                         <FormItem>
                           <FormLabel>Telefone*</FormLabel>
                           <FormControl>
-                            <Input
-                              type="tel"
-                              placeholder="(00) 00000-0000"
-                              {...field}
-                              data-testid="input-login-phone"
-                            />
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                +244
+                              </span>
+                              <Input
+                                type="tel"
+                                placeholder="9XX XXX XXX"
+                                {...field}
+                                className="pl-16"
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/\D/g, '');
+                                  field.onChange(value);
+                                }}
+                                data-testid="input-login-phone"
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

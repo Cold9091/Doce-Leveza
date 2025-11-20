@@ -182,21 +182,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background dark">
-      {/* Header Invisível com Botão Entrar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
-        <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-6">
-          <div className="flex justify-end items-center">
-            <Button
-              className="backdrop-blur-md bg-white/10 border border-white/40 text-white hover:bg-white/20 transition-all duration-300 font-medium text-xs tracking-wider px-8 py-2 rounded-full uppercase whitespace-nowrap h-9"
-              onClick={() => setAuthDialogOpen(true)}
-              data-testid="button-header-login"
-            >
-              Entrar
-            </Button>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
@@ -205,6 +190,20 @@ export default function Home() {
         }}
         data-testid="section-hero"
       >
+        {/* Header com Botão Entrar (apenas no Hero) */}
+        <div className="absolute top-0 left-0 right-0 z-10">
+          <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-6">
+            <div className="flex justify-end items-center">
+              <Button
+                className="backdrop-blur-md bg-white/10 border border-white/40 text-white hover:bg-white/20 transition-all duration-300 font-medium text-xs tracking-wider px-8 py-2 rounded-full uppercase whitespace-nowrap h-9"
+                onClick={() => setAuthDialogOpen(true)}
+                data-testid="button-header-login"
+              >
+                Entrar
+              </Button>
+            </div>
+          </div>
+        </div>
         <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-20">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
