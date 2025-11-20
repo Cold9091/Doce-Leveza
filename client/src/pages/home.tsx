@@ -184,10 +184,10 @@ export default function Home() {
     <div className="min-h-screen bg-background dark">
       {/* Header Invisível com Botão Entrar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
-        <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-4">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-6">
           <div className="flex justify-end items-center">
             <Button
-              className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap"
+              className="backdrop-blur-md bg-white/10 border border-white/40 text-white hover:bg-white/20 transition-all duration-300 font-medium text-xs tracking-wider px-8 py-2 rounded-full uppercase whitespace-nowrap h-9"
               onClick={() => setAuthDialogOpen(true)}
               data-testid="button-header-login"
             >
@@ -206,18 +206,15 @@ export default function Home() {
         data-testid="section-hero"
       >
         <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-20">
-          {/* Logo */}
-          <div className="mb-8 sm:mb-12">
-            <div 
-              className="flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-700" 
-              data-testid="logo-header"
-            >
-              <img src={logoImage} alt="Doce Leveza" className="h-16 sm:h-20 lg:h-24 w-auto" />
-            </div>
-          </div>
-
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
+            {/* Logo acima do texto */}
+            <div 
+              className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-4 duration-700" 
+              data-testid="logo-header"
+            >
+              <img src={logoImage} alt="Doce Leveza" className="h-12 sm:h-16 lg:h-20 w-auto" />
+            </div>
             
             <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white leading-snug animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 mb-4 sm:mb-5">
               Cuida da tua saúde com orientação nutricional profissional
