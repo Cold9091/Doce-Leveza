@@ -530,29 +530,29 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-white border-gray-200 shadow-2xl w-full aspect-[2/3] flex flex-col justify-center p-8 rounded-md">
-                <div className="text-center space-y-6 flex-1 flex flex-col justify-center">
+              <Card className="bg-white border-gray-200 shadow-2xl w-full max-w-xs aspect-[3/4] flex flex-col justify-center p-6 rounded-md mx-auto">
+                <div className="text-center space-y-5 flex-1 flex flex-col justify-center">
                   <Badge className="bg-gray-700 text-white border-gray-600 text-xs uppercase tracking-wide mx-auto">
                     Assinatura Anual
                   </Badge>
                   
                   <div className="space-y-2">
-                    <div className="text-base text-gray-500 line-through">
+                    <div className="text-sm text-gray-500 line-through">
                       DE 547.000 Kwanzas
                     </div>
-                    <div className="text-sm text-gray-600 uppercase tracking-wide">
+                    <div className="text-xs text-gray-600 uppercase tracking-wide">
                       Por 12x de
                     </div>
-                    <div className="text-6xl font-heading font-bold text-primary">
+                    <div className="text-5xl font-heading font-bold text-primary">
                       29.560
                     </div>
-                    <div className="text-base text-gray-600 uppercase tracking-wide">
+                    <div className="text-sm text-gray-600 uppercase tracking-wide">
                       ou 297.000 Kwanzas à vista
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-center gap-2 text-base text-gray-600">
-                    <Clock className="w-5 h-5 text-primary" />
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                    <Clock className="w-4 h-4 text-primary" />
                     <span>ENCERRA EM:</span>
                     <span className="font-mono font-semibold">
                       {String(timeLeft.hours).padStart(2, "0")}:
@@ -563,7 +563,7 @@ export default function Home() {
 
                   <Button
                     size="lg"
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-lg py-7 rounded-lg uppercase"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base py-6 rounded-lg uppercase"
                     onClick={() => setDialogOpen(true)}
                     data-testid="button-cta-subscription"
                   >
