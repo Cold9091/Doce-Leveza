@@ -110,6 +110,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Pathologies routes
+  app.get("/api/pathologies", async (_req, res) => {
+    try {
+      const pathologies = await storage.getPathologies();
+      res.json(pathologies);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/pathologies/:slug", async (req, res) => {
+    try {
+      const pathology = await storage.getPathologyBySlug(req.params.slug);
+      if (!pathology) {
+        return res.status(404).json({ error: "Pathology not found" });
+      }
+      res.json(pathology);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Videos routes
+  app.get("/api/videos", async (_req, res) => {
+    try {
+      const videos = await storage.getVideos();
+      res.json(videos);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/videos/:id", async (req, res) => {
+    try {
+      const video = await storage.getVideoById(parseInt(req.params.id));
+      if (!video) {
+        return res.status(404).json({ error: "Video not found" });
+      }
+      res.json(video);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Ebooks routes
+  app.get("/api/ebooks", async (_req, res) => {
+    try {
+      const ebooks = await storage.getEbooks();
+      res.json(ebooks);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/ebooks/:id", async (req, res) => {
+    try {
+      const ebook = await storage.getEbookById(parseInt(req.params.id));
+      if (!ebook) {
+        return res.status(404).json({ error: "Ebook not found" });
+      }
+      res.json(ebook);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Consultations routes
+  app.get("/api/consultations/user/:userId", async (req, res) => {
+    try {
+      const consultations = await storage.getConsultationsByUser(parseInt(req.params.userId));
+      res.json(consultations);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Subscriptions routes
+  app.get("/api/subscriptions/user/:userId", async (req, res) => {
+    try {
+      const subscription = await storage.getSubscriptionByUser(parseInt(req.params.userId));
+      res.json(subscription);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
