@@ -583,13 +583,13 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               {[
-                { icon: GraduationCap, text: "21 aulas científicas", color: "text-lime-400" },
-                { icon: Video, text: "3 mentorias ao vivo na zoom", color: "text-lime-400" },
-                { icon: Award, text: "10 aulas bônus com nutricionistas", color: "text-lime-400" },
-                { icon: Utensils, text: "Plano alimentar especializado", color: "text-lime-400" },
-                { icon: Tag, text: "Cupons de descontos para compras", color: "text-lime-400" },
-                { icon: RefreshCw, text: "1 ano de acesso com atualizações", color: "text-lime-400" },
-                { icon: Clock, text: "+32 horas de conteúdo e materiais", color: "text-lime-400" },
+                { icon: GraduationCap, text: "21 aulas científicas", color: "text-blue-400" },
+                { icon: Video, text: "3 mentorias ao vivo na zoom", color: "text-blue-400" },
+                { icon: Award, text: "10 aulas bônus com nutricionistas", color: "text-blue-400" },
+                { icon: Utensils, text: "Plano alimentar especializado", color: "text-blue-400" },
+                { icon: Tag, text: "Cupons de descontos para compras", color: "text-blue-400" },
+                { icon: RefreshCw, text: "1 ano de acesso com atualizações", color: "text-blue-400" },
+                { icon: Clock, text: "+32 horas de conteúdo e materiais", color: "text-blue-400" },
               ].map((benefit, idx) => (
                 <motion.div
                   key={idx}
