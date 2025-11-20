@@ -505,16 +505,16 @@ export default function Home() {
       {/* Assinatura Anual Section */}
       <section className="py-20 bg-gray-900 light">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-8 items-start max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-8 items-center max-w-7xl mx-auto">
             {/* Left Column - Title */}
             <motion.div 
-              className="lg:col-span-1 space-y-4"
+              className="lg:col-span-1 space-y-4 text-center lg:text-left"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl lg:text-4xl font-heading font-bold text-white leading-tight">
+              <h2 className="text-3xl lg:text-4xl font-heading font-normal text-white leading-tight">
                 Quanto você precisará <span className="text-primary">Investir</span>
               </h2>
               <p className="text-base text-gray-300 leading-relaxed">
@@ -530,9 +530,9 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-white border-gray-200 p-6 shadow-2xl w-full max-w-sm">
-                <div className="text-center space-y-4">
-                  <Badge className="bg-gray-700 text-white border-gray-600 text-xs uppercase tracking-wide">
+              <Card className="bg-white border-gray-200 shadow-2xl w-full aspect-[2/3] flex flex-col justify-between p-6 rounded-md">
+                <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
+                  <Badge className="bg-gray-700 text-white border-gray-600 text-xs uppercase tracking-wide mx-auto">
                     Assinatura Anual
                   </Badge>
                   
@@ -569,19 +569,19 @@ export default function Home() {
                   >
                     Quero Começar Agora
                   </Button>
+                </div>
 
-                  <div className="flex items-center justify-center gap-3 pt-2">
-                    <CreditCard className="w-5 h-5 text-gray-400" />
-                    <Shield className="w-5 h-5 text-gray-400" />
-                    <FileText className="w-5 h-5 text-gray-400" />
-                  </div>
+                <div className="flex items-center justify-center gap-3 pt-3 border-t border-gray-200">
+                  <CreditCard className="w-5 h-5 text-gray-400" />
+                  <Shield className="w-5 h-5 text-gray-400" />
+                  <FileText className="w-5 h-5 text-gray-400" />
                 </div>
               </Card>
             </motion.div>
 
             {/* Right Column - Benefits */}
             <motion.div 
-              className="lg:col-span-1 space-y-4"
+              className="lg:col-span-1 space-y-4 text-center lg:text-left"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -598,7 +598,7 @@ export default function Home() {
               ].map((benefit, idx) => (
                 <motion.div
                   key={idx}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-3 justify-center lg:justify-start"
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
