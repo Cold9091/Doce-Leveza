@@ -51,6 +51,7 @@ import {
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
+import { AuthDialog } from "@/components/auth-dialog";
 import logoImage from "@assets/Rectangle__1_-removebg-preview_1763494828422.png";
 import videoImg from "@assets/stock_images/professional_woman_w_b6a99b19.jpg";
 import ebookImg from "@assets/stock_images/person_reading_healt_ec03a133.jpg";
@@ -59,6 +60,7 @@ import professionalImg from "@assets/stock_images/smiling_nutritionist_6abfbe04.
 
 export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     hours: 5,
     minutes: 16,
@@ -180,6 +182,20 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background dark">
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <img src={logoImage} alt="Doce Leveza" className="h-12 w-auto" />
+          <Button
+            className="backdrop-blur-md bg-white/20 border-2 border-primary text-primary hover:bg-primary/10 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap"
+            onClick={() => setAuthDialogOpen(true)}
+            data-testid="button-header-login"
+          >
+            Entrar na Área de Membros
+          </Button>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
@@ -209,7 +225,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
               <Button
                 className="bg-accent hover:bg-accent/90 hover:scale-105 transition-all duration-300 text-accent-foreground font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
-                onClick={() => setDialogOpen(true)}
+                onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-cta-hero"
               >
                 Assinar Acesso Anual
@@ -217,7 +233,7 @@ export default function Home() {
               
               <Button
                 className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
-                onClick={() => setDialogOpen(true)}
+                onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-members-hero"
               >
                 Entrar na Área de Membros
@@ -1205,6 +1221,7 @@ export default function Home() {
       </footer>
 
       <LeadCaptureDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
     </div>
   );
 }
