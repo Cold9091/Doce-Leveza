@@ -847,24 +847,24 @@ export default function Home() {
       {/* Testimonials Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-12 items-center">
-            <div className="lg:col-span-1 space-y-6">
+          <div className="grid lg:grid-cols-[1fr_1.8fr] gap-10 items-start">
+            <div className="space-y-6">
               <Badge
                 variant="outline"
-                className="text-xs uppercase tracking-wide border-border bg-muted/30"
+                className="text-xs uppercase tracking-wide border-border bg-muted text-white"
               >
                 DEPOIMENTOS
               </Badge>
               
-              <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
+              <h2 className="text-3xl lg:text-4xl font-heading text-foreground">
                 Já são{" "}
                 <span className="text-accent">milhares de pessoas</span> que
                 mudaram de vida com o DOCE LEVEZA:
               </h2>
 
               <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-lg uppercase"
+                size="default"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm px-6 rounded-full uppercase w-fit"
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-cta-testimonials"
               >
@@ -872,7 +872,7 @@ export default function Home() {
               </Button>
             </div>
 
-            <div className="lg:col-span-2">
+            <div>
               <Carousel
                 opts={{
                   align: "start",
@@ -882,12 +882,12 @@ export default function Home() {
               >
                 <CarouselContent className="-ml-4">
                   {testimonials.map((testimonial, idx) => (
-                    <CarouselItem key={idx} className="pl-4 md:basis-1/2 lg:basis-1/4">
+                    <CarouselItem key={idx} className="pl-4 basis-[240px] lg:basis-[260px]">
                       <Card
-                        className="border-card-border bg-card hover-elevate h-full"
+                        className="border-card-border bg-card hover-elevate"
                         data-testid={`testimonial-card-${idx + 1}`}
                       >
-                        <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                        <CardContent className="p-6 flex flex-col items-center text-center gap-4">
                           <img
                             src={testimonial.image}
                             alt={testimonial.name}
@@ -903,7 +903,7 @@ export default function Home() {
                             ))}
                           </div>
 
-                          <h4 className="font-heading font-bold text-card-foreground">
+                          <h4 className="font-heading text-card-foreground">
                             {testimonial.name}
                           </h4>
 
