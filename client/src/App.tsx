@@ -26,11 +26,11 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen w-full dark">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <header className="flex items-center gap-4 border-b border-sidebar-border p-4 bg-sidebar">
+          <header className="flex items-center gap-3 sm:gap-4 border-b border-sidebar-border p-3 sm:p-4 bg-sidebar">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
-            <h2 className="text-lg font-semibold text-sidebar-foreground">Doce Leveza</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-sidebar-foreground truncate">Doce Leveza</h2>
           </header>
-          <main className="flex-1 overflow-auto p-6 bg-background">
+          <main className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6 bg-background">
             {children}
           </main>
         </div>

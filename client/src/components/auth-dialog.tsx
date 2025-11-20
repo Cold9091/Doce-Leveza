@@ -131,30 +131,30 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" data-testid="dialog-auth">
+      <DialogContent className="w-[95vw] max-w-[420px] sm:max-w-md max-h-[90vh] overflow-y-auto" data-testid="dialog-auth">
         {!success ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-heading font-normal text-center">
+              <DialogTitle className="text-xl sm:text-2xl font-heading font-normal text-center">
                 Acesso à Área de Membros
               </DialogTitle>
-              <DialogDescription className="text-center">
+              <DialogDescription className="text-xs sm:text-sm text-center">
                 Entre ou crie sua conta no{" "}
                 <span className="text-accent font-bold">DOCE LEVEZA</span>
               </DialogDescription>
             </DialogHeader>
 
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")} className="w-full mt-4">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")} className="w-full mt-3 sm:mt-4">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signup" data-testid="tab-signup">Criar Conta</TabsTrigger>
-                <TabsTrigger value="login" data-testid="tab-login">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="text-xs sm:text-sm" data-testid="tab-signup">Criar Conta</TabsTrigger>
+                <TabsTrigger value="login" className="text-xs sm:text-sm" data-testid="tab-login">Entrar</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="signup" className="mt-4">
+              <TabsContent value="signup" className="mt-3 sm:mt-4">
                 <Form {...signupForm}>
                   <form
                     onSubmit={signupForm.handleSubmit(onSignupSubmit)}
-                    className="space-y-4"
+                    className="space-y-3 sm:space-y-4"
                   >
                     <FormField
                       control={signupForm.control}
@@ -242,7 +242,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
 
                     <Button
                       type="submit"
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base py-6 uppercase rounded-full"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm sm:text-base py-5 sm:py-6 uppercase rounded-full"
                       disabled={signupMutation.isPending}
                       data-testid="button-submit-signup"
                     >
@@ -252,11 +252,11 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                 </Form>
               </TabsContent>
 
-              <TabsContent value="login" className="mt-4">
+              <TabsContent value="login" className="mt-3 sm:mt-4">
                 <Form {...loginForm}>
                   <form
                     onSubmit={loginForm.handleSubmit(onLoginSubmit)}
-                    className="space-y-4"
+                    className="space-y-3 sm:space-y-4"
                   >
                     <FormField
                       control={loginForm.control}
@@ -308,7 +308,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
 
                     <Button
                       type="submit"
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base py-6 uppercase rounded-full"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm sm:text-base py-5 sm:py-6 uppercase rounded-full"
                       disabled={loginMutation.isPending}
                       data-testid="button-submit-login"
                     >

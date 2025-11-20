@@ -12,11 +12,11 @@ export default function Library() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-heading font-bold">Biblioteca</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="space-y-4 sm:space-y-6">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold">Biblioteca</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="h-96 animate-pulse bg-muted" />
+            <Card key={i} className="h-80 sm:h-96 animate-pulse bg-muted" />
           ))}
         </div>
       </div>
@@ -24,17 +24,17 @@ export default function Library() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-foreground" data-testid="heading-library">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground" data-testid="heading-library">
           Biblioteca de Ebooks
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
           Acesse e baixe todos os materiais de estudo
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         {ebooks?.map((ebook) => (
           <Card
             key={ebook.id}

@@ -76,14 +76,14 @@ export function LeadCaptureDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" data-testid="dialog-lead-capture">
+      <DialogContent className="w-[95vw] max-w-[420px] sm:max-w-md max-h-[90vh] overflow-y-auto" data-testid="dialog-lead-capture">
         {!success ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-heading font-bold text-center">
+              <DialogTitle className="text-xl sm:text-2xl font-heading font-bold text-center">
                 Comece Sua Transformação Agora!
               </DialogTitle>
-              <DialogDescription className="text-center">
+              <DialogDescription className="text-xs sm:text-sm text-center">
                 Preencha seus dados abaixo e garanta seu acesso ao{" "}
                 <span className="text-accent font-bold">DOCE LEVEZA</span>
               </DialogDescription>
@@ -92,7 +92,7 @@ export function LeadCaptureDialog({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 mt-4"
+                className="space-y-3 sm:space-y-4 mt-3 sm:mt-4"
               >
                 <FormField
                   control={form.control}
@@ -152,7 +152,7 @@ export function LeadCaptureDialog({
 
                 <Button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-lg py-6 uppercase"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm sm:text-base lg:text-lg py-5 sm:py-6 uppercase"
                   disabled={createLeadMutation.isPending}
                   data-testid="button-submit-lead"
                 >
@@ -161,7 +161,7 @@ export function LeadCaptureDialog({
                     : "Quero começar agora"}
                 </Button>
 
-                <p className="text-xs text-center text-muted-foreground">
+                <p className="text-[10px] sm:text-xs text-center text-muted-foreground">
                   Ao se inscrever, você concorda em receber comunicações sobre o
                   DOCE LEVEZA
                 </p>

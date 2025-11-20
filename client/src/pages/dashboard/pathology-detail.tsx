@@ -26,16 +26,16 @@ export default function PathologyDetail() {
 
   if (!pathology) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <Link href="/dashboard/patologias">
-          <a className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+          <a className="inline-flex items-center text-xs sm:text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
             Voltar para Patologias
           </a>
         </Link>
         <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">Patologia não encontrada</p>
+          <CardContent className="p-8 sm:p-12 text-center">
+            <p className="text-sm sm:text-base text-muted-foreground">Patologia não encontrada</p>
           </CardContent>
         </Card>
       </div>
@@ -43,32 +43,32 @@ export default function PathologyDetail() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Link href="/dashboard/patologias">
         <a
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center text-xs sm:text-sm text-muted-foreground hover:text-foreground"
           data-testid="link-back-pathologies"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
           Voltar para Patologias
         </a>
       </Link>
 
       <div>
-        <h1 className="text-3xl font-heading font-bold text-foreground" data-testid={`heading-pathology-${slug}`}>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground" data-testid={`heading-pathology-${slug}`}>
           {pathology.title}
         </h1>
-        <p className="text-muted-foreground mt-2">{pathology.description}</p>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">{pathology.description}</p>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="h-64 animate-pulse bg-muted" />
+            <Card key={i} className="h-56 sm:h-64 animate-pulse bg-muted" />
           ))}
         </div>
       ) : pathologyVideos && pathologyVideos.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           {pathologyVideos.map((video) => (
             <Card
               key={video.id}

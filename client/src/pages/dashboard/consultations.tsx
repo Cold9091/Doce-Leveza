@@ -42,23 +42,23 @@ export default function Consultations() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground" data-testid="heading-consultations">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground" data-testid="heading-consultations">
             Minhas Consultas
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
             Gerencie suas consultas com nossos profissionais
           </p>
         </div>
-        <Button data-testid="button-schedule-consultation">
-          <Plus className="mr-2 h-4 w-4" />
+        <Button className="w-full sm:w-auto text-xs sm:text-sm" data-testid="button-schedule-consultation">
+          <Plus className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
           Agendar Consulta
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4">
         {consultations.map((consultation) => (
           <Card key={consultation.id} data-testid={`card-consultation-${consultation.id}`}>
             <CardHeader>

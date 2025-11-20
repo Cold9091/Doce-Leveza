@@ -7,12 +7,12 @@ import { User, Lock, Bell } from "lucide-react";
 
 export default function Settings() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-foreground" data-testid="heading-settings">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground" data-testid="heading-settings">
           Configurações
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
           Gerencie suas preferências e informações pessoais
         </p>
       </div>
@@ -29,8 +29,8 @@ export default function Settings() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nome Completo</Label>
               <Input

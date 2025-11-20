@@ -184,7 +184,7 @@ export default function Home() {
     <div className="min-h-screen bg-background dark">
       {/* Hero Section */}
       <section
-        className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
+        className="relative min-h-[80vh] sm:min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480802/Brown_Yellow_Modern_Museum_Presentation_2_xizdht.svg')`,
         }}
@@ -192,10 +192,10 @@ export default function Home() {
       >
         {/* Header com Botão Entrar (apenas no Hero) */}
         <div className="absolute top-0 left-0 right-0 z-10">
-          <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-6">
+          <div className="container mx-auto px-3 sm:px-6 lg:px-12 py-4 sm:py-6">
             <div className="flex justify-end items-center">
               <Button
-                className="backdrop-blur-md bg-white/10 border border-white/40 text-white hover:bg-white/20 transition-all duration-300 font-medium text-xs tracking-wider px-8 py-2 rounded-full uppercase whitespace-nowrap h-9"
+                className="backdrop-blur-md bg-white/10 border border-white/40 text-white hover:bg-white/20 transition-all duration-300 font-medium text-xs sm:text-sm tracking-wider px-4 sm:px-8 py-2 rounded-full uppercase whitespace-nowrap h-8 sm:h-9"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-header-login"
               >
@@ -204,29 +204,29 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-20">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12 xl:px-16 py-12 sm:py-16 lg:py-20">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
+            <div className="pl-0 sm:pl-4 lg:pl-16" data-testid="hero-content">
             {/* Logo acima do texto */}
             <div 
-              className="mb-3 sm:mb-4 animate-in fade-in slide-in-from-top-4 duration-700" 
+              className="mb-3 sm:mb-4 lg:mb-6 animate-in fade-in slide-in-from-top-4 duration-700" 
               data-testid="logo-header"
             >
-              <img src={logoImage} alt="Doce Leveza" className="h-12 sm:h-16 lg:h-20 w-auto" />
+              <img src={logoImage} alt="Doce Leveza" className="h-10 sm:h-14 lg:h-16 xl:h-20 w-auto" />
             </div>
             
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white leading-snug animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 mb-4 sm:mb-5">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white leading-tight sm:leading-snug animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 mb-3 sm:mb-4 lg:mb-5">
               Cuida da tua saúde com orientação nutricional profissional
             </h1>
 
-            <p className="text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 mb-4 sm:mb-5">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-200 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 mb-4 sm:mb-5 lg:mb-6">
               Vídeos, aulas, ebooks e programas especializados para Diabetes, Emagrecimento,
               Hipertensão e Gestantes — tudo num único lugar.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
               <Button
-                className="bg-accent hover:bg-accent/90 hover:scale-105 transition-all duration-300 text-accent-foreground font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
+                className="bg-accent hover:bg-accent/90 hover:scale-105 transition-all duration-300 text-accent-foreground font-semibold text-xs sm:text-sm px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-cta-hero"
               >
@@ -234,7 +234,7 @@ export default function Home() {
               </Button>
               
               <Button
-                className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
+                className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-members-hero"
               >
@@ -246,14 +246,14 @@ export default function Home() {
         </div>
 
         {/* Infinite Ticker */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 py-1.5 overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 py-1 sm:py-1.5 overflow-hidden">
           <div className="flex animate-scroll whitespace-nowrap" style={{ width: "max-content" }}>
             {[...Array(30)].map((_, i) => (
               <div
                 key={i}
-                className="inline-flex items-center gap-2 mx-6"
+                className="inline-flex items-center gap-2 mx-4 sm:mx-6"
               >
-                <img src={logoImage} alt="Doce Leveza" className="h-10 w-auto" />
+                <img src={logoImage} alt="Doce Leveza" className="h-8 sm:h-10 w-auto" />
               </div>
             ))}
           </div>
@@ -262,16 +262,16 @@ export default function Home() {
 
       {/* Como Podemos Ajudarte Section */}
       <section
-        className="py-20 bg-background"
+        className="py-12 sm:py-16 lg:py-20 bg-background"
         data-testid="section-help"
       >
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-            <h2 className="text-3xl lg:text-4xl font-heading text-foreground">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground">
               Como podemos ajudarte?
             </h2>
             <Button
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 text-xs sm:text-sm px-4 sm:px-6 whitespace-nowrap w-full md:w-auto"
               onClick={() => setDialogOpen(true)}
               data-testid="button-contact-consultant"
             >
@@ -279,7 +279,7 @@ export default function Home() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[
               {
                 title: "Aulas em Vídeo",
@@ -354,8 +354,8 @@ export default function Home() {
       </section>
 
       {/* Patologias Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
           <motion.div 
             className="mb-12"
             initial={{ opacity: 0, y: -20 }}
@@ -396,7 +396,7 @@ export default function Home() {
             </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
               {
                 title: "Diabetes",
@@ -522,21 +522,21 @@ export default function Home() {
       </section>
 
       {/* Assinatura Anual Section */}
-      <section className="py-20 bg-gray-900 light">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-8 items-center max-w-7xl mx-auto">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-900 light">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 items-center max-w-7xl mx-auto">
             {/* Left Column - Title */}
             <motion.div 
-              className="lg:col-span-1 space-y-4 text-center lg:text-left"
+              className="lg:col-span-1 space-y-3 sm:space-y-4 text-center lg:text-left"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl lg:text-4xl font-heading font-normal text-white leading-tight">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-normal text-white leading-tight">
                 Quanto você precisará <span className="text-primary">Investir</span>
               </h2>
-              <p className="text-base text-gray-300 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
                 Transforme sua saúde com conhecimento científico e construa uma vida mais saudável para o seu futuro!
               </p>
             </motion.div>
@@ -549,7 +549,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-white border-gray-200 shadow-2xl w-full max-w-xs aspect-[3/4] flex flex-col p-6 rounded-md mx-auto">
+              <Card className="bg-white border-gray-200 shadow-2xl w-full max-w-xs aspect-auto lg:aspect-[3/4] flex flex-col p-4 sm:p-6 rounded-md mx-auto">
                 <div className="text-center mb-4">
                   <Badge className="bg-gray-700 text-white border-gray-600 text-xs uppercase tracking-wide">
                     Assinatura Anual
@@ -595,7 +595,7 @@ export default function Home() {
 
             {/* Right Column - Benefits */}
             <motion.div 
-              className="lg:col-span-1 space-y-4 text-center lg:text-left"
+              className="lg:col-span-1 space-y-3 sm:space-y-4 text-center lg:text-left"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -612,15 +612,15 @@ export default function Home() {
               ].map((benefit, idx) => (
                 <motion.div
                   key={idx}
-                  className="flex items-center gap-3 justify-center lg:justify-start"
+                  className="flex items-center gap-2 sm:gap-3 justify-center lg:justify-start"
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: 0.5 + idx * 0.1 }}
                   data-testid={`benefit-${idx + 1}`}
                 >
-                  <benefit.icon className={`w-5 h-5 ${benefit.color} flex-shrink-0`} />
-                  <span className="text-white text-base font-normal">{benefit.text}</span>
+                  <benefit.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${benefit.color} flex-shrink-0`} />
+                  <span className="text-white text-sm sm:text-base font-normal">{benefit.text}</span>
                 </motion.div>
               ))}
             </motion.div>
@@ -629,18 +629,18 @@ export default function Home() {
       </section>
 
       {/* Latest Content Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground mb-3 sm:mb-4">
               Últimos conteúdos <span className="text-accent">publicados</span>
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-2xl mx-auto px-4">
               Aprende no teu ritmo com materiais preparados para transformar a tua saúde.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto mb-8 sm:mb-12">
             <Card className="overflow-hidden border-card-border bg-card hover-elevate" data-testid="content-card-1">
               <CardContent className="p-0">
                 <div className="relative">
@@ -740,22 +740,22 @@ export default function Home() {
       </section>
 
       {/* Como Funciona Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <div className="text-center mb-8 sm:mb-12">
             <Badge
               variant="outline"
-              className="mb-4 text-xs uppercase tracking-wide border-border bg-muted/30"
+              className="mb-3 sm:mb-4 text-xs uppercase tracking-wide border-border bg-muted/30"
             >
               3 SEMANAS PARA TRANSFORMAR O SEU CORPO
             </Badge>
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground">
               <span className="text-accent">Como funciona</span> o DOCE
               LEVEZA?
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {[
               {
                 icon: PlayCircle,
@@ -819,10 +819,10 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-[1fr_1.8fr] gap-10 items-start">
-            <div className="space-y-6">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <div className="grid lg:grid-cols-[1fr_1.8fr] gap-6 sm:gap-8 lg:gap-10 items-start">
+            <div className="space-y-4 sm:space-y-6">
               <Badge
                 variant="outline"
                 className="text-xs uppercase tracking-wide border-border bg-muted text-white"
@@ -830,7 +830,7 @@ export default function Home() {
                 DEPOIMENTOS
               </Badge>
               
-              <h2 className="text-3xl lg:text-4xl font-heading text-foreground">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground">
                 Já são{" "}
                 <span className="text-accent">milhares de pessoas</span> que
                 mudaram de vida com o DOCE LEVEZA:
@@ -838,7 +838,7 @@ export default function Home() {
 
               <Button
                 size="default"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm px-6 rounded-full uppercase w-fit"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-xs sm:text-sm px-4 sm:px-6 rounded-full uppercase w-full sm:w-fit"
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-cta-testimonials"
               >
@@ -906,15 +906,15 @@ export default function Home() {
       </section>
 
       {/* Instructor Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-            <div className="space-y-6">
-              <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center max-w-6xl mx-auto">
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground">
                 Sobre a <span className="text-accent">Dra. Angelina</span>
               </h2>
 
-              <div className="space-y-4 text-muted-foreground leading-relaxed">
+              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
                 <p>
                   A Dra. Angelina é nutricionista especializada em acompanhamento nutricional por patologia.
                 </p>
@@ -953,15 +953,15 @@ export default function Home() {
       </section>
 
       {/* Start Here Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
+      <section className="py-12 sm:py-16 lg:py-20 bg-muted/30">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground mb-3 sm:mb-4">
               Começa a tua jornada <span className="text-accent">com leveza</span>
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
             <Card className="border-card-border bg-card hover-elevate" data-testid="card-start-subscription">
               <CardContent className="p-8 text-center space-y-6">
                 <div className="flex justify-center">
@@ -1041,13 +1041,13 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground text-center mb-12">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground text-center mb-8 sm:mb-12">
             Ficou com alguma <span className="text-accent">dúvida?</span>
           </h2>
 
-          <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 max-w-6xl mx-auto">
             <div className="space-y-4">
               <p className="text-muted-foreground mb-6">
                 Confira as respostas das perguntas frequentes ou entre em
@@ -1148,10 +1148,10 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-card border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-center gap-6 max-w-4xl mx-auto">
-            <img src={logoImage} alt="Doce Leveza" className="h-20 w-auto" data-testid="img-footer-logo" />
+      <footer className="py-8 sm:py-12 bg-card border-t border-border">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+          <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 max-w-4xl mx-auto">
+            <img src={logoImage} alt="Doce Leveza" className="h-16 sm:h-20 w-auto" data-testid="img-footer-logo" />
             
             <p className="text-center text-muted-foreground">
               Doce Leveza — Nutrição com leveza, clareza e ciência.
