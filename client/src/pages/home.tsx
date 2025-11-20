@@ -182,20 +182,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background dark">
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <img src={logoImage} alt="Doce Leveza" className="h-12 w-auto" />
-          <Button
-            className="backdrop-blur-md bg-white/20 border-2 border-primary text-primary hover:bg-primary/10 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap"
-            onClick={() => setAuthDialogOpen(true)}
-            data-testid="button-header-login"
-          >
-            Entrar na Área de Membros
-          </Button>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
@@ -204,14 +190,26 @@ export default function Home() {
         }}
         data-testid="section-hero"
       >
-        <div className="container mx-auto px-4 sm:px-8 lg:px-16 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-16 sm:py-20">
-          <div className="pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-16 py-16 sm:py-20">
+          {/* Header with Logo and Login Button */}
+          <div className="flex justify-between items-center mb-8 sm:mb-12">
             <div 
-              className="flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-700 mb-3" 
+              className="flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-700" 
               data-testid="logo-header"
             >
               <img src={logoImage} alt="Doce Leveza" className="h-16 sm:h-20 lg:h-24 w-auto" />
             </div>
+            <Button
+              className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap"
+              onClick={() => setAuthDialogOpen(true)}
+              data-testid="button-header-login"
+            >
+              Entrar
+            </Button>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="pl-0 sm:pl-8 lg:pl-16" data-testid="hero-content">
             
             <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white leading-snug animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 mb-4 sm:mb-5">
               Cuida da tua saúde com orientação nutricional profissional
@@ -238,6 +236,7 @@ export default function Home() {
               >
                 Entrar na Área de Membros
               </Button>
+            </div>
             </div>
           </div>
         </div>
