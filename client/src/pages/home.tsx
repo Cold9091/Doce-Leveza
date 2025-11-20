@@ -530,12 +530,14 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-white border-gray-200 shadow-2xl w-full max-w-xs aspect-[3/4] flex flex-col justify-between p-6 rounded-md mx-auto">
-                <div className="text-center space-y-5 flex-1 flex flex-col justify-center">
-                  <Badge className="bg-gray-700 text-white border-gray-600 text-xs uppercase tracking-wide mx-auto">
+              <Card className="bg-white border-gray-200 shadow-2xl w-full max-w-xs aspect-[3/4] flex flex-col p-6 rounded-md mx-auto">
+                <div className="text-center mb-4">
+                  <Badge className="bg-gray-700 text-white border-gray-600 text-xs uppercase tracking-wide">
                     Assinatura Anual
                   </Badge>
-                  
+                </div>
+
+                <div className="text-center space-y-5 flex-1 flex flex-col justify-center">
                   <div className="space-y-2">
                     <div className="text-sm text-gray-500 line-through">
                       DE 547.000 Kwanzas
@@ -563,7 +565,7 @@ export default function Home() {
                 </div>
 
                 <Button
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full mt-4"
                   onClick={() => setDialogOpen(true)}
                   data-testid="button-cta-subscription"
                 >
