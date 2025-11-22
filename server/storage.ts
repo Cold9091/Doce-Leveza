@@ -3,6 +3,7 @@ import {
   type User, 
   type SignupData,
   type Pathology,
+  type InsertPathology,
   type Video,
   type Ebook,
   type Consultation,
@@ -10,42 +11,66 @@ import {
   type InsertVideo,
   type InsertEbook,
   type InsertConsultation,
-  type InsertSubscription
+  type InsertSubscription,
+  type AdminUser,
+  type AdminLoginData,
+  type Statistics
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
   createLead(lead: Lead): Promise<Lead & { id: string }>;
   getLeads(): Promise<(Lead & { id: string })[]>;
+  deleteLead(id: string): Promise<boolean>;
+  
   createUser(data: SignupData): Promise<User>;
   getUserByPhone(phone: string): Promise<User | null>;
+  getUserById(id: number): Promise<User | null>;
   getUsers(): Promise<User[]>;
+  updateUser(id: number, data: Partial<User>): Promise<User | null>;
+  deleteUser(id: number): Promise<boolean>;
   
   // Pathologies
   getPathologies(): Promise<Pathology[]>;
+  getPathologyById(id: number): Promise<Pathology | null>;
   getPathologyBySlug(slug: string): Promise<Pathology | null>;
+  createPathology(data: InsertPathology): Promise<Pathology>;
+  updatePathology(id: number, data: Partial<Pathology>): Promise<Pathology | null>;
+  deletePathology(id: number): Promise<boolean>;
   
   // Videos
   getVideos(): Promise<Video[]>;
   getVideosByPathology(pathologyId: number): Promise<Video[]>;
   getVideoById(id: number): Promise<Video | null>;
   createVideo(data: InsertVideo): Promise<Video>;
+  updateVideo(id: number, data: Partial<Video>): Promise<Video | null>;
+  deleteVideo(id: number): Promise<boolean>;
   
   // Ebooks
   getEbooks(): Promise<Ebook[]>;
   getEbookById(id: number): Promise<Ebook | null>;
   createEbook(data: InsertEbook): Promise<Ebook>;
+  updateEbook(id: number, data: Partial<Ebook>): Promise<Ebook | null>;
+  deleteEbook(id: number): Promise<boolean>;
   
   // Consultations
+  getConsultations(): Promise<Consultation[]>;
   getConsultationsByUser(userId: number): Promise<Consultation[]>;
   getConsultationById(id: number): Promise<Consultation | null>;
   createConsultation(data: InsertConsultation): Promise<Consultation>;
   updateConsultation(id: number, data: Partial<Consultation>): Promise<Consultation | null>;
+  deleteConsultation(id: number): Promise<boolean>;
   
   // Subscriptions
+  getSubscriptions(): Promise<Subscription[]>;
   getSubscriptionByUser(userId: number): Promise<Subscription | null>;
   createSubscription(data: InsertSubscription): Promise<Subscription>;
   updateSubscription(id: number, data: Partial<Subscription>): Promise<Subscription | null>;
+  deleteSubscription(id: number): Promise<boolean>;
+  
+  // Admin
+  getAdminByEmail(email: string): Promise<AdminUser | null>;
+  getStatistics(): Promise<Statistics>;
 }
 
 export class MemStorage implements IStorage {
@@ -56,7 +81,9 @@ export class MemStorage implements IStorage {
   private ebooks: Map<number, Ebook>;
   private consultations: Map<number, Consultation>;
   private subscriptions: Map<number, Subscription>;
+  private admins: Map<number, AdminUser>;
   private userIdCounter: number;
+  private pathologyIdCounter: number;
   private videoIdCounter: number;
   private ebookIdCounter: number;
   private consultationIdCounter: number;
@@ -70,7 +97,9 @@ export class MemStorage implements IStorage {
     this.ebooks = new Map();
     this.consultations = new Map();
     this.subscriptions = new Map();
+    this.admins = new Map();
     this.userIdCounter = 1;
+    this.pathologyIdCounter = 1;
     this.videoIdCounter = 1;
     this.ebookIdCounter = 1;
     this.consultationIdCounter = 1;
@@ -88,6 +117,10 @@ export class MemStorage implements IStorage {
 
   async getLeads(): Promise<(Lead & { id: string })[]> {
     return Array.from(this.leads.values());
+  }
+
+  async deleteLead(id: string): Promise<boolean> {
+    return this.leads.delete(id);
   }
 
   async createUser(data: SignupData): Promise<User> {
@@ -113,14 +146,53 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values());
   }
 
+  async getUserById(id: number): Promise<User | null> {
+    return this.users.get(id) || null;
+  }
+
+  async updateUser(id: number, data: Partial<User>): Promise<User | null> {
+    const user = this.users.get(id);
+    if (!user) return null;
+    const updated = { ...user, ...data };
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    return this.users.delete(id);
+  }
+
   // Pathologies
   async getPathologies(): Promise<Pathology[]> {
     return Array.from(this.pathologies.values());
   }
 
+  async getPathologyById(id: number): Promise<Pathology | null> {
+    return this.pathologies.get(id) || null;
+  }
+
   async getPathologyBySlug(slug: string): Promise<Pathology | null> {
     const pathologies = Array.from(this.pathologies.values());
     return pathologies.find(p => p.slug === slug) || null;
+  }
+
+  async createPathology(data: InsertPathology): Promise<Pathology> {
+    const id = this.pathologyIdCounter++;
+    const pathology: Pathology = { id, ...data };
+    this.pathologies.set(id, pathology);
+    return pathology;
+  }
+
+  async updatePathology(id: number, data: Partial<Pathology>): Promise<Pathology | null> {
+    const pathology = this.pathologies.get(id);
+    if (!pathology) return null;
+    const updated = { ...pathology, ...data };
+    this.pathologies.set(id, updated);
+    return updated;
+  }
+
+  async deletePathology(id: number): Promise<boolean> {
+    return this.pathologies.delete(id);
   }
 
   // Videos
@@ -144,6 +216,18 @@ export class MemStorage implements IStorage {
     return video;
   }
 
+  async updateVideo(id: number, data: Partial<Video>): Promise<Video | null> {
+    const video = this.videos.get(id);
+    if (!video) return null;
+    const updated = { ...video, ...data };
+    this.videos.set(id, updated);
+    return updated;
+  }
+
+  async deleteVideo(id: number): Promise<boolean> {
+    return this.videos.delete(id);
+  }
+
   // Ebooks
   async getEbooks(): Promise<Ebook[]> {
     return Array.from(this.ebooks.values());
@@ -160,7 +244,23 @@ export class MemStorage implements IStorage {
     return ebook;
   }
 
+  async updateEbook(id: number, data: Partial<Ebook>): Promise<Ebook | null> {
+    const ebook = this.ebooks.get(id);
+    if (!ebook) return null;
+    const updated = { ...ebook, ...data };
+    this.ebooks.set(id, updated);
+    return updated;
+  }
+
+  async deleteEbook(id: number): Promise<boolean> {
+    return this.ebooks.delete(id);
+  }
+
   // Consultations
+  async getConsultations(): Promise<Consultation[]> {
+    return Array.from(this.consultations.values());
+  }
+
   async getConsultationsByUser(userId: number): Promise<Consultation[]> {
     const consultations = Array.from(this.consultations.values());
     return consultations.filter(c => c.userId === userId);
@@ -185,7 +285,15 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async deleteConsultation(id: number): Promise<boolean> {
+    return this.consultations.delete(id);
+  }
+
   // Subscriptions
+  async getSubscriptions(): Promise<Subscription[]> {
+    return Array.from(this.subscriptions.values());
+  }
+
   async getSubscriptionByUser(userId: number): Promise<Subscription | null> {
     const subscriptions = Array.from(this.subscriptions.values());
     return subscriptions.find(s => s.userId === userId) || null;
@@ -204,6 +312,39 @@ export class MemStorage implements IStorage {
     const updated = { ...subscription, ...data };
     this.subscriptions.set(id, updated);
     return updated;
+  }
+
+  async deleteSubscription(id: number): Promise<boolean> {
+    return this.subscriptions.delete(id);
+  }
+
+  // Admin
+  async getAdminByEmail(email: string): Promise<AdminUser | null> {
+    const admins = Array.from(this.admins.values());
+    return admins.find(a => a.email === email) || null;
+  }
+
+  async getStatistics(): Promise<Statistics> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentUsers = Array.from(this.users.values()).filter(
+      u => new Date(u.createdAt) >= thirtyDaysAgo
+    ).length;
+
+    const activeSubscriptions = Array.from(this.subscriptions.values()).filter(
+      s => s.status === "ativa"
+    ).length;
+
+    return {
+      totalUsers: this.users.size,
+      activeSubscriptions,
+      totalVideos: this.videos.size,
+      totalEbooks: this.ebooks.size,
+      totalConsultations: this.consultations.size,
+      totalLeads: this.leads.size,
+      recentUsers,
+    };
   }
 
   // Seed data
@@ -240,7 +381,10 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    pathologies.forEach(p => this.pathologies.set(p.id, p));
+    pathologies.forEach(p => {
+      this.pathologies.set(p.id, p);
+      this.pathologyIdCounter = Math.max(this.pathologyIdCounter, p.id + 1);
+    });
 
     // Seed videos
     const videos: Video[] = [
@@ -332,6 +476,17 @@ export class MemStorage implements IStorage {
       this.ebooks.set(e.id, e);
       this.ebookIdCounter = Math.max(this.ebookIdCounter, e.id + 1);
     });
+
+    // Seed admin user
+    const admin: AdminUser = {
+      id: 1,
+      name: "Admin",
+      email: "admin@doceleveza.com",
+      password: "admin123",
+      role: "super_admin",
+      createdAt: new Date().toISOString(),
+    };
+    this.admins.set(admin.id, admin);
   }
 }
 

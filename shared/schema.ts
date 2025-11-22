@@ -42,9 +42,12 @@ export const pathologySchema = z.object({
   title: z.string(),
   description: z.string(),
   icon: z.string(),
+  imageUrl: z.string().optional(),
 });
 
+export const insertPathologySchema = pathologySchema.omit({ id: true });
 export type Pathology = z.infer<typeof pathologySchema>;
+export type InsertPathology = z.infer<typeof insertPathologySchema>;
 
 // Video schema
 export const videoSchema = z.object({
@@ -106,3 +109,35 @@ export const subscriptionSchema = z.object({
 export const insertSubscriptionSchema = subscriptionSchema.omit({ id: true });
 export type Subscription = z.infer<typeof subscriptionSchema>;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+
+// Admin user schema
+export const adminUserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  email: z.string().email(),
+  password: z.string(),
+  role: z.enum(["admin", "super_admin"]),
+  createdAt: z.string(),
+});
+
+export const adminLoginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "Senha é obrigatória"),
+});
+
+export type AdminUser = z.infer<typeof adminUserSchema>;
+export type AdminLoginData = z.infer<typeof adminLoginSchema>;
+
+// Statistics schema for admin dashboard
+export const statisticsSchema = z.object({
+  totalUsers: z.number(),
+  activeSubscriptions: z.number(),
+  totalVideos: z.number(),
+  totalEbooks: z.number(),
+  totalConsultations: z.number(),
+  totalLeads: z.number(),
+  recentUsers: z.number(),
+  revenue: z.number().optional(),
+});
+
+export type Statistics = z.infer<typeof statisticsSchema>;

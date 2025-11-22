@@ -1,7 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { leadSchema, signupSchema, loginSchema } from "@shared/schema";
+import { 
+  leadSchema, 
+  signupSchema, 
+  loginSchema,
+  adminLoginSchema,
+  insertPathologySchema,
+  insertVideoSchema,
+  insertEbookSchema,
+  insertConsultationSchema,
+  insertSubscriptionSchema
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -191,6 +201,323 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const subscription = await storage.getSubscriptionByUser(parseInt(req.params.userId));
       res.json(subscription);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // ============================================
+  // ADMIN ROUTES
+  // ============================================
+
+  // Admin authentication
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const validatedData = adminLoginSchema.parse(req.body);
+      const admin = await storage.getAdminByEmail(validatedData.email);
+      
+      if (!admin || admin.password !== validatedData.password) {
+        return res.status(401).json({
+          success: false,
+          error: "Email ou senha incorretos",
+        });
+      }
+
+      const { password, ...adminWithoutPassword } = admin;
+      res.json({ success: true, data: adminWithoutPassword });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: error.errors,
+        });
+      } else {
+        res.status(500).json({ success: false, error: "Internal server error" });
+      }
+    }
+  });
+
+  // Admin statistics
+  app.get("/api/admin/statistics", async (_req, res) => {
+    try {
+      const stats = await storage.getStatistics();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Users management
+  app.get("/api/admin/users", async (_req, res) => {
+    try {
+      const users = await storage.getUsers();
+      const usersWithoutPassword = users.map(({ password, ...user }) => user);
+      res.json(usersWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/users/:id", async (req, res) => {
+    try {
+      const user = await storage.getUserById(parseInt(req.params.id));
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.put("/api/admin/users/:id", async (req, res) => {
+    try {
+      const user = await storage.updateUser(parseInt(req.params.id), req.body);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteUser(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Pathologies management
+  app.post("/api/admin/pathologies", async (req, res) => {
+    try {
+      const validatedData = insertPathologySchema.parse(req.body);
+      const pathology = await storage.createPathology(validatedData);
+      res.status(201).json(pathology);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation error", details: error.errors });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/admin/pathologies/:id", async (req, res) => {
+    try {
+      const pathology = await storage.updatePathology(parseInt(req.params.id), req.body);
+      if (!pathology) {
+        return res.status(404).json({ error: "Pathology not found" });
+      }
+      res.json(pathology);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/pathologies/:id", async (req, res) => {
+    try {
+      const success = await storage.deletePathology(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "Pathology not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Videos management
+  app.post("/api/admin/videos", async (req, res) => {
+    try {
+      const validatedData = insertVideoSchema.parse(req.body);
+      const video = await storage.createVideo(validatedData);
+      res.status(201).json(video);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation error", details: error.errors });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/admin/videos/:id", async (req, res) => {
+    try {
+      const video = await storage.updateVideo(parseInt(req.params.id), req.body);
+      if (!video) {
+        return res.status(404).json({ error: "Video not found" });
+      }
+      res.json(video);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/videos/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteVideo(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "Video not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Ebooks management
+  app.post("/api/admin/ebooks", async (req, res) => {
+    try {
+      const validatedData = insertEbookSchema.parse(req.body);
+      const ebook = await storage.createEbook(validatedData);
+      res.status(201).json(ebook);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation error", details: error.errors });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/admin/ebooks/:id", async (req, res) => {
+    try {
+      const ebook = await storage.updateEbook(parseInt(req.params.id), req.body);
+      if (!ebook) {
+        return res.status(404).json({ error: "Ebook not found" });
+      }
+      res.json(ebook);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/ebooks/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteEbook(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "Ebook not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Consultations management
+  app.get("/api/admin/consultations", async (_req, res) => {
+    try {
+      const consultations = await storage.getConsultations();
+      res.json(consultations);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/consultations", async (req, res) => {
+    try {
+      const validatedData = insertConsultationSchema.parse(req.body);
+      const consultation = await storage.createConsultation(validatedData);
+      res.status(201).json(consultation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation error", details: error.errors });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/admin/consultations/:id", async (req, res) => {
+    try {
+      const consultation = await storage.updateConsultation(parseInt(req.params.id), req.body);
+      if (!consultation) {
+        return res.status(404).json({ error: "Consultation not found" });
+      }
+      res.json(consultation);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/consultations/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteConsultation(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "Consultation not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Subscriptions management
+  app.get("/api/admin/subscriptions", async (_req, res) => {
+    try {
+      const subscriptions = await storage.getSubscriptions();
+      res.json(subscriptions);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/subscriptions", async (req, res) => {
+    try {
+      const validatedData = insertSubscriptionSchema.parse(req.body);
+      const subscription = await storage.createSubscription(validatedData);
+      res.status(201).json(subscription);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation error", details: error.errors });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/admin/subscriptions/:id", async (req, res) => {
+    try {
+      const subscription = await storage.updateSubscription(parseInt(req.params.id), req.body);
+      if (!subscription) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
+      res.json(subscription);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/subscriptions/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteSubscription(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Leads management
+  app.delete("/api/admin/leads/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteLead(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Lead not found" });
+      }
+      res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
