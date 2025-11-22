@@ -184,7 +184,7 @@ export default function Home() {
     <div className="min-h-screen bg-background dark">
       {/* Hero Section */}
       <section
-        className="relative min-h-[80vh] sm:min-h-screen flex items-center justify-center bg-cover bg-center overflow-hidden"
+        className="relative min-h-[80vh] sm:min-h-screen flex items-center justify-center bg-cover overflow-hidden bg-[75%_center] sm:bg-[65%_center] lg:bg-center"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480802/Brown_Yellow_Modern_Museum_Presentation_2_xizdht.svg')`,
         }}
