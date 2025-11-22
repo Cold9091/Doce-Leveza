@@ -206,7 +206,7 @@ export default function Home() {
         </div>
         <div className="container mx-auto px-3 sm:px-6 lg:px-12 xl:px-16 py-12 sm:py-16 lg:py-20">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
-            <div className="pl-0 sm:pl-4 lg:pl-16" data-testid="hero-content">
+            <div className="pl-0 sm:pl-4 lg:pl-16 max-w-[65%] sm:max-w-[55%] md:max-w-[50%] lg:max-w-none" data-testid="hero-content">
             {/* Logo acima do texto */}
             <div 
               className="mb-3 sm:mb-4 lg:mb-6 animate-in fade-in slide-in-from-top-4 duration-700" 
