@@ -942,7 +942,7 @@ export default function Home() {
 
             <div className="relative">
               <img
-                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&h=600&fit=crop"
+                src="https://res.cloudinary.com/dl90hjhoj/image/upload/v1763811045/Gemini_Generated_Image_rrkg61rrkg61rrkg_u05e5v.png"
                 alt="Dra. Angelina"
                 className="w-full rounded-lg shadow-xl"
                 data-testid="img-instructor"
