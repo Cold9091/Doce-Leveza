@@ -19,16 +19,19 @@ import {
   SkipForward,
   Volume2,
   VolumeX,
-  Maximize
+  Maximize,
+  Shield
 } from "lucide-react";
 import type { Video } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useContentProtection, ProtectionOverlay, ScreenCaptureBlocker } from "@/hooks/use-content-protection.js";
 
 interface VideoPlayerProps {
   video: Video | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  userIdentifier?: string;
 }
 
 declare global {
@@ -95,7 +98,7 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
+export function VideoPlayer({ video, open, onOpenChange, userIdentifier = "Usuário" }: VideoPlayerProps) {
   const [apiReady, setApiReady] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -110,6 +113,13 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  useContentProtection({ 
+    enabled: open,
+    showWarning: true,
+    warningMessage: "Este vídeo é protegido por direitos autorais.",
+    userIdentifier,
+  });
   
   const incrementViewMutation = useMutation({
     mutationFn: async (videoId: number) => {
@@ -345,21 +355,34 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
               <Eye className="mr-1 h-3 w-3" />
               {viewCount.toLocaleString()} visualizações
             </Badge>
+            <Badge variant="outline" className="text-xs text-green-600 border-green-600/30">
+              <Shield className="mr-1 h-3 w-3" />
+              Conteúdo Protegido
+            </Badge>
           </div>
         </DialogHeader>
 
         <div 
           ref={containerRef}
-          className="relative w-full aspect-video bg-black"
+          className="relative w-full aspect-video bg-black protected-content"
           onMouseMove={handleMouseMove}
           onMouseLeave={() => isPlaying && setShowControls(false)}
+          onContextMenu={(e) => e.preventDefault()}
+          onDragStart={(e) => e.preventDefault()}
+          style={{ 
+            userSelect: "none",
+            WebkitUserSelect: "none",
+          }}
         >
+          <ScreenCaptureBlocker enabled={open} />
           {videoId ? (
             <>
               <div 
                 id={`yt-player-${video.id}`}
                 className="absolute inset-0 w-full h-full"
               />
+              
+              <ProtectionOverlay userIdentifier={userIdentifier} showWatermark={true} />
               
               <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-10" />
 

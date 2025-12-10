@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import {
   Dialog,
@@ -13,10 +13,11 @@ import {
   ChevronRight,
   ZoomIn,
   ZoomOut,
-  Maximize,
   FileText,
+  Shield,
 } from "lucide-react";
 import type { Ebook } from "@shared/schema";
+import { useContentProtection, ProtectionOverlay, ScreenCaptureBlocker } from "@/hooks/use-content-protection.js";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -27,13 +28,21 @@ interface PdfReaderProps {
   ebook: Ebook | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  userIdentifier?: string;
 }
 
-export function PdfReader({ ebook, open, onOpenChange }: PdfReaderProps) {
+export function PdfReader({ ebook, open, onOpenChange, userIdentifier = "Usuário" }: PdfReaderProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  useContentProtection({ 
+    enabled: open,
+    showWarning: true,
+    warningMessage: "Este ebook é protegido por direitos autorais.",
+    userIdentifier,
+  });
 
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -92,6 +101,10 @@ export function PdfReader({ ebook, open, onOpenChange }: PdfReaderProps) {
               <FileText className="mr-1 h-3 w-3" />
               {ebook.pages} páginas
             </Badge>
+            <Badge variant="outline" className="text-xs text-green-600 border-green-600/30">
+              <Shield className="mr-1 h-3 w-3" />
+              Conteúdo Protegido
+            </Badge>
             {ebook.tags.map((tag, idx) => (
               <Badge key={idx} variant="outline" className="text-xs">
                 {tag}
@@ -100,27 +113,39 @@ export function PdfReader({ ebook, open, onOpenChange }: PdfReaderProps) {
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto bg-muted/50 flex items-start justify-center p-4">
+        <div 
+          className="flex-1 overflow-auto bg-muted/50 flex items-start justify-center p-4 relative protected-content"
+          onContextMenu={(e) => e.preventDefault()}
+          onDragStart={(e) => e.preventDefault()}
+          style={{ 
+            userSelect: "none",
+            WebkitUserSelect: "none",
+          }}
+        >
+          <ScreenCaptureBlocker enabled={open} />
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
               <div className="text-sm text-muted-foreground">Carregando PDF...</div>
             </div>
           )}
-          <Document
-            file={ebook.downloadUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={onDocumentLoadError}
-            loading={null}
-            className="flex justify-center"
-          >
-            <Page
-              pageNumber={pageNumber}
-              scale={scale}
-              className="shadow-lg"
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-            />
-          </Document>
+          <div className="relative">
+            <Document
+              file={ebook.downloadUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              loading={null}
+              className="flex justify-center"
+            >
+              <Page
+                pageNumber={pageNumber}
+                scale={scale}
+                className="shadow-lg"
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+              />
+            </Document>
+            <ProtectionOverlay userIdentifier={userIdentifier} showWatermark={true} />
+          </div>
         </div>
 
         <div className="p-3 border-t bg-background shrink-0">
