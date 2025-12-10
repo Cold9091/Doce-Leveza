@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { Ebook } from "@shared/schema";
-import { BookOpen, Download, FileText } from "lucide-react";
+import { BookOpen, FileText } from "lucide-react";
+import { PdfReader } from "@/components/pdf-reader";
 
 export default function Library() {
+  const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
+  const [readerOpen, setReaderOpen] = useState(false);
+
   const { data: ebooks, isLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks"],
   });
@@ -68,14 +73,27 @@ export default function Library() {
                   </Badge>
                 ))}
               </div>
-              <Button className="w-full" data-testid={`button-download-ebook-${ebook.id}`}>
-                <Download className="mr-2 h-4 w-4" />
-                Baixar PDF
+              <Button 
+                className="w-full" 
+                data-testid={`button-read-ebook-${ebook.id}`}
+                onClick={() => {
+                  setSelectedEbook(ebook);
+                  setReaderOpen(true);
+                }}
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                Ler Livro
               </Button>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <PdfReader
+        ebook={selectedEbook}
+        open={readerOpen}
+        onOpenChange={setReaderOpen}
+      />
 
       {(!ebooks || ebooks.length === 0) && (
         <Card>
