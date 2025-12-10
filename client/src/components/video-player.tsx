@@ -110,7 +110,6 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const playerContainerId = useRef(`yt-player-${Date.now()}`);
   
   const incrementViewMutation = useMutation({
     mutationFn: async (videoId: number) => {
@@ -162,18 +161,31 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
       return;
     }
 
-    const videoId = getYouTubeVideoId(video.videoUrl);
-    if (!videoId) return;
+    const ytVideoId = getYouTubeVideoId(video.videoUrl);
+    if (!ytVideoId) return;
 
-    playerContainerId.current = `yt-player-${Date.now()}`;
+    const containerId = `yt-player-${video.id}`;
+    let cancelled = false;
 
-    const initTimer = setTimeout(() => {
-      const container = document.getElementById(playerContainerId.current);
-      if (!container) return;
+    const initPlayer = () => {
+      if (cancelled) return;
+      
+      const container = document.getElementById(containerId);
+      if (!container) {
+        setTimeout(initPlayer, 50);
+        return;
+      }
+
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {}
+        playerRef.current = null;
+      }
 
       try {
-        playerRef.current = new window.YT.Player(playerContainerId.current, {
-          videoId: videoId,
+        playerRef.current = new window.YT.Player(containerId, {
+          videoId: ytVideoId,
           width: '100%',
           height: '100%',
           playerVars: {
@@ -207,10 +219,12 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
       } catch (e) {
         console.error('Failed to create YouTube player:', e);
       }
-    }, 100);
+    };
+
+    setTimeout(initPlayer, 100);
 
     return () => {
-      clearTimeout(initTimer);
+      cancelled = true;
       if (playerRef.current) {
         try {
           playerRef.current.destroy();
@@ -343,7 +357,7 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
           {videoId ? (
             <>
               <div 
-                id={playerContainerId.current}
+                id={`yt-player-${video.id}`}
                 className="absolute inset-0 w-full h-full"
               />
               
