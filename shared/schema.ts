@@ -59,6 +59,7 @@ export const videoSchema = z.object({
   thumbnailUrl: z.string(),
   videoUrl: z.string(),
   resources: z.array(z.string()).optional(),
+  viewCount: z.number().optional(),
 });
 
 export const insertVideoSchema = videoSchema.omit({ id: true });

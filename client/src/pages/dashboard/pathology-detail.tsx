@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import type { Pathology, Video } from "@shared/schema";
-import { ArrowLeft, Play, Clock, FileText } from "lucide-react";
+import { ArrowLeft, Play, Clock, FileText, Eye } from "lucide-react";
+import { VideoPlayer } from "@/components/video-player";
 
 export default function PathologyDetail() {
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [playerOpen, setPlayerOpen] = useState(false);
   const [, params] = useRoute("/dashboard/patologias/:slug");
   const slug = params?.slug;
 
@@ -68,50 +72,67 @@ export default function PathologyDetail() {
           ))}
         </div>
       ) : pathologyVideos && pathologyVideos.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-          {pathologyVideos.map((video) => (
-            <Card
-              key={video.id}
-              className="overflow-hidden hover-elevate active-elevate-2 transition-all cursor-pointer"
-              data-testid={`card-video-${video.id}`}
-            >
-              <div className="relative aspect-video bg-muted">
-                <img
-                  src={video.thumbnailUrl}
-                  alt={video.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
-                  <Play className="h-12 w-12 text-white" />
-                </div>
-                <Badge className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm">
-                  <Clock className="mr-1 h-3 w-3" />
-                  {video.duration}
-                </Badge>
-              </div>
-              <CardHeader>
-                <CardTitle className="line-clamp-2 text-base">
-                  {video.title}
-                </CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {video.description}
-                </CardDescription>
-              </CardHeader>
-              {video.resources && video.resources.length > 0 && (
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {video.resources.map((resource, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs">
-                        <FileText className="mr-1 h-3 w-3" />
-                        {resource}
-                      </Badge>
-                    ))}
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+            {pathologyVideos.map((video) => (
+              <Card
+                key={video.id}
+                className="overflow-hidden hover-elevate active-elevate-2 transition-all cursor-pointer"
+                data-testid={`card-video-${video.id}`}
+                onClick={() => {
+                  setSelectedVideo(video);
+                  setPlayerOpen(true);
+                }}
+              >
+                <div className="relative aspect-video bg-muted">
+                  <img
+                    src={video.thumbnailUrl}
+                    alt={video.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
+                    <Play className="h-12 w-12 text-white" />
                   </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
-        </div>
+                  <Badge className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm">
+                    <Clock className="mr-1 h-3 w-3" />
+                    {video.duration}
+                  </Badge>
+                  {video.viewCount !== undefined && video.viewCount > 0 && (
+                    <Badge className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm">
+                      <Eye className="mr-1 h-3 w-3" />
+                      {video.viewCount.toLocaleString()}
+                    </Badge>
+                  )}
+                </div>
+                <CardHeader>
+                  <CardTitle className="line-clamp-2 text-base">
+                    {video.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2">
+                    {video.description}
+                  </CardDescription>
+                </CardHeader>
+                {video.resources && video.resources.length > 0 && (
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {video.resources.map((resource, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs">
+                          <FileText className="mr-1 h-3 w-3" />
+                          {resource}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            ))}
+          </div>
+          <VideoPlayer
+            video={selectedVideo}
+            open={playerOpen}
+            onOpenChange={setPlayerOpen}
+          />
+        </>
       ) : (
         <Card>
           <CardContent className="p-12 text-center">

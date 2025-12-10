@@ -164,6 +164,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/videos/:id/view", async (req, res) => {
+    try {
+      const video = await storage.getVideoById(parseInt(req.params.id));
+      if (!video) {
+        return res.status(404).json({ error: "Video not found" });
+      }
+      const updatedVideo = await storage.updateVideo(video.id, {
+        viewCount: (video.viewCount || 0) + 1
+      });
+      res.json(updatedVideo);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Ebooks routes
   app.get("/api/ebooks", async (_req, res) => {
     try {

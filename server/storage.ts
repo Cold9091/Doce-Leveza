@@ -395,8 +395,9 @@ export class MemStorage implements IStorage {
         description: "Aprenda os fundamentos para controlar a diabetes através da alimentação",
         duration: "15:30",
         thumbnailUrl: "https://images.unsplash.com/photo-1505576391880-b3f9d713dc4f?w=400",
-        videoUrl: "#",
-        resources: ["PDF: Tabela de Alimentos", "Receitas Diabéticos"]
+        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        resources: ["PDF: Tabela de Alimentos", "Receitas Diabéticos"],
+        viewCount: 245
       },
       {
         id: 2,
@@ -405,7 +406,8 @@ export class MemStorage implements IStorage {
         description: "Descubra quais alimentos ajudam a manter o açúcar estável",
         duration: "12:45",
         thumbnailUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400",
-        videoUrl: "#"
+        videoUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
+        viewCount: 189
       },
       {
         id: 3,
@@ -414,7 +416,8 @@ export class MemStorage implements IStorage {
         description: "Métodos comprovados para perder peso de forma sustentável",
         duration: "18:20",
         thumbnailUrl: "https://images.unsplash.com/photo-1511688878353-3a2f5be94cd7?w=400",
-        videoUrl: "#"
+        videoUrl: "https://www.youtube.com/watch?v=kJQP7kiw5Fk",
+        viewCount: 512
       },
       {
         id: 4,
@@ -423,7 +426,8 @@ export class MemStorage implements IStorage {
         description: "Dieta DASH e outras estratégias nutricionais",
         duration: "14:15",
         thumbnailUrl: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400",
-        videoUrl: "#"
+        videoUrl: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
+        viewCount: 156
       },
       {
         id: 5,
@@ -432,7 +436,8 @@ export class MemStorage implements IStorage {
         description: "Tudo que você precisa saber sobre alimentação durante a gravidez",
         duration: "20:10",
         thumbnailUrl: "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?w=400",
-        videoUrl: "#"
+        videoUrl: "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
+        viewCount: 328
       }
     ];
 
