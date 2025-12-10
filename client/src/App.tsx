@@ -35,17 +35,16 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
-      <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <header className="flex items-center justify-between gap-3 sm:gap-4 border-b border-sidebar-border p-3 sm:p-4 bg-sidebar">
+          <header className="flex items-center justify-between gap-3 sm:gap-4 border-b p-3 sm:p-4 bg-background">
             <div className="flex items-center gap-3 sm:gap-4">
-              <SidebarTrigger data-testid="button-sidebar-toggle" />
-              <h2 className="text-base sm:text-lg font-semibold text-sidebar-foreground truncate">Doce Leveza</h2>
+              <SidebarTrigger data-testid="button-sidebar-toggle" className="text-muted-foreground hover:text-foreground" />
             </div>
             <ThemeToggle />
           </header>
-          <main className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6 bg-background">
+          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 bg-muted/30">
             {children}
           </main>
         </div>
@@ -62,17 +61,16 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
-      <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full bg-background">
         <AdminSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <header className="flex items-center justify-between gap-3 sm:gap-4 border-b border-sidebar-border p-3 sm:p-4 bg-sidebar">
+          <header className="flex items-center justify-between gap-3 sm:gap-4 border-b p-3 sm:p-4 bg-background">
             <div className="flex items-center gap-3 sm:gap-4">
-              <SidebarTrigger data-testid="button-admin-sidebar-toggle" />
-              <h2 className="text-base sm:text-lg font-semibold text-sidebar-foreground truncate">Admin - Doce Leveza</h2>
+              <SidebarTrigger data-testid="button-admin-sidebar-toggle" className="text-muted-foreground hover:text-foreground" />
             </div>
             <ThemeToggle />
           </header>
-          <main className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6 bg-background">
+          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 bg-muted/30">
             {children}
           </main>
         </div>
