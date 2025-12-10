@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,10 @@ import {
   Clock, 
   FileText, 
   Download,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
   Volume2,
   VolumeX,
   Maximize
@@ -27,7 +31,48 @@ interface VideoPlayerProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function getYouTubeEmbedUrl(url: string): string | null {
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
+let ytApiPromise: Promise<void> | null = null;
+
+function loadYouTubeApi(): Promise<void> {
+  if (ytApiPromise) return ytApiPromise;
+  
+  if (window.YT && window.YT.Player) {
+    return Promise.resolve();
+  }
+
+  ytApiPromise = new Promise((resolve) => {
+    const existingScript = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+    if (existingScript) {
+      const checkReady = setInterval(() => {
+        if (window.YT && window.YT.Player) {
+          clearInterval(checkReady);
+          resolve();
+        }
+      }, 100);
+      return;
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      resolve();
+    };
+
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+  });
+
+  return ytApiPromise;
+}
+
+function getYouTubeVideoId(url: string): string | null {
   if (!url) return null;
   
   const patterns = [
@@ -37,18 +82,35 @@ function getYouTubeEmbedUrl(url: string): string | null {
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) {
-      return `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3`;
+      return match[1];
     }
   }
   
   return null;
 }
 
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
 export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
-  const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
+  const [apiReady, setApiReady] = useState(false);
+  const [playerReady, setPlayerReady] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [hasCountedView, setHasCountedView] = useState(false);
+  
+  const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<number | null>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const playerContainerId = useRef(`yt-player-${Date.now()}`);
   
   const incrementViewMutation = useMutation({
     mutationFn: async (videoId: number) => {
@@ -60,46 +122,190 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
     },
   });
 
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      setHasStartedPlaying(false);
+  useEffect(() => {
+    loadYouTubeApi().then(() => {
+      setApiReady(true);
+    });
+  }, []);
+
+  const updateProgress = useCallback(() => {
+    if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
+      setCurrentTime(playerRef.current.getCurrentTime());
     }
+    if (isPlaying) {
+      animationRef.current = requestAnimationFrame(updateProgress);
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      animationRef.current = requestAnimationFrame(updateProgress);
+    }
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isPlaying, updateProgress]);
+
+  useEffect(() => {
+    if (!open || !video || !apiReady) {
+      if (playerRef.current) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
+      setPlayerReady(false);
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      setHasCountedView(false);
+      return;
+    }
+
+    const videoId = getYouTubeVideoId(video.videoUrl);
+    if (!videoId) return;
+
+    playerContainerId.current = `yt-player-${Date.now()}`;
+
+    const initTimer = setTimeout(() => {
+      const container = document.getElementById(playerContainerId.current);
+      if (!container) return;
+
+      try {
+        playerRef.current = new window.YT.Player(playerContainerId.current, {
+          videoId: videoId,
+          width: '100%',
+          height: '100%',
+          playerVars: {
+            autoplay: 1,
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            iv_load_policy: 3,
+            disablekb: 0,
+            fs: 0,
+            playsinline: 1,
+          },
+          events: {
+            onReady: (event: any) => {
+              setPlayerReady(true);
+              setDuration(event.target.getDuration());
+              event.target.setVolume(volume);
+            },
+            onStateChange: (event: any) => {
+              const playing = event.data === window.YT.PlayerState.PLAYING;
+              setIsPlaying(playing);
+              
+              if (playing && !hasCountedView && video) {
+                setHasCountedView(true);
+                incrementViewMutation.mutate(video.id);
+              }
+            },
+          },
+        });
+      } catch (e) {
+        console.error('Failed to create YouTube player:', e);
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(initTimer);
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {}
+        playerRef.current = null;
+      }
+    };
+  }, [open, video, apiReady]);
+
+  const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
   };
 
-  const handleVideoLoad = () => {
-    if (!hasStartedPlaying && video) {
-      setHasStartedPlaying(true);
-      incrementViewMutation.mutate(video.id);
-    }
-  };
-
-  const handleFullscreen = () => {
-    if (containerRef.current) {
-      const iframe = containerRef.current.querySelector('iframe');
-      if (iframe) {
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-        } else {
-          iframe.requestFullscreen();
-        }
+  const togglePlay = useCallback(() => {
+    if (!playerRef.current || !playerReady) return;
+    try {
+      if (isPlaying) {
+        playerRef.current.pauseVideo();
+      } else {
+        playerRef.current.playVideo();
       }
-    }
-  };
+    } catch (e) {}
+  }, [playerReady, isPlaying]);
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
+  const seekTo = useCallback((seconds: number) => {
+    if (!playerRef.current || !playerReady) return;
+    try {
+      playerRef.current.seekTo(seconds, true);
+      setCurrentTime(seconds);
+    } catch (e) {}
+  }, [playerReady]);
 
-  const handleVolumeChange = (value: number[]) => {
+  const skipBack = useCallback(() => {
+    seekTo(Math.max(0, currentTime - 10));
+  }, [seekTo, currentTime]);
+
+  const skipForward = useCallback(() => {
+    seekTo(Math.min(duration, currentTime + 10));
+  }, [seekTo, currentTime, duration]);
+
+  const handleVolumeChange = useCallback((value: number[]) => {
     const newVolume = value[0];
     setVolume(newVolume);
     setIsMuted(newVolume === 0);
-  };
+    if (playerRef.current && playerReady) {
+      try {
+        playerRef.current.unMute();
+        playerRef.current.setVolume(newVolume);
+      } catch (e) {}
+    }
+  }, [playerReady]);
+
+  const toggleMute = useCallback(() => {
+    if (!playerRef.current || !playerReady) return;
+    try {
+      if (isMuted) {
+        playerRef.current.unMute();
+        playerRef.current.setVolume(volume > 0 ? volume : 50);
+        setIsMuted(false);
+      } else {
+        playerRef.current.mute();
+        setIsMuted(true);
+      }
+    } catch (e) {}
+  }, [playerReady, isMuted, volume]);
+
+  const handleProgressChange = useCallback((value: number[]) => {
+    seekTo(value[0]);
+  }, [seekTo]);
+
+  const handleFullscreen = useCallback(() => {
+    if (containerRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        containerRef.current.requestFullscreen();
+      }
+    }
+  }, []);
+
+  const handleMouseMove = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (isPlaying) {
+        setShowControls(false);
+      }
+    }, 3000);
+  }, [isPlaying]);
 
   if (!video) return null;
 
-  const embedUrl = getYouTubeEmbedUrl(video.videoUrl);
+  const videoId = getYouTubeVideoId(video.videoUrl);
   const viewCount = video.viewCount || 0;
 
   return (
@@ -131,56 +337,134 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
         <div 
           ref={containerRef}
           className="relative w-full aspect-video bg-black"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => isPlaying && setShowControls(false)}
         >
-          {embedUrl ? (
+          {videoId ? (
             <>
-              <iframe
-                src={embedUrl}
-                className="absolute inset-0 w-full h-full z-10"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
-                onLoad={handleVideoLoad}
-                data-testid="video-iframe"
+              <div 
+                id={playerContainerId.current}
+                className="absolute inset-0 w-full h-full"
               />
               
-              <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/40 to-transparent pointer-events-none z-20" />
-              
-              <div className="absolute bottom-0 left-0 right-0 p-3 z-20 bg-gradient-to-t from-black/60 to-transparent">
-                <div className="flex items-center justify-end gap-2">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-white hover:bg-white/20"
-                    onClick={toggleMute}
-                    data-testid="button-mute"
-                  >
-                    {isMuted ? (
-                      <VolumeX className="h-4 w-4" />
-                    ) : (
-                      <Volume2 className="h-4 w-4" />
-                    )}
-                  </Button>
-                  
-                  <Slider
-                    value={[isMuted ? 0 : volume]}
-                    max={100}
-                    step={1}
-                    onValueChange={handleVolumeChange}
-                    className="w-20 cursor-pointer"
-                    data-testid="slider-volume"
-                  />
+              <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-10" />
 
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-white hover:bg-white/20"
-                    onClick={handleFullscreen}
-                    data-testid="button-fullscreen"
-                  >
-                    <Maximize className="h-4 w-4" />
-                  </Button>
+              <div 
+                className={`absolute inset-0 z-20 transition-opacity duration-300 ${
+                  showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+              >
+                <div 
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                  onClick={togglePlay}
+                >
+                  {playerReady && (
+                    <div className="h-16 w-16 rounded-full bg-black/50 flex items-center justify-center">
+                      {isPlaying ? (
+                        <Pause className="h-8 w-8 text-white" />
+                      ) : (
+                        <Play className="h-8 w-8 text-white ml-1" />
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                  <div className="mb-3">
+                    <Slider
+                      value={[currentTime]}
+                      max={duration || 100}
+                      step={0.1}
+                      onValueChange={handleProgressChange}
+                      className="cursor-pointer"
+                      data-testid="slider-progress"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        onClick={skipBack}
+                        data-testid="button-skip-back"
+                      >
+                        <SkipBack className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-9 w-9 text-white hover:bg-white/20"
+                        onClick={togglePlay}
+                        data-testid="button-play-toggle"
+                      >
+                        {isPlaying ? (
+                          <Pause className="h-5 w-5" />
+                        ) : (
+                          <Play className="h-5 w-5 ml-0.5" />
+                        )}
+                      </Button>
+                      
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        onClick={skipForward}
+                        data-testid="button-skip-forward"
+                      >
+                        <SkipForward className="h-4 w-4" />
+                      </Button>
+
+                      <span className="text-xs text-white ml-2 font-mono">
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        onClick={toggleMute}
+                        data-testid="button-mute"
+                      >
+                        {isMuted ? (
+                          <VolumeX className="h-4 w-4" />
+                        ) : (
+                          <Volume2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                      
+                      <Slider
+                        value={[isMuted ? 0 : volume]}
+                        max={100}
+                        step={1}
+                        onValueChange={handleVolumeChange}
+                        className="w-20 cursor-pointer"
+                        data-testid="slider-volume"
+                      />
+
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        onClick={handleFullscreen}
+                        data-testid="button-fullscreen"
+                      >
+                        <Maximize className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {!playerReady && (
+                <div className="absolute inset-0 flex items-center justify-center z-30 bg-black">
+                  <div className="text-white text-sm">Carregando vídeo...</div>
+                </div>
+              )}
             </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-white">
