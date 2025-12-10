@@ -450,19 +450,19 @@ export class MemStorage implements IStorage {
     const ebooks: Ebook[] = [
       {
         id: 1,
-        title: "Guia Completo de Nutrição para Diabetes",
-        description: "Manual abrangente com receitas e orientações práticas",
+        title: "A Arte da Guerra - Sun Tzu",
+        description: "Clássico da estratégia e filosofia militar",
         coverUrl: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
-        downloadUrl: "#",
-        tags: ["diabetes", "receitas", "guia"],
-        pages: 120
+        downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
+        tags: ["estratégia", "clássico", "filosofia"],
+        pages: 58
       },
       {
         id: 2,
         title: "30 Dias de Emagrecimento Saudável",
         description: "Plano alimentar completo para 30 dias",
         coverUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400",
-        downloadUrl: "#",
+        downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
         tags: ["emagrecimento", "plano alimentar"],
         pages: 85
       },
@@ -471,7 +471,7 @@ export class MemStorage implements IStorage {
         title: "Receitas Low Carb",
         description: "50 receitas deliciosas com baixo carboidrato",
         coverUrl: "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=400",
-        downloadUrl: "#",
+        downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
         tags: ["receitas", "low carb", "emagrecimento"],
         pages: 95
       }
