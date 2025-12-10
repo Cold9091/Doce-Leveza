@@ -189,7 +189,8 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
   };
 
   const togglePlay = () => {
-    if (!playerRef.current) return;
+    if (!playerRef.current || !playerReady) return;
+    if (typeof playerRef.current.pauseVideo !== 'function') return;
     if (isPlaying) {
       playerRef.current.pauseVideo();
     } else {
@@ -198,7 +199,8 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
   };
 
   const seekTo = (seconds: number) => {
-    if (!playerRef.current) return;
+    if (!playerRef.current || !playerReady) return;
+    if (typeof playerRef.current.seekTo !== 'function') return;
     playerRef.current.seekTo(seconds, true);
     setCurrentTime(seconds);
   };
@@ -215,14 +217,15 @@ export function VideoPlayer({ video, open, onOpenChange }: VideoPlayerProps) {
     const newVolume = value[0];
     setVolume(newVolume);
     setIsMuted(newVolume === 0);
-    if (playerRef.current) {
+    if (playerRef.current && playerReady && typeof playerRef.current.setVolume === 'function') {
       playerRef.current.setVolume(newVolume);
       playerRef.current.unMute();
     }
   };
 
   const toggleMute = () => {
-    if (!playerRef.current) return;
+    if (!playerRef.current || !playerReady) return;
+    if (typeof playerRef.current.mute !== 'function') return;
     if (isMuted) {
       playerRef.current.unMute();
       playerRef.current.setVolume(volume || 50);
