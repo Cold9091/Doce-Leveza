@@ -20,9 +20,7 @@ export default function AdminConsultations() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/api/admin/consultations/${id}`, {
-        method: "DELETE",
-      });
+      await apiRequest("DELETE", `/api/admin/consultations/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/consultations"] });

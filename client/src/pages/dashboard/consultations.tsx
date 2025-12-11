@@ -61,16 +61,13 @@ export default function Consultations() {
   const scheduleMutation = useMutation({
     mutationFn: async (data: ScheduleFormData) => {
       const datetime = `${data.date}T${data.time}:00`;
-      const response = await apiRequest("/api/consultations", {
-        method: "POST",
-        body: JSON.stringify({
-          userId,
-          professionalName: data.professionalName,
-          professionalSpecialty: data.professionalSpecialty,
-          datetime,
-          status: "agendada",
-          notes: data.notes || "",
-        }),
+      const response = await apiRequest("POST", "/api/consultations", {
+        userId,
+        professionalName: data.professionalName,
+        professionalSpecialty: data.professionalSpecialty,
+        datetime,
+        status: "agendada",
+        notes: data.notes || "",
       });
       return response;
     },
