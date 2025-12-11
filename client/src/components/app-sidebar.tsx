@@ -14,13 +14,10 @@ import {
   Calendar,
   BookOpen,
   Settings,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import logoImage from "@assets/Rectangle__1_-removebg-preview_1763494828422.png";
-import { Badge } from "@/components/ui/badge";
 
 const mainMenuItems = [
   {
@@ -34,6 +31,7 @@ const mainMenuItems = [
     url: "/dashboard/patologias",
     icon: Activity,
     testId: "nav-pathologies",
+    badge: 2,
   },
   {
     title: "Consultas",
@@ -56,110 +54,55 @@ const bottomMenuItems = [
     icon: Settings,
     testId: "nav-settings",
   },
-  {
-    title: "Assinatura",
-    url: "/dashboard/assinatura",
-    icon: CreditCard,
-    testId: "nav-subscription",
-    badge: "Pro",
-  },
 ];
 
 export function AppSidebar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  const handleNavigation = (url: string) => {
+    setLocation(url);
+  };
 
   return (
-    <Sidebar className="border-r-0">
-      <SidebarHeader className="px-4 py-6">
-        <Link href="/dashboard">
-          <a className="flex items-center gap-3" data-testid="sidebar-logo">
-            <img src={logoImage} alt="Doce Leveza" className="h-10 w-auto" />
-          </a>
-        </Link>
-        <div className="mt-4 p-3 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium text-primary">Membro Ativo</span>
+    <Sidebar collapsible="icon" className="border-r border-border/40">
+      <SidebarHeader className="p-3 flex items-center justify-center">
+        <button 
+          onClick={() => handleNavigation("/dashboard")}
+          className="cursor-pointer flex items-center justify-center" 
+          data-testid="sidebar-logo"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg">
+            <img src={logoImage} alt="Doce Leveza" className="h-6 w-auto" />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Acesso completo à plataforma
-          </p>
-        </div>
+        </button>
       </SidebarHeader>
       
-      <SidebarContent className="px-3">
-        <div className="mb-2 px-3">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Menu Principal
-          </span>
-        </div>
-        <SidebarMenu className="space-y-1">
+      <SidebarContent className="px-2 py-4">
+        <SidebarMenu className="space-y-2">
           {mainMenuItems.map((item) => {
             const isActive = location === item.url || 
               (item.url !== "/dashboard" && location.startsWith(item.url));
+            const Icon = item.icon;
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
-                  asChild
+                  tooltip={item.title}
+                  onClick={() => handleNavigation(item.url)}
                   className={`
-                    h-11 px-4 rounded-xl transition-all duration-200
+                    relative h-12 w-12 p-0 mx-auto rounded-xl transition-all duration-200 flex items-center justify-center cursor-pointer
                     ${isActive 
-                      ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium shadow-md shadow-primary/20" 
+                      ? "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/25" 
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     }
                   `}
+                  data-testid={item.testId}
                 >
-                  <Link href={item.url}>
-                    <a
-                      className="flex items-center gap-3 w-full"
-                      data-testid={item.testId}
-                    >
-                      <item.icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
-                      <span className="text-sm">{item.title}</span>
-                    </a>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
-
-        <SidebarSeparator className="my-4" />
-
-        <div className="mb-2 px-3">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Conta
-          </span>
-        </div>
-        <SidebarMenu className="space-y-1">
-          {bottomMenuItems.map((item) => {
-            const isActive = location === item.url;
-            return (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  className={`
-                    h-11 px-4 rounded-xl transition-all duration-200
-                    ${isActive 
-                      ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium shadow-md shadow-primary/20" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }
-                  `}
-                >
-                  <Link href={item.url}>
-                    <a
-                      className="flex items-center gap-3 w-full"
-                      data-testid={item.testId}
-                    >
-                      <item.icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
-                      <span className="text-sm flex-1">{item.title}</span>
-                      {item.badge && (
-                        <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </a>
-                  </Link>
+                  <Icon className="h-5 w-5" />
+                  {item.badge && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                      {item.badge}
+                    </span>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
@@ -167,22 +110,40 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="px-3 py-4">
-        <SidebarMenu>
+      <SidebarFooter className="px-2 py-4">
+        <SidebarSeparator className="mb-4" />
+        <SidebarMenu className="space-y-2">
+          {bottomMenuItems.map((item) => {
+            const isActive = location === item.url;
+            const Icon = item.icon;
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  onClick={() => handleNavigation(item.url)}
+                  className={`
+                    h-12 w-12 p-0 mx-auto rounded-xl transition-all duration-200 flex items-center justify-center cursor-pointer
+                    ${isActive 
+                      ? "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/25" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }
+                  `}
+                  data-testid={item.testId}
+                >
+                  <Icon className="h-5 w-5" />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+          
           <SidebarMenuItem>
             <SidebarMenuButton 
-              asChild
-              className="h-11 px-4 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+              tooltip="Sair da Conta"
+              onClick={() => handleNavigation("/")}
+              className="h-12 w-12 p-0 mx-auto rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 flex items-center justify-center cursor-pointer"
+              data-testid="button-logout"
             >
-              <Link href="/">
-                <a
-                  className="flex items-center gap-3 w-full"
-                  data-testid="button-logout"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span className="text-sm">Sair da Conta</span>
-                </a>
-              </Link>
+              <LogOut className="h-5 w-5" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
