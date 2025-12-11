@@ -211,6 +211,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/consultations", async (req, res) => {
+    try {
+      const validatedData = insertConsultationSchema.parse(req.body);
+      const consultation = await storage.createConsultation(validatedData);
+      res.status(201).json(consultation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation error", details: error.errors });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  });
+
   // Subscriptions routes
   app.get("/api/subscriptions/user/:userId", async (req, res) => {
     try {
