@@ -3,11 +3,32 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+
+function DashboardContent({ children }: { children: React.ReactNode }) {
+  const { setOpen } = useSidebar();
+
+  return (
+    <div className="flex h-screen w-full bg-muted/30">
+      <div 
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+      >
+        <AppSidebar />
+      </div>
+      <div className="flex flex-col flex-1 overflow-hidden transition-all duration-300">
+        <DashboardHeader userName="Maria" />
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
 import Overview from "@/pages/dashboard/overview";
@@ -29,21 +50,13 @@ import AdminSettings from "@/pages/admin/settings";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const style = {
-    "--sidebar-width": "5rem",
+    "--sidebar-width": "16rem",
     "--sidebar-width-icon": "5rem",
   };
 
   return (
     <SidebarProvider style={style as React.CSSProperties} defaultOpen={false}>
-      <div className="flex h-screen w-full bg-muted/30">
-        <AppSidebar />
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <DashboardHeader userName="Maria" />
-          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-            {children}
-          </main>
-        </div>
-      </div>
+      <DashboardContent>{children}</DashboardContent>
     </SidebarProvider>
   );
 }

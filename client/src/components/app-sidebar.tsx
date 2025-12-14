@@ -7,6 +7,7 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
@@ -58,6 +59,8 @@ const bottomMenuItems = [
 
 export function AppSidebar() {
   const [location, setLocation] = useLocation();
+  const { state } = useSidebar();
+  const isExpanded = state === "expanded";
 
   const handleNavigation = (url: string) => {
     setLocation(url);
@@ -68,12 +71,17 @@ export function AppSidebar() {
       <SidebarHeader className="p-3 flex items-center justify-center">
         <button 
           onClick={() => handleNavigation("/dashboard")}
-          className="cursor-pointer flex items-center justify-center" 
+          className="cursor-pointer flex items-center justify-center gap-3" 
           data-testid="sidebar-logo"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg flex-shrink-0">
             <img src={logoImage} alt="Doce Leveza" className="h-6 w-auto" />
           </div>
+          {isExpanded && (
+            <span className="font-heading font-bold text-foreground whitespace-nowrap">
+              Doce Leveza
+            </span>
+          )}
         </button>
       </SidebarHeader>
       
@@ -89,7 +97,11 @@ export function AppSidebar() {
                   tooltip={item.title}
                   onClick={() => handleNavigation(item.url)}
                   className={`
-                    relative h-12 w-12 p-0 mx-auto rounded-xl transition-all duration-200 flex items-center justify-center cursor-pointer
+                    relative transition-all duration-200 cursor-pointer
+                    ${isExpanded 
+                      ? "h-11 px-3 mx-0 rounded-lg flex items-center justify-start gap-3" 
+                      : "h-12 w-12 p-0 mx-auto rounded-xl flex items-center justify-center"
+                    }
                     ${isActive 
                       ? "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/25" 
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -97,9 +109,15 @@ export function AppSidebar() {
                   `}
                   data-testid={item.testId}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {isExpanded && (
+                    <span className="text-sm font-medium whitespace-nowrap">{item.title}</span>
+                  )}
                   {item.badge && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    <span className={`
+                      w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium
+                      ${isExpanded ? "ml-auto" : "absolute -top-1 -right-1"}
+                    `}>
                       {item.badge}
                     </span>
                   )}
@@ -122,7 +140,11 @@ export function AppSidebar() {
                   tooltip={item.title}
                   onClick={() => handleNavigation(item.url)}
                   className={`
-                    h-12 w-12 p-0 mx-auto rounded-xl transition-all duration-200 flex items-center justify-center cursor-pointer
+                    transition-all duration-200 cursor-pointer
+                    ${isExpanded 
+                      ? "h-11 px-3 mx-0 rounded-lg flex items-center justify-start gap-3" 
+                      : "h-12 w-12 p-0 mx-auto rounded-xl flex items-center justify-center"
+                    }
                     ${isActive 
                       ? "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/25" 
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -130,7 +152,10 @@ export function AppSidebar() {
                   `}
                   data-testid={item.testId}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {isExpanded && (
+                    <span className="text-sm font-medium whitespace-nowrap">{item.title}</span>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
@@ -140,10 +165,19 @@ export function AppSidebar() {
             <SidebarMenuButton 
               tooltip="Sair da Conta"
               onClick={() => handleNavigation("/")}
-              className="h-12 w-12 p-0 mx-auto rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 flex items-center justify-center cursor-pointer"
+              className={`
+                transition-all duration-200 cursor-pointer text-muted-foreground hover:text-destructive hover:bg-destructive/10
+                ${isExpanded 
+                  ? "h-11 px-3 mx-0 rounded-lg flex items-center justify-start gap-3" 
+                  : "h-12 w-12 p-0 mx-auto rounded-xl flex items-center justify-center"
+                }
+              `}
               data-testid="button-logout"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-5 w-5 flex-shrink-0" />
+              {isExpanded && (
+                <span className="text-sm font-medium whitespace-nowrap">Sair da Conta</span>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
