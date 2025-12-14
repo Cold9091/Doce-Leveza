@@ -20,17 +20,24 @@ import {
   Maximize,
   PlayCircle,
   CheckCircle,
-  Download,
   Shield,
   BookOpen,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ZoomIn,
+  ZoomOut
 } from "lucide-react";
 import { VideoPlayer } from "@/components/video-player";
 import { Slider } from "@/components/ui/slider";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useContentProtection, ProtectionOverlay, ScreenCaptureBlocker } from "@/hooks/use-content-protection";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+import pdfTestFile from "@assets/A-ARTE-DA-GUERRA_1765386889371.pdf";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 declare global {
   interface Window {
@@ -97,9 +104,9 @@ function formatTime(seconds: number): string {
 }
 
 const mockPdfs = [
-  { id: 1, title: "Guia Completo de Tratamento", pages: 45, url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-  { id: 2, title: "Protocolo de Exercícios", pages: 28, url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-  { id: 3, title: "Material de Apoio - Anatomia", pages: 62, url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+  { id: 1, title: "A Arte da Guerra - Sun Tzu", pages: 68, url: pdfTestFile },
+  { id: 2, title: "Protocolo de Exercícios", pages: 28, url: pdfTestFile },
+  { id: 3, title: "Material de Apoio - Anatomia", pages: 62, url: pdfTestFile },
 ];
 
 export default function PathologyDetail() {
@@ -118,6 +125,10 @@ export default function PathologyDetail() {
   const [hasCountedView, setHasCountedView] = useState(false);
   const [selectedPdf, setSelectedPdf] = useState<typeof mockPdfs[0] | null>(null);
   const [rightPanelView, setRightPanelView] = useState<'lessons' | 'pdf'>('lessons');
+  const [pdfNumPages, setPdfNumPages] = useState<number>(0);
+  const [pdfPageNumber, setPdfPageNumber] = useState<number>(1);
+  const [pdfScale, setPdfScale] = useState<number>(0.6);
+  const [pdfLoading, setPdfLoading] = useState<boolean>(true);
   
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -370,12 +381,37 @@ export default function PathologyDetail() {
   const handlePdfSelect = (pdf: typeof mockPdfs[0]) => {
     setSelectedPdf(pdf);
     setRightPanelView('pdf');
+    setPdfPageNumber(1);
+    setPdfLoading(true);
   };
 
   const handleClosePdf = () => {
     setSelectedPdf(null);
     setRightPanelView('lessons');
+    setPdfPageNumber(1);
+    setPdfNumPages(0);
   };
+
+  const onPdfLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
+    setPdfNumPages(numPages);
+    setPdfLoading(false);
+  }, []);
+
+  const goToPrevPdfPage = useCallback(() => {
+    setPdfPageNumber((prev) => Math.max(1, prev - 1));
+  }, []);
+
+  const goToNextPdfPage = useCallback(() => {
+    setPdfPageNumber((prev) => Math.min(pdfNumPages, prev + 1));
+  }, [pdfNumPages]);
+
+  const zoomInPdf = useCallback(() => {
+    setPdfScale((prev) => Math.min(1.5, prev + 0.1));
+  }, []);
+
+  const zoomOutPdf = useCallback(() => {
+    setPdfScale((prev) => Math.max(0.3, prev - 0.1));
+  }, []);
 
   if (!pathology) {
     return (
@@ -698,7 +734,7 @@ export default function PathologyDetail() {
             </>
           ) : (
             <>
-              <div className="p-4 border-b flex items-center justify-between">
+              <div className="p-3 border-b flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Button
                     size="icon"
@@ -713,39 +749,99 @@ export default function PathologyDetail() {
                     {selectedPdf?.title}
                   </h3>
                 </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8"
-                  onClick={handleClosePdf}
-                  data-testid="button-close-pdf-x"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <Badge variant="outline" className="text-xs text-green-600 border-green-600/30">
+                  <Shield className="mr-1 h-3 w-3" />
+                  Protegido
+                </Badge>
               </div>
 
-              <div className="flex-1 bg-muted/50">
-                {selectedPdf && (
-                  <iframe
-                    src={`${selectedPdf.url}#toolbar=0&navpanes=0`}
-                    className="w-full h-full border-0"
-                    title={selectedPdf.title}
-                    data-testid="iframe-pdf-viewer"
-                  />
-                )}
-              </div>
+              <ScrollArea 
+                className="flex-1 protected-content"
+                onContextMenu={(e) => e.preventDefault()}
+                style={{ userSelect: "none", WebkitUserSelect: "none" }}
+              >
+                <div className="flex justify-center p-2">
+                  {selectedPdf && (
+                    <div className="relative">
+                      {pdfLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                          <div className="text-sm text-muted-foreground">Carregando...</div>
+                        </div>
+                      )}
+                      <Document
+                        file={selectedPdf.url}
+                        onLoadSuccess={onPdfLoadSuccess}
+                        loading={null}
+                        className="flex justify-center"
+                      >
+                        <Page
+                          pageNumber={pdfPageNumber}
+                          scale={pdfScale}
+                          className="shadow-lg"
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                        />
+                      </Document>
+                      <ProtectionOverlay userIdentifier="Usuário" showWatermark={true} />
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
 
-              <div className="p-3 border-t">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => selectedPdf && window.open(selectedPdf.url, '_blank')}
-                  data-testid="button-download-pdf"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Baixar PDF
-                </Button>
+              <div className="p-2 border-t bg-background">
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7"
+                      onClick={goToPrevPdfPage}
+                      disabled={pdfPageNumber <= 1}
+                      data-testid="button-prev-pdf-page"
+                    >
+                      <ChevronLeft className="h-3 w-3" />
+                    </Button>
+                    <span className="text-xs px-1 min-w-[50px] text-center">
+                      {pdfPageNumber}/{pdfNumPages}
+                    </span>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7"
+                      onClick={goToNextPdfPage}
+                      disabled={pdfPageNumber >= pdfNumPages}
+                      data-testid="button-next-pdf-page"
+                    >
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7"
+                      onClick={zoomOutPdf}
+                      disabled={pdfScale <= 0.3}
+                      data-testid="button-zoom-out-pdf"
+                    >
+                      <ZoomOut className="h-3 w-3" />
+                    </Button>
+                    <span className="text-xs px-1 min-w-[40px] text-center">
+                      {Math.round(pdfScale * 100)}%
+                    </span>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7"
+                      onClick={zoomInPdf}
+                      disabled={pdfScale >= 1.5}
+                      data-testid="button-zoom-in-pdf"
+                    >
+                      <ZoomIn className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
               </div>
             </>
           )}
