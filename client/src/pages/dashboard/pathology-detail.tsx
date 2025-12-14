@@ -18,11 +18,14 @@ import {
   Volume2,
   VolumeX,
   Maximize,
-  ChevronRight,
   PlayCircle,
   CheckCircle,
   Download,
-  Shield
+  Shield,
+  BookOpen,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { VideoPlayer } from "@/components/video-player";
 import { Slider } from "@/components/ui/slider";
@@ -93,6 +96,12 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+const mockPdfs = [
+  { id: 1, title: "Guia Completo de Tratamento", pages: 45, url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+  { id: 2, title: "Protocolo de Exercícios", pages: 28, url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+  { id: 3, title: "Material de Apoio - Anatomia", pages: 62, url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+];
+
 export default function PathologyDetail() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [playerOpen, setPlayerOpen] = useState(false);
@@ -107,6 +116,8 @@ export default function PathologyDetail() {
   const [apiReady, setApiReady] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
   const [hasCountedView, setHasCountedView] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState<typeof mockPdfs[0] | null>(null);
+  const [rightPanelView, setRightPanelView] = useState<'lessons' | 'pdf'>('lessons');
   
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -352,6 +363,18 @@ export default function PathologyDetail() {
     setDuration(0);
     setHasCountedView(false);
     setCurrentVideoIndex(index);
+    setRightPanelView('lessons');
+    setSelectedPdf(null);
+  };
+
+  const handlePdfSelect = (pdf: typeof mockPdfs[0]) => {
+    setSelectedPdf(pdf);
+    setRightPanelView('pdf');
+  };
+
+  const handleClosePdf = () => {
+    setSelectedPdf(null);
+    setRightPanelView('lessons');
   };
 
   if (!pathology) {
@@ -373,274 +396,359 @@ export default function PathologyDetail() {
   }
 
   if (showCourseView && currentVideo) {
-    const nextVideos = pathologyVideos?.filter((_, idx) => idx !== currentVideoIndex) || [];
-    
     return (
-      <div className="flex h-full">
-        <div className="flex-1 flex flex-col p-4 overflow-hidden">
-          <div className="mb-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => setShowCourseView(false)}
-              className="text-muted-foreground"
-              data-testid="button-back-videos"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para lista de vídeos
-            </Button>
-          </div>
-
-          <div 
-            ref={containerRef}
-            className="relative w-full bg-black rounded-xl overflow-hidden protected-content"
-            style={{ aspectRatio: '16/9', maxHeight: 'calc(100vh - 280px)' }}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() => isPlaying && setShowControls(false)}
-            onContextMenu={(e) => e.preventDefault()}
-            onDragStart={(e) => e.preventDefault()}
-          >
-            <ScreenCaptureBlocker enabled={showCourseView} />
-            
-            {videoId ? (
-              <>
-                <div 
-                  id={`yt-player-inline-${currentVideo.id}`}
-                  className="absolute inset-0 w-full h-full"
-                />
-                
-                <ProtectionOverlay userIdentifier="Usuário" showWatermark={true} />
-                
-                <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-10" />
-
-                <div 
-                  className={`absolute inset-0 z-20 transition-opacity duration-300 ${
-                    showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                  }`}
+      <div className="flex h-full overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <ScrollArea className="flex-1">
+            <div className="p-4">
+              <div className="mb-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowCourseView(false)}
+                  className="text-muted-foreground"
+                  data-testid="button-back-videos"
                 >
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                    onClick={togglePlay}
-                  >
-                    {playerReady && (
-                      <div className="flex items-center gap-4">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
-                          onClick={(e) => { e.stopPropagation(); skipBack(); }}
-                          data-testid="button-skip-back"
-                        >
-                          <SkipBack className="h-6 w-6" />
-                        </Button>
-                        
-                        <Button
-                          size="icon"
-                          className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
-                          onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-                          data-testid="button-play-pause"
-                        >
-                          {isPlaying ? (
-                            <Pause className="h-8 w-8 text-white" />
-                          ) : (
-                            <Play className="h-8 w-8 text-white ml-1" />
-                          )}
-                        </Button>
-                        
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
-                          onClick={(e) => { e.stopPropagation(); skipForward(); }}
-                          data-testid="button-skip-forward"
-                        >
-                          <SkipForward className="h-6 w-6" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar para lista de vídeos
+                </Button>
+              </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <div className="space-y-2">
-                      <Slider
-                        value={[currentTime]}
-                        max={duration || 100}
-                        step={1}
-                        onValueChange={handleProgressChange}
-                        className="cursor-pointer"
-                        data-testid="slider-progress"
-                      />
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={togglePlay}
-                            data-testid="button-play-small"
-                          >
-                            {isPlaying ? (
-                              <Pause className="h-4 w-4" />
-                            ) : (
-                              <Play className="h-4 w-4" />
-                            )}
-                          </Button>
-                          
-                          <div className="flex items-center gap-2">
+              <div 
+                ref={containerRef}
+                className="relative w-full bg-black rounded-2xl overflow-hidden protected-content shadow-lg"
+                style={{ aspectRatio: '16/9' }}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={() => isPlaying && setShowControls(false)}
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
+              >
+                <ScreenCaptureBlocker enabled={showCourseView} />
+
+                <Badge className="absolute top-4 left-4 z-30 bg-red-500 text-white border-0">
+                  <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse" />
+                  {formatTime(currentTime)}
+                </Badge>
+                
+                {videoId ? (
+                  <>
+                    <div 
+                      id={`yt-player-inline-${currentVideo.id}`}
+                      className="absolute inset-0 w-full h-full"
+                    />
+                    
+                    <ProtectionOverlay userIdentifier="Usuário" showWatermark={true} />
+                    
+                    <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-10" />
+
+                    <div 
+                      className={`absolute inset-0 z-20 transition-opacity duration-300 ${
+                        showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                      }`}
+                    >
+                      <div 
+                        className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                        onClick={togglePlay}
+                      >
+                        {playerReady && (
+                          <div className="flex items-center gap-4">
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-8 w-8 text-white hover:bg-white/20"
-                              onClick={toggleMute}
-                              data-testid="button-mute"
+                              className="h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
+                              onClick={(e) => { e.stopPropagation(); skipBack(); }}
+                              data-testid="button-skip-back"
                             >
-                              {isMuted ? (
-                                <VolumeX className="h-4 w-4" />
+                              <SkipBack className="h-6 w-6" />
+                            </Button>
+                            
+                            <Button
+                              size="icon"
+                              className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
+                              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                              data-testid="button-play-pause"
+                            >
+                              {isPlaying ? (
+                                <Pause className="h-8 w-8 text-white" />
                               ) : (
-                                <Volume2 className="h-4 w-4" />
+                                <Play className="h-8 w-8 text-white ml-1" />
                               )}
                             </Button>
-                            <Slider
-                              value={[isMuted ? 0 : volume]}
-                              max={100}
-                              step={1}
-                              onValueChange={handleVolumeChange}
-                              className="w-20 cursor-pointer"
-                              data-testid="slider-volume"
-                            />
+                            
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
+                              onClick={(e) => { e.stopPropagation(); skipForward(); }}
+                              data-testid="button-skip-forward"
+                            >
+                              <SkipForward className="h-6 w-6" />
+                            </Button>
                           </div>
+                        )}
+                      </div>
+
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                        <div className="space-y-2">
+                          <Slider
+                            value={[currentTime]}
+                            max={duration || 100}
+                            step={1}
+                            onValueChange={handleProgressChange}
+                            className="cursor-pointer"
+                            data-testid="slider-progress"
+                          />
                           
-                          <span className="text-white text-sm ml-2">
-                            {formatTime(currentTime)} / {formatTime(duration)}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs text-white border-white/30 bg-black/30">
-                            <Shield className="mr-1 h-3 w-3" />
-                            Protegido
-                          </Badge>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={handleFullscreen}
-                            data-testid="button-fullscreen"
-                          >
-                            <Maximize className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-white hover:bg-white/20"
+                                onClick={togglePlay}
+                                data-testid="button-play-small"
+                              >
+                                {isPlaying ? (
+                                  <Pause className="h-4 w-4" />
+                                ) : (
+                                  <Play className="h-4 w-4" />
+                                )}
+                              </Button>
+                              
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8 text-white hover:bg-white/20"
+                                  onClick={toggleMute}
+                                  data-testid="button-mute"
+                                >
+                                  {isMuted ? (
+                                    <VolumeX className="h-4 w-4" />
+                                  ) : (
+                                    <Volume2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Slider
+                                  value={[isMuted ? 0 : volume]}
+                                  max={100}
+                                  step={1}
+                                  onValueChange={handleVolumeChange}
+                                  className="w-20 cursor-pointer"
+                                  data-testid="slider-volume"
+                                />
+                              </div>
+                              
+                              <span className="text-white text-sm ml-2">
+                                {formatTime(currentTime)} / {formatTime(duration)}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs text-white border-white/30 bg-black/30">
+                                <Shield className="mr-1 h-3 w-3" />
+                                Protegido
+                              </Badge>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-white hover:bg-white/20"
+                                onClick={handleFullscreen}
+                                data-testid="button-fullscreen"
+                              >
+                                <Maximize className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <p className="text-white/60">Carregando vídeo...</p>
                   </div>
-                </div>
-              </>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-white/60">Carregando vídeo...</p>
+                )}
               </div>
-            )}
-          </div>
 
-          <div className="mt-4">
-            <h2 className="text-lg font-semibold text-foreground" data-testid="heading-video-title">
-              {currentVideo.title}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">{currentVideo.description}</p>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              <Badge variant="secondary" className="text-xs">
-                <Clock className="mr-1 h-3 w-3" />
-                {currentVideo.duration}
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                <Eye className="mr-1 h-3 w-3" />
-                {(currentVideo.viewCount || 0).toLocaleString()} visualizações
-              </Badge>
-            </div>
-            {currentVideo.resources && currentVideo.resources.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {currentVideo.resources.map((resource, idx) => (
-                  <Button
-                    key={idx}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs"
-                    data-testid={`button-resource-${idx}`}
-                  >
-                    <FileText className="mr-1 h-3 w-3" />
-                    {resource}
-                    <Download className="ml-1 h-3 w-3" />
-                  </Button>
-                ))}
+              <div className="mt-4">
+                <h2 className="text-lg font-semibold text-foreground" data-testid="heading-video-title">
+                  {currentVideo.title}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">{currentVideo.description}</p>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <Badge variant="secondary" className="text-xs">
+                    <Clock className="mr-1 h-3 w-3" />
+                    {currentVideo.duration}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    <Eye className="mr-1 h-3 w-3" />
+                    {(currentVideo.viewCount || 0).toLocaleString()} visualizações
+                  </Badge>
+                </div>
               </div>
-            )}
-          </div>
+
+              <div className="mt-6">
+                <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Materiais de Apoio
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {mockPdfs.map((pdf) => (
+                    <Card 
+                      key={pdf.id} 
+                      className="hover-elevate active-elevate-2 cursor-pointer transition-all"
+                      onClick={() => handlePdfSelect(pdf)}
+                      data-testid={`card-pdf-${pdf.id}`}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-12 h-14 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground line-clamp-2">{pdf.title}</p>
+                            <p className="text-xs text-muted-foreground mt-1">{pdf.pages} páginas</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-3"
+                          data-testid={`button-read-pdf-${pdf.id}`}
+                        >
+                          <BookOpen className="mr-2 h-4 w-4" />
+                          Ler PDF
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
         </div>
 
         <div className="w-80 border-l bg-card flex flex-col">
-          <div className="p-4 border-b flex items-center justify-between">
-            <h3 className="font-semibold text-foreground" data-testid="heading-next-lessons">Próximas Aulas</h3>
-            <Badge variant="secondary" className="text-xs">
-              {pathologyVideos?.length || 0} aulas
-            </Badge>
-          </div>
+          {rightPanelView === 'lessons' ? (
+            <>
+              <div className="p-4 border-b flex items-center justify-between">
+                <h3 className="font-semibold text-foreground" data-testid="heading-next-lessons">Próximas Aulas</h3>
+                <Badge variant="secondary" className="text-xs">
+                  {pathologyVideos?.length || 0} aulas
+                </Badge>
+              </div>
 
-          <ScrollArea className="flex-1">
-            <div className="p-2">
-              {pathologyVideos?.map((video, index) => (
-                <div
-                  key={video.id}
-                  className={`flex gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                    index === currentVideoIndex 
-                      ? 'bg-primary/10 border border-primary/20' 
-                      : 'hover:bg-muted'
-                  }`}
-                  onClick={() => handleVideoSelect(index)}
-                  data-testid={`lesson-item-${video.id}`}
-                >
-                  <div className="relative w-24 h-14 rounded-md overflow-hidden flex-shrink-0">
-                    <img 
-                      src={video.thumbnailUrl} 
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
-                    {index === currentVideoIndex ? (
-                      <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
-                        <PlayCircle className="h-6 w-6 text-white" />
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <Play className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-                    <Badge className="absolute bottom-1 right-1 bg-black/70 text-[10px] px-1 py-0">
-                      {video.duration}
-                    </Badge>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium line-clamp-2 ${
-                      index === currentVideoIndex ? 'text-primary' : 'text-foreground'
-                    }`}>
-                      {video.title}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {index === currentVideoIndex && (
-                        <Badge variant="default" className="text-[10px] px-1.5 py-0">
-                          Assistindo
+              <ScrollArea className="flex-1">
+                <div className="p-2">
+                  {pathologyVideos?.map((video, index) => (
+                    <div
+                      key={video.id}
+                      className={`flex gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                        index === currentVideoIndex 
+                          ? 'bg-primary/10 border border-primary/20' 
+                          : 'hover:bg-muted'
+                      }`}
+                      onClick={() => handleVideoSelect(index)}
+                      data-testid={`lesson-item-${video.id}`}
+                    >
+                      <div className="relative w-24 h-14 rounded-md overflow-hidden flex-shrink-0">
+                        <img 
+                          src={video.thumbnailUrl} 
+                          alt={video.title}
+                          className="w-full h-full object-cover"
+                        />
+                        {index === currentVideoIndex ? (
+                          <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
+                            <PlayCircle className="h-6 w-6 text-white" />
+                          </div>
+                        ) : (
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <Play className="h-5 w-5 text-white" />
+                          </div>
+                        )}
+                        <Badge className="absolute bottom-1 right-1 bg-black/70 text-[10px] px-1 py-0">
+                          {video.duration}
                         </Badge>
-                      )}
-                      {index < currentVideoIndex && (
-                        <span className="flex items-center text-[10px] text-green-600">
-                          <CheckCircle className="h-3 w-3 mr-0.5" />
-                          Concluído
-                        </span>
-                      )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium line-clamp-2 ${
+                          index === currentVideoIndex ? 'text-primary' : 'text-foreground'
+                        }`}>
+                          {video.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {index === currentVideoIndex && (
+                            <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                              Assistindo
+                            </Badge>
+                          )}
+                          {index < currentVideoIndex && (
+                            <span className="flex items-center text-[10px] text-green-600">
+                              <CheckCircle className="h-3 w-3 mr-0.5" />
+                              Concluído
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
+              </ScrollArea>
+            </>
+          ) : (
+            <>
+              <div className="p-4 border-b flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={handleClosePdf}
+                    data-testid="button-close-pdf"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <h3 className="font-semibold text-foreground text-sm line-clamp-1" data-testid="heading-pdf-title">
+                    {selectedPdf?.title}
+                  </h3>
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8"
+                  onClick={handleClosePdf}
+                  data-testid="button-close-pdf-x"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex-1 bg-muted/50">
+                {selectedPdf && (
+                  <iframe
+                    src={`${selectedPdf.url}#toolbar=0&navpanes=0`}
+                    className="w-full h-full border-0"
+                    title={selectedPdf.title}
+                    data-testid="iframe-pdf-viewer"
+                  />
+                )}
+              </div>
+
+              <div className="p-3 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => selectedPdf && window.open(selectedPdf.url, '_blank')}
+                  data-testid="button-download-pdf"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Baixar PDF
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
