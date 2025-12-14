@@ -1,11 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import type { Pathology, Video } from "@shared/schema";
 import { 
@@ -14,54 +12,107 @@ import {
   Clock, 
   FileText, 
   Eye,
-  Mic,
-  Video as VideoIcon,
-  Maximize2,
-  Settings,
-  Phone,
-  MonitorUp,
-  Paperclip,
-  Image,
-  FileCheck,
-  ClipboardList,
-  MessageSquare,
-  Send,
-  ChevronRight
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+  Maximize,
+  ChevronRight,
+  PlayCircle,
+  CheckCircle,
+  Download,
+  Shield
 } from "lucide-react";
 import { VideoPlayer } from "@/components/video-player";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Slider } from "@/components/ui/slider";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useContentProtection, ProtectionOverlay, ScreenCaptureBlocker } from "@/hooks/use-content-protection";
 
-const mockParticipants = [
-  { id: 1, name: "Maria Silva", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" },
-  { id: 2, name: "João Santos", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
-  { id: 3, name: "Ana Costa", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" },
-];
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
 
-const mockMessages = [
-  { id: 1, user: "Maria", message: "Olá a todos!", time: "09:58", color: "text-orange-500" },
-  { id: 2, user: "João", message: "Oi pessoal", time: "09:59", color: "text-orange-400" },
-  { id: 3, user: "Maria", message: "Olá João!", time: "09:59", color: "text-orange-500" },
-  { id: 4, user: "Ana", message: "Bom dia", time: "10:00", color: "text-green-500" },
-  { id: 5, user: "Carla", message: "Olá!", time: "10:00", color: "text-blue-500" },
-  { id: 6, user: "Maria", message: "Animados para a aula de hoje?", time: "10:01", color: "text-orange-500" },
-  { id: 7, user: "João", message: "Sim, espero que seja ótima", time: "10:02", color: "text-orange-400" },
-];
+let ytApiPromise: Promise<void> | null = null;
 
-const toolbarItems = [
-  { icon: MonitorUp, label: "Compartilhar tela" },
-  { icon: Paperclip, label: "Anexo" },
-  { icon: Image, label: "Imagem" },
-  { icon: FileCheck, label: "Documentos" },
-  { icon: ClipboardList, label: "Testes" },
-  { icon: MessageSquare, label: "Mensagens" },
-];
+function loadYouTubeApi(): Promise<void> {
+  if (ytApiPromise) return ytApiPromise;
+  
+  if (window.YT && window.YT.Player) {
+    return Promise.resolve();
+  }
+
+  ytApiPromise = new Promise((resolve) => {
+    const existingScript = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+    if (existingScript) {
+      const checkReady = setInterval(() => {
+        if (window.YT && window.YT.Player) {
+          clearInterval(checkReady);
+          resolve();
+        }
+      }, 100);
+      return;
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      resolve();
+    };
+
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+  });
+
+  return ytApiPromise;
+}
+
+function getYouTubeVideoId(url: string): string | null {
+  if (!url) return null;
+  
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null;
+}
+
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 
 export default function PathologyDetail() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [playerOpen, setPlayerOpen] = useState(false);
   const [showCourseView, setShowCourseView] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [message, setMessage] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(100);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [apiReady, setApiReady] = useState(false);
+  const [playerReady, setPlayerReady] = useState(false);
+  const [hasCountedView, setHasCountedView] = useState(false);
+  
+  const playerRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<number | null>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const [, params] = useRoute("/dashboard/patologias/:slug");
   const slug = params?.slug;
 
@@ -80,6 +131,228 @@ export default function PathologyDetail() {
   );
 
   const currentVideo = pathologyVideos?.[currentVideoIndex];
+  const videoId = currentVideo ? getYouTubeVideoId(currentVideo.videoUrl) : null;
+  
+  useContentProtection({ 
+    enabled: showCourseView,
+    showWarning: true,
+    warningMessage: "Este vídeo é protegido por direitos autorais.",
+    userIdentifier: "Usuário",
+  });
+
+  const incrementViewMutation = useMutation({
+    mutationFn: async (videoId: number) => {
+      const response = await apiRequest("POST", `/api/videos/${videoId}/view`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+    },
+  });
+
+  useEffect(() => {
+    loadYouTubeApi().then(() => {
+      setApiReady(true);
+    });
+  }, []);
+
+  const updateProgress = useCallback(() => {
+    if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
+      setCurrentTime(playerRef.current.getCurrentTime());
+    }
+    if (isPlaying) {
+      animationRef.current = requestAnimationFrame(updateProgress);
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      animationRef.current = requestAnimationFrame(updateProgress);
+    }
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isPlaying, updateProgress]);
+
+  useEffect(() => {
+    if (!showCourseView || !currentVideo || !apiReady) {
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {}
+        playerRef.current = null;
+      }
+      setPlayerReady(false);
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      setHasCountedView(false);
+      return;
+    }
+
+    const ytVideoId = getYouTubeVideoId(currentVideo.videoUrl);
+    if (!ytVideoId) return;
+
+    const containerId = `yt-player-inline-${currentVideo.id}`;
+    let cancelled = false;
+
+    const initPlayer = () => {
+      if (cancelled) return;
+      
+      const container = document.getElementById(containerId);
+      if (!container) {
+        setTimeout(initPlayer, 50);
+        return;
+      }
+
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {}
+        playerRef.current = null;
+      }
+
+      try {
+        playerRef.current = new window.YT.Player(containerId, {
+          videoId: ytVideoId,
+          width: '100%',
+          height: '100%',
+          playerVars: {
+            autoplay: 0,
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            iv_load_policy: 3,
+            disablekb: 0,
+            fs: 0,
+            playsinline: 1,
+          },
+          events: {
+            onReady: (event: any) => {
+              setPlayerReady(true);
+              setDuration(event.target.getDuration());
+              event.target.setVolume(volume);
+            },
+            onStateChange: (event: any) => {
+              const playing = event.data === window.YT.PlayerState.PLAYING;
+              setIsPlaying(playing);
+              
+              if (playing && !hasCountedView && currentVideo) {
+                setHasCountedView(true);
+                incrementViewMutation.mutate(currentVideo.id);
+              }
+            },
+          },
+        });
+      } catch (e) {
+        console.error("Failed to create YouTube player:", e);
+      }
+    };
+
+    const timer = setTimeout(initPlayer, 100);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [showCourseView, currentVideo?.id, apiReady]);
+
+  const handleMouseMove = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    if (isPlaying) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
+  }, [isPlaying]);
+
+  const togglePlay = useCallback(() => {
+    if (!playerRef.current || !playerReady) return;
+    try {
+      if (isPlaying) {
+        playerRef.current.pauseVideo();
+      } else {
+        playerRef.current.playVideo();
+      }
+    } catch (e) {}
+  }, [playerReady, isPlaying]);
+
+  const seekTo = useCallback((seconds: number) => {
+    if (!playerRef.current || !playerReady) return;
+    try {
+      playerRef.current.seekTo(seconds, true);
+      setCurrentTime(seconds);
+    } catch (e) {}
+  }, [playerReady]);
+
+  const skipBack = useCallback(() => {
+    seekTo(Math.max(0, currentTime - 10));
+  }, [seekTo, currentTime]);
+
+  const skipForward = useCallback(() => {
+    seekTo(Math.min(duration, currentTime + 10));
+  }, [seekTo, currentTime, duration]);
+
+  const handleVolumeChange = useCallback((value: number[]) => {
+    const newVolume = value[0];
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+    if (playerRef.current && playerReady) {
+      try {
+        playerRef.current.unMute();
+        playerRef.current.setVolume(newVolume);
+      } catch (e) {}
+    }
+  }, [playerReady]);
+
+  const toggleMute = useCallback(() => {
+    if (!playerRef.current || !playerReady) return;
+    try {
+      if (isMuted) {
+        playerRef.current.unMute();
+        playerRef.current.setVolume(volume > 0 ? volume : 50);
+        setIsMuted(false);
+      } else {
+        playerRef.current.mute();
+        setIsMuted(true);
+      }
+    } catch (e) {}
+  }, [playerReady, isMuted, volume]);
+
+  const handleProgressChange = useCallback((value: number[]) => {
+    seekTo(value[0]);
+  }, [seekTo]);
+
+  const handleFullscreen = useCallback(() => {
+    if (containerRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        containerRef.current.requestFullscreen();
+      }
+    }
+  }, []);
+
+  const handleVideoSelect = (index: number) => {
+    if (playerRef.current) {
+      try {
+        playerRef.current.destroy();
+      } catch (e) {}
+      playerRef.current = null;
+    }
+    setPlayerReady(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setHasCountedView(false);
+    setCurrentVideoIndex(index);
+  };
 
   if (!pathology) {
     return (
@@ -100,94 +373,12 @@ export default function PathologyDetail() {
   }
 
   if (showCourseView && currentVideo) {
+    const nextVideos = pathologyVideos?.filter((_, idx) => idx !== currentVideoIndex) || [];
+    
     return (
       <div className="flex h-full">
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 p-4 flex flex-col gap-4">
-            <div className="relative flex-1 bg-card rounded-2xl overflow-hidden shadow-lg">
-              <Badge className="absolute top-4 left-4 z-10 bg-red-500 text-white border-0">
-                <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse" />
-                {currentVideo.duration || "00:05:45"}
-              </Badge>
-
-              <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-                {mockParticipants.map((participant, idx) => (
-                  <div 
-                    key={participant.id}
-                    className="relative"
-                    style={{ marginLeft: idx > 0 ? "-0.5rem" : 0 }}
-                  >
-                    <Avatar className="h-12 w-12 border-2 border-card">
-                      <AvatarImage src={participant.image} alt={participant.name} />
-                      <AvatarFallback>{participant.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] bg-card/80 backdrop-blur-sm px-1 rounded text-foreground whitespace-nowrap">
-                      {participant.name.split(" ")[0]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="h-full w-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                <img 
-                  src={currentVideo.thumbnailUrl} 
-                  alt={currentVideo.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <Button
-                    size="icon"
-                    className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
-                    onClick={() => {
-                      setSelectedVideo(currentVideo);
-                      setPlayerOpen(true);
-                    }}
-                    data-testid="button-play-video"
-                  >
-                    <Play className="h-8 w-8 text-white" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
-                <Button size="icon" variant="secondary" className="h-12 w-12 rounded-full bg-card/80 backdrop-blur-sm" data-testid="button-mic">
-                  <Mic className="h-5 w-5" />
-                </Button>
-                <Button size="icon" variant="secondary" className="h-12 w-12 rounded-full bg-card/80 backdrop-blur-sm" data-testid="button-video">
-                  <VideoIcon className="h-5 w-5" />
-                </Button>
-                <Button size="icon" variant="secondary" className="h-12 w-12 rounded-full bg-card/80 backdrop-blur-sm" data-testid="button-fullscreen">
-                  <Maximize2 className="h-5 w-5" />
-                </Button>
-                <Button size="icon" variant="secondary" className="h-12 w-12 rounded-full bg-card/80 backdrop-blur-sm" data-testid="button-settings">
-                  <Settings className="h-5 w-5" />
-                </Button>
-                <Button size="icon" className="h-12 w-12 rounded-full bg-red-500 hover:bg-red-600" data-testid="button-end-call">
-                  <Phone className="h-5 w-5 text-white" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 p-4 bg-card rounded-xl">
-              {toolbarItems.map((item) => (
-                <Tooltip key={item.label}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="flex flex-col items-center gap-2 h-auto py-3 px-4 hover:bg-muted"
-                      data-testid={`button-toolbar-${item.label.toLowerCase().replace(/\s/g, '-')}`}
-                    >
-                      <item.icon className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">{item.label}</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{item.label}</TooltipContent>
-                </Tooltip>
-              ))}
-            </div>
-          </div>
-
-          <div className="p-4 pt-0">
+        <div className="flex-1 flex flex-col p-4 overflow-hidden">
+          <div className="mb-4">
             <Button 
               variant="ghost" 
               onClick={() => setShowCourseView(false)}
@@ -198,62 +389,259 @@ export default function PathologyDetail() {
               Voltar para lista de vídeos
             </Button>
           </div>
+
+          <div 
+            ref={containerRef}
+            className="relative w-full bg-black rounded-xl overflow-hidden protected-content"
+            style={{ aspectRatio: '16/9', maxHeight: 'calc(100vh - 280px)' }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => isPlaying && setShowControls(false)}
+            onContextMenu={(e) => e.preventDefault()}
+            onDragStart={(e) => e.preventDefault()}
+          >
+            <ScreenCaptureBlocker enabled={showCourseView} />
+            
+            {videoId ? (
+              <>
+                <div 
+                  id={`yt-player-inline-${currentVideo.id}`}
+                  className="absolute inset-0 w-full h-full"
+                />
+                
+                <ProtectionOverlay userIdentifier="Usuário" showWatermark={true} />
+                
+                <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-10" />
+
+                <div 
+                  className={`absolute inset-0 z-20 transition-opacity duration-300 ${
+                    showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    onClick={togglePlay}
+                  >
+                    {playerReady && (
+                      <div className="flex items-center gap-4">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
+                          onClick={(e) => { e.stopPropagation(); skipBack(); }}
+                          data-testid="button-skip-back"
+                        >
+                          <SkipBack className="h-6 w-6" />
+                        </Button>
+                        
+                        <Button
+                          size="icon"
+                          className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
+                          onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                          data-testid="button-play-pause"
+                        >
+                          {isPlaying ? (
+                            <Pause className="h-8 w-8 text-white" />
+                          ) : (
+                            <Play className="h-8 w-8 text-white ml-1" />
+                          )}
+                        </Button>
+                        
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
+                          onClick={(e) => { e.stopPropagation(); skipForward(); }}
+                          data-testid="button-skip-forward"
+                        >
+                          <SkipForward className="h-6 w-6" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <div className="space-y-2">
+                      <Slider
+                        value={[currentTime]}
+                        max={duration || 100}
+                        step={1}
+                        onValueChange={handleProgressChange}
+                        className="cursor-pointer"
+                        data-testid="slider-progress"
+                      />
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-white hover:bg-white/20"
+                            onClick={togglePlay}
+                            data-testid="button-play-small"
+                          >
+                            {isPlaying ? (
+                              <Pause className="h-4 w-4" />
+                            ) : (
+                              <Play className="h-4 w-4" />
+                            )}
+                          </Button>
+                          
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-white hover:bg-white/20"
+                              onClick={toggleMute}
+                              data-testid="button-mute"
+                            >
+                              {isMuted ? (
+                                <VolumeX className="h-4 w-4" />
+                              ) : (
+                                <Volume2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Slider
+                              value={[isMuted ? 0 : volume]}
+                              max={100}
+                              step={1}
+                              onValueChange={handleVolumeChange}
+                              className="w-20 cursor-pointer"
+                              data-testid="slider-volume"
+                            />
+                          </div>
+                          
+                          <span className="text-white text-sm ml-2">
+                            {formatTime(currentTime)} / {formatTime(duration)}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs text-white border-white/30 bg-black/30">
+                            <Shield className="mr-1 h-3 w-3" />
+                            Protegido
+                          </Badge>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-white hover:bg-white/20"
+                            onClick={handleFullscreen}
+                            data-testid="button-fullscreen"
+                          >
+                            <Maximize className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-white/60">Carregando vídeo...</p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold text-foreground" data-testid="heading-video-title">
+              {currentVideo.title}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">{currentVideo.description}</p>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <Badge variant="secondary" className="text-xs">
+                <Clock className="mr-1 h-3 w-3" />
+                {currentVideo.duration}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                <Eye className="mr-1 h-3 w-3" />
+                {(currentVideo.viewCount || 0).toLocaleString()} visualizações
+              </Badge>
+            </div>
+            {currentVideo.resources && currentVideo.resources.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {currentVideo.resources.map((resource, idx) => (
+                  <Button
+                    key={idx}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    data-testid={`button-resource-${idx}`}
+                  >
+                    <FileText className="mr-1 h-3 w-3" />
+                    {resource}
+                    <Download className="ml-1 h-3 w-3" />
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="w-80 border-l bg-card flex flex-col">
           <div className="p-4 border-b flex items-center justify-between">
-            <h3 className="font-semibold text-foreground" data-testid="heading-group-chat">Grupo de Chat</h3>
-            <Button size="icon" variant="ghost" data-testid="button-toggle-chat">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            <h3 className="font-semibold text-foreground" data-testid="heading-next-lessons">Próximas Aulas</h3>
+            <Badge variant="secondary" className="text-xs">
+              {pathologyVideos?.length || 0} aulas
+            </Badge>
           </div>
 
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {mockMessages.map((msg) => (
-                <div key={msg.id} className="flex items-start gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className={`${msg.color} bg-muted`}>
-                      {msg.user.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${msg.color}`}>{msg.user}</span>
-                      <span className="text-xs text-muted-foreground">{msg.time}</span>
+          <ScrollArea className="flex-1">
+            <div className="p-2">
+              {pathologyVideos?.map((video, index) => (
+                <div
+                  key={video.id}
+                  className={`flex gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                    index === currentVideoIndex 
+                      ? 'bg-primary/10 border border-primary/20' 
+                      : 'hover:bg-muted'
+                  }`}
+                  onClick={() => handleVideoSelect(index)}
+                  data-testid={`lesson-item-${video.id}`}
+                >
+                  <div className="relative w-24 h-14 rounded-md overflow-hidden flex-shrink-0">
+                    <img 
+                      src={video.thumbnailUrl} 
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {index === currentVideoIndex ? (
+                      <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
+                        <PlayCircle className="h-6 w-6 text-white" />
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                        <Play className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <Badge className="absolute bottom-1 right-1 bg-black/70 text-[10px] px-1 py-0">
+                      {video.duration}
+                    </Badge>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium line-clamp-2 ${
+                      index === currentVideoIndex ? 'text-primary' : 'text-foreground'
+                    }`}>
+                      {video.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {index === currentVideoIndex && (
+                        <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                          Assistindo
+                        </Badge>
+                      )}
+                      {index < currentVideoIndex && (
+                        <span className="flex items-center text-[10px] text-green-600">
+                          <CheckCircle className="h-3 w-3 mr-0.5" />
+                          Concluído
+                        </span>
+                      )}
                     </div>
-                    <p className="text-sm text-foreground">{msg.message}</p>
                   </div>
                 </div>
               ))}
             </div>
           </ScrollArea>
-
-          <div className="p-4 border-t">
-            <div className="relative">
-              <Input
-                placeholder="Mensagem..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="pr-10 bg-muted border-0"
-                data-testid="input-chat-message"
-              />
-              <Button 
-                size="icon" 
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-primary"
-                data-testid="button-send-message"
-              >
-                <Send className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
         </div>
-
-        <VideoPlayer
-          video={selectedVideo}
-          open={playerOpen}
-          onOpenChange={setPlayerOpen}
-        />
       </div>
     );
   }
