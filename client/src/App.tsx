@@ -6,9 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AdminSidebar } from "@/components/admin-sidebar";
-import { ThemeProvider } from "@/components/theme-provider";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
@@ -65,7 +63,6 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3 sm:gap-4">
               <SidebarTrigger data-testid="button-admin-sidebar-toggle" className="text-muted-foreground hover:text-foreground" />
             </div>
-            <ThemeToggle />
           </header>
           <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 bg-muted/30">
             {children}
@@ -200,12 +197,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

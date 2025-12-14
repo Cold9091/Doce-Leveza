@@ -1,9 +1,8 @@
-import { Search, Bell, Settings, Moon, Sun } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useTheme } from "@/components/theme-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +23,6 @@ export function DashboardHeader({
   courseButtonText = "Ver Aula",
   onCourseButtonClick
 }: DashboardHeaderProps) {
-  const { theme, setTheme } = useTheme();
 
   return (
     <header className="flex items-center justify-between gap-4 border-b p-4 bg-background">
@@ -58,29 +56,6 @@ export function DashboardHeader({
             {courseButtonText}
           </Button>
         )}
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              className="text-muted-foreground hover:text-foreground"
-              data-testid="button-theme-toggle"
-            >
-              {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <Sun className="mr-2 h-4 w-4" />
-              Claro
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <Moon className="mr-2 h-4 w-4" />
-              Escuro
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
 
         <Button 
           size="icon" 
