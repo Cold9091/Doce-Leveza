@@ -33,6 +33,8 @@ import { Slider } from "@/components/ui/slider";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useContentProtection, ProtectionOverlay, ScreenCaptureBlocker } from "@/hooks/use-content-protection";
 import { Document, Page, pdfjs } from "react-pdf";
+import { PdfReader } from "@/components/pdf-reader";
+import type { Ebook } from "@shared/schema";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import pdfTestFile from "@assets/A-ARTE-DA-GUERRA_1765386889371.pdf";
@@ -129,6 +131,7 @@ export default function PathologyDetail() {
   const [pdfPageNumber, setPdfPageNumber] = useState<number>(1);
   const [pdfScale, setPdfScale] = useState<number>(0.6);
   const [pdfLoading, setPdfLoading] = useState<boolean>(true);
+  const [pdfReaderOpen, setPdfReaderOpen] = useState(false);
   
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -411,6 +414,18 @@ export default function PathologyDetail() {
 
   const zoomOutPdf = useCallback(() => {
     setPdfScale((prev) => Math.max(0.3, prev - 0.1));
+  }, []);
+
+  const convertPdfToEbook = useCallback((pdf: typeof mockPdfs[0]): Ebook => {
+    return {
+      id: pdf.id,
+      title: pdf.title,
+      description: "Material de apoio para estudo",
+      pages: pdf.pages,
+      downloadUrl: pdf.url,
+      coverUrl: "",
+      tags: ["Material de Apoio"],
+    };
   }, []);
 
   if (!pathology) {
@@ -840,12 +855,30 @@ export default function PathologyDetail() {
                     >
                       <ZoomIn className="h-3 w-3" />
                     </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7"
+                      onClick={() => setPdfReaderOpen(true)}
+                      data-testid="button-expand-pdf"
+                    >
+                      <Maximize className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
               </div>
             </>
           )}
         </div>
+
+        {selectedPdf && (
+          <PdfReader
+            ebook={convertPdfToEbook(selectedPdf)}
+            open={pdfReaderOpen}
+            onOpenChange={setPdfReaderOpen}
+            userIdentifier="Usuário"
+          />
+        )}
       </div>
     );
   }
