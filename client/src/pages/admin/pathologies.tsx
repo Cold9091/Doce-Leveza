@@ -39,6 +39,7 @@ export default function AdminPathologies() {
       description: "",
       icon: "Activity",
       imageUrl: "",
+      price: 0,
     },
   });
 
@@ -172,6 +173,25 @@ export default function AdminPathologies() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Preço (AOA)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          {...field} 
+                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          placeholder="Ex: 85000" 
+                          data-testid="input-pathology-price" 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <DialogFooter>
                   <Button
                     type="submit"
@@ -210,6 +230,9 @@ export default function AdminPathologies() {
                 <div className="text-xs text-muted-foreground">
                   <div>Slug: {pathology.slug}</div>
                   <div>Ícone: {pathology.icon}</div>
+                  <div className="font-bold text-foreground mt-1">
+                    Preço: {pathology.price?.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button
