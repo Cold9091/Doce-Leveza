@@ -221,7 +221,7 @@ export default function Home() {
 
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-200 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 mb-4 sm:mb-5 lg:mb-6">
               Vídeos, aulas, ebooks e programas especializados para Diabetes, Emagrecimento,
-              Hipertensão e Gestantes — tudo num único lugar.
+              Hipertensão, Gastrite, Amamentação e Terceira Idade — tudo num único lugar.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
@@ -294,9 +294,9 @@ export default function Home() {
                 image: ebookImg,
               },
               {
-                title: "Programas por Patologia",
+                title: "Conteúdo Programático",
                 subtitle: "Bloco 3",
-                desc: "Orientações específicas para Diabetes, Hipertensão, Emagrecimento e Gestantes.",
+                desc: "Programas especializados para Diabetes, Hipertensão, Emagrecimento, Gastrite e muito mais.",
                 image: programsImg,
               },
               {
@@ -373,7 +373,7 @@ export default function Home() {
                 variant="outline"
                 className="mb-4 text-xs uppercase tracking-wide border-border bg-muted text-white"
               >
-                PATOLOGIA
+                PROGRAMA
               </Badge>
             </motion.div>
             <motion.h2 
@@ -383,7 +383,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              Conteúdos por Patologia
+              Conteúdo Programático
             </motion.h2>
             <motion.p 
               className="text-base text-muted-foreground"
@@ -392,35 +392,47 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              Escolhe a categoria que corresponde às tuas necessidades.
+              Escolhe o programa de reeducação alimentar que corresponde às tuas necessidades.
             </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[
               {
-                title: "Diabetes",
-                desc: "Vídeos, planos e orientações para controlar a glicemia com segurança.",
-                image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=450&fit=crop",
-                icon: Activity,
-              },
-              {
-                title: "Emagrecimento",
-                desc: "Estratégias práticas para perder peso de forma saudável e sustentável.",
+                title: "Programa de reeducação alimentar para perder de peso",
+                desc: "Plano completo para atingir o seu peso ideal de forma saudável.",
                 image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=450&fit=crop",
                 icon: TrendingDown,
               },
               {
-                title: "Hipertensão",
-                desc: "Dicas e planos para equilibrar a pressão arterial com alimentação adequada.",
+                title: "Programa de reeducação alimentar para perder de peso na diabetes",
+                desc: "Orientações específicas para o controlo da glicémia e perda de peso.",
+                image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=450&fit=crop",
+                icon: Activity,
+              },
+              {
+                title: "Programa de reeducação alimentar para perder de peso na hipertensão",
+                desc: "Estratégias para equilibrar a pressão arterial enquanto perde peso.",
                 image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&h=450&fit=crop",
                 icon: HeartPulse,
               },
               {
-                title: "Gestantes",
-                desc: "Alimentação segura, prática e nutritiva para todas as fases da gestação.",
-                image: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=800&h=450&fit=crop",
+                title: "Programa de reeducação alimentar para perder de peso na gastrite",
+                desc: "Alimentação leve e curativa para o sistema digestivo.",
+                image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=450&fit=crop",
+                icon: Utensils,
+              },
+              {
+                title: "Programa de reeducação alimentar para perder de peso na amamentação",
+                desc: "Nutrição equilibrada para a mãe e o bebé durante a perda de peso.",
+                image: "https://images.unsplash.com/photo-1525253086316-d0c936c814f8?w=800&h=450&fit=crop",
                 icon: Baby,
+              },
+              {
+                title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
+                desc: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
+                image: "https://images.unsplash.com/photo-1516307364728-25b36c5f400f?w=800&h=450&fit=crop",
+                icon: Users,
               },
             ].map((pathology, idx) => (
               <motion.div
