@@ -885,13 +885,13 @@ export default function PathologyDetail() {
 
   return (
     <div className="p-6 space-y-4 sm:space-y-6">
-      <Link href="/dashboard/patologias">
+      <Link href="/dashboard/programas">
         <a
           className="inline-flex items-center text-xs sm:text-sm text-muted-foreground hover:text-foreground"
           data-testid="link-back-pathologies"
         >
           <ArrowLeft className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-          Voltar para Patologias
+          Voltar para Programas
         </a>
       </Link>
 
