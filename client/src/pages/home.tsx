@@ -403,36 +403,42 @@ export default function Home() {
                 desc: "Plano completo para atingir o seu peso ideal de forma saudável.",
                 image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=450&fit=crop",
                 icon: TrendingDown,
+                price: 97,
               },
               {
                 title: "Programa de reeducação alimentar para perder de peso na diabetes",
                 desc: "Orientações específicas para o controlo da glicémia e perda de peso.",
                 image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=450&fit=crop",
                 icon: Activity,
+                price: 127,
               },
               {
                 title: "Programa de reeducação alimentar para perder de peso na hipertensão",
                 desc: "Estratégias para equilibrar a pressão arterial enquanto perde peso.",
                 image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&h=450&fit=crop",
                 icon: HeartPulse,
+                price: 127,
               },
               {
                 title: "Programa de reeducação alimentar para perder de peso na gastrite",
                 desc: "Alimentação leve e curativa para o sistema digestivo.",
                 image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=450&fit=crop",
                 icon: Utensils,
+                price: 97,
               },
               {
                 title: "Programa de reeducação alimentar para perder de peso na amamentação",
                 desc: "Nutrição equilibrada para a mãe e o bebé durante a perda de peso.",
                 image: "https://images.unsplash.com/photo-1525253086316-d0c936c814f8?w=800&h=450&fit=crop",
                 icon: Baby,
+                price: 97,
               },
               {
                 title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
                 desc: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
                 image: "https://images.unsplash.com/photo-1516307364728-25b36c5f400f?w=800&h=450&fit=crop",
                 icon: Users,
+                price: 97,
               },
             ].map((pathology, idx) => (
               <motion.div
@@ -473,6 +479,12 @@ export default function Home() {
                         <pathology.icon className="w-6 h-6 text-accent-foreground" />
                       </motion.div>
                     </div>
+                    {/* Badge de Preço */}
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-primary text-primary-foreground font-bold text-sm px-3 py-1 shadow-lg">
+                        €{pathology.price}
+                      </Badge>
+                    </div>
                   </div>
                   <CardContent className="p-6 flex-1 flex flex-col">
                     <motion.h3 
@@ -497,11 +509,11 @@ export default function Home() {
                     >
                       <Button
                         variant="default"
-                        className="w-full"
+                        className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-bold"
                         onClick={() => setDialogOpen(true)}
                         data-testid={`button-view-content-${idx + 1}`}
                       >
-                        Ver Conteúdos
+                        Comprar Acesso Individual
                       </Button>
                     </motion.div>
                   </CardContent>
