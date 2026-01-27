@@ -69,6 +69,7 @@ export type InsertVideo = z.infer<typeof insertVideoSchema>;
 // Ebook schema
 export const ebookSchema = z.object({
   id: z.number(),
+  pathologyId: z.number().optional(), // Conecta ebook a uma patologia/programa
   title: z.string(),
   description: z.string(),
   coverUrl: z.string(),

@@ -180,9 +180,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Ebooks routes
-  app.get("/api/ebooks", async (_req, res) => {
+  app.get("/api/ebooks", async (req, res) => {
     try {
-      const ebooks = await storage.getEbooks();
+      const pathologyId = req.query.pathologyId ? parseInt(req.query.pathologyId as string) : undefined;
+      let ebooks;
+      if (pathologyId) {
+        ebooks = await storage.getEbooksByPathology(pathologyId);
+      } else {
+        ebooks = await storage.getEbooks();
+      }
       res.json(ebooks);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });

@@ -48,6 +48,7 @@ export interface IStorage {
   
   // Ebooks
   getEbooks(): Promise<Ebook[]>;
+  getEbooksByPathology(pathologyId: number): Promise<Ebook[]>;
   getEbookById(id: number): Promise<Ebook | null>;
   createEbook(data: InsertEbook): Promise<Ebook>;
   updateEbook(id: number, data: Partial<Ebook>): Promise<Ebook | null>;
@@ -231,6 +232,11 @@ export class MemStorage implements IStorage {
   // Ebooks
   async getEbooks(): Promise<Ebook[]> {
     return Array.from(this.ebooks.values());
+  }
+
+  async getEbooksByPathology(pathologyId: number): Promise<Ebook[]> {
+    const ebooks = Array.from(this.ebooks.values());
+    return ebooks.filter(e => e.pathologyId === pathologyId);
   }
 
   async getEbookById(id: number): Promise<Ebook | null> {
@@ -474,29 +480,32 @@ export class MemStorage implements IStorage {
     const ebooks: Ebook[] = [
       {
         id: 1,
-        title: "A Arte da Guerra - Sun Tzu",
-        description: "Clássico da estratégia e filosofia militar",
+        pathologyId: 1,
+        title: "Manual de Reeducação Alimentar",
+        description: "Guia prático para emagrecimento saudável",
         coverUrl: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
         downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
-        tags: ["estratégia", "clássico", "filosofia"],
-        pages: 58
+        tags: ["emagrecimento", "guia", "nutrição"],
+        pages: 45
       },
       {
         id: 2,
-        title: "30 Dias de Emagrecimento Saudável",
-        description: "Plano alimentar completo para 30 dias",
+        pathologyId: 2,
+        title: "30 Dias de Emagrecimento Saudável (Diabetes)",
+        description: "Plano alimentar completo para diabéticos",
         coverUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400",
         downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
-        tags: ["emagrecimento", "plano alimentar"],
+        tags: ["diabetes", "emagrecimento", "plano alimentar"],
         pages: 85
       },
       {
         id: 3,
-        title: "Receitas Low Carb",
-        description: "50 receitas deliciosas com baixo carboidrato",
+        pathologyId: 3,
+        title: "Receitas de Baixo Sódio",
+        description: "50 receitas deliciosas para hipertensos",
         coverUrl: "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=400",
         downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
-        tags: ["receitas", "low carb", "emagrecimento"],
+        tags: ["receitas", "hipertensão", "saúde"],
         pages: 95
       }
     ];
