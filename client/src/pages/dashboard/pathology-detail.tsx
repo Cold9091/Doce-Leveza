@@ -138,7 +138,7 @@ export default function PathologyDetail() {
   const animationRef = useRef<number | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  const [, params] = useRoute("/dashboard/patologias/:slug");
+  const [, params] = useRoute("/dashboard/programas/:slug");
   const slug = params?.slug;
 
   const { data: pathologies } = useQuery<Pathology[]>({
@@ -431,15 +431,15 @@ export default function PathologyDetail() {
   if (!pathology) {
     return (
       <div className="p-6 space-y-4 sm:space-y-6">
-        <Link href="/dashboard/patologias">
+        <Link href="/dashboard/programas">
           <a className="inline-flex items-center text-xs sm:text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-            Voltar para Patologias
+            Voltar para Programas
           </a>
         </Link>
         <Card>
           <CardContent className="p-8 sm:p-12 text-center">
-            <p className="text-sm sm:text-base text-muted-foreground">Patologia não encontrada</p>
+            <p className="text-sm sm:text-base text-muted-foreground">Programa não encontrado</p>
           </CardContent>
         </Card>
       </div>

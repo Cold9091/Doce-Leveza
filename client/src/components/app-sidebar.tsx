@@ -28,11 +28,11 @@ const mainMenuItems = [
     testId: "nav-overview",
   },
   {
-    title: "Patologias",
-    url: "/dashboard/patologias",
+    title: "Programas",
+    url: "/dashboard/programas",
     icon: Activity,
     testId: "nav-pathologies",
-    badge: 2,
+    badge: 6,
   },
   {
     title: "Consultas",

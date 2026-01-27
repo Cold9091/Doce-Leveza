@@ -97,14 +97,14 @@ function Router() {
           </DashboardLayout>
         )}
       </Route>
-      <Route path="/dashboard/patologias">
+      <Route path="/dashboard/programas">
         {() => (
           <DashboardLayout>
             <Pathologies />
           </DashboardLayout>
         )}
       </Route>
-      <Route path="/dashboard/patologias/:slug">
+      <Route path="/dashboard/programas/:slug">
         {() => (
           <DashboardLayout>
             <PathologyDetail />

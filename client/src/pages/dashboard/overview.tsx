@@ -25,7 +25,7 @@ export default function Overview() {
 
   const stats = [
     {
-      title: "Patologias",
+      title: "Programas",
       value: pathologies?.length || 0,
       subtitle: "disponíveis para estudo",
       icon: Activity,
@@ -93,7 +93,7 @@ export default function Overview() {
           </p>
           
           <div className="flex flex-wrap gap-3">
-            <Link href="/dashboard/patologias">
+            <Link href="/dashboard/programas">
               <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" data-testid="button-explore-content">
                 Explorar Conteúdo
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -155,7 +155,7 @@ export default function Overview() {
               </div>
               <CardTitle className="text-base sm:text-lg">Continue Assistindo</CardTitle>
             </div>
-            <Link href="/dashboard/patologias">
+            <Link href="/dashboard/programas">
               <Button variant="ghost" size="sm" className="text-xs">
                 Ver todos
                 <ArrowRight className="ml-1 h-3 w-3" />
