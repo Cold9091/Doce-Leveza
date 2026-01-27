@@ -31,7 +31,7 @@ export default function Overview() {
       icon: Activity,
       gradient: "from-blue-500 to-blue-600",
       bgGradient: "from-blue-500/10 to-blue-600/5",
-      testId: "stat-pathologies",
+      testId: "stat-programs",
     },
     {
       title: "Vídeos Assistidos",

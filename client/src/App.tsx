@@ -153,7 +153,7 @@ function Router() {
           </AdminLayout>
         )}
       </Route>
-      <Route path="/admin/patologias">
+      <Route path="/admin/programas">
         {() => (
           <AdminLayout>
             <AdminPathologies />

@@ -896,7 +896,7 @@ export default function PathologyDetail() {
       </Link>
 
       <div>
-        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground" data-testid={`heading-pathology-${slug}`}>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground" data-testid={`heading-program-${slug}`}>
           {pathology.title}
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">{pathology.description}</p>

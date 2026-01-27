@@ -38,8 +38,8 @@ const mainMenuItems = [
     testId: "nav-admin-users",
   },
   {
-    title: "Patologias",
-    url: "/admin/patologias",
+    title: "Programas",
+    url: "/admin/programas",
     icon: Activity,
     testId: "nav-admin-pathologies",
   },

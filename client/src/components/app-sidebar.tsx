@@ -31,7 +31,7 @@ const mainMenuItems = [
     title: "Programas",
     url: "/dashboard/programas",
     icon: Activity,
-    testId: "nav-pathologies",
+    testId: "nav-programs",
     badge: 6,
   },
   {
