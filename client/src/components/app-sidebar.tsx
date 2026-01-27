@@ -32,7 +32,6 @@ const mainMenuItems = [
     url: "/dashboard/programas",
     icon: Activity,
     testId: "nav-programs",
-    badge: 6,
   },
   {
     title: "Consultas",
