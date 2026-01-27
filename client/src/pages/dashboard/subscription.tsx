@@ -17,7 +17,7 @@ export default function Subscription() {
     "Acesso ilimitado a todos os vídeos",
     "Biblioteca completa de ebooks",
     "2 consultas mensais com nutricionistas",
-    "Conteúdo exclusivo por patologia",
+    "Conteúdo exclusivo por programa",
     "Suporte prioritário",
     "Atualizações semanais de conteúdo",
   ];

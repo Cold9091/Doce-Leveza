@@ -974,7 +974,7 @@ export default function PathologyDetail() {
         <Card>
           <CardContent className="p-12 text-center">
             <p className="text-muted-foreground">
-              Nenhum vídeo disponível para esta patologia ainda.
+              Nenhum vídeo disponível para este programa ainda.
             </p>
           </CardContent>
         </Card>

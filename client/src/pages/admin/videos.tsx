@@ -169,7 +169,7 @@ export default function AdminVideos() {
                     name="pathologyId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Patologia</FormLabel>
+                        <FormLabel>Programa</FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(parseInt(value))}
                           value={field.value?.toString()}
@@ -261,10 +261,10 @@ export default function AdminVideos() {
             </div>
             <Select value={filterPathology} onValueChange={setFilterPathology}>
               <SelectTrigger className="w-full sm:w-[200px]" data-testid="select-filter-pathology">
-                <SelectValue placeholder="Todas patologias" />
+                <SelectValue placeholder="Todos programas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas patologias</SelectItem>
+                <SelectItem value="all">Todos programas</SelectItem>
                 {pathologies?.map((pathology) => (
                   <SelectItem key={pathology.id} value={pathology.id.toString()}>
                     {pathology.title}

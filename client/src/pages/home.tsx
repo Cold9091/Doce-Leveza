@@ -353,7 +353,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Patologias Section */}
+      {/* Programas Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-background">
         <div className="container mx-auto px-3 sm:px-6 lg:px-12">
           <motion.div 
@@ -928,7 +928,7 @@ export default function Home() {
 
               <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
                 <p>
-                  A Dra. Angelina é nutricionista especializada em acompanhamento nutricional por patologia.
+                  A Dra. Angelina é nutricionista especializada em acompanhamento nutricional por programa.
                 </p>
 
                 <p>
@@ -1008,7 +1008,7 @@ export default function Home() {
                 </div>
                 <div className="space-y-3">
                   <h3 className="font-heading font-bold text-xl text-foreground">
-                    Ver Conteúdos por Patologia
+                    Ver Conteúdos por Programa
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
                     Aprende exatamente o que precisas para o teu caso.

@@ -53,7 +53,7 @@ export default function AdminPathologies() {
       queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
       toast({
         title: "Sucesso",
-        description: "Patologia criada com sucesso",
+        description: "Programa criado com sucesso",
       });
       setIsDialogOpen(false);
       form.reset();
@@ -61,7 +61,7 @@ export default function AdminPathologies() {
     onError: () => {
       toast({
         title: "Erro",
-        description: "Erro ao criar patologia",
+        description: "Erro ao criar programa",
         variant: "destructive",
       });
     },
@@ -77,13 +77,13 @@ export default function AdminPathologies() {
       queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
       toast({
         title: "Sucesso",
-        description: "Patologia removida com sucesso",
+        description: "Programa removido com sucesso",
       });
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Erro ao remover patologia",
+        description: "Erro ao remover programa",
         variant: "destructive",
       });
     },
@@ -98,24 +98,24 @@ export default function AdminPathologies() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground" data-testid="heading-admin-pathologies">
-            Gerenciar Patologias
+            Gerenciar Programas
           </h1>
           <p className="text-muted-foreground mt-2">
-            Adicione e gerencie as patologias do sistema
+            Adicione e gerencie os programas do sistema
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button data-testid="button-add-pathology">
               <Plus className="mr-2 h-4 w-4" />
-              Nova Patologia
+              Novo Programa
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Nova Patologia</DialogTitle>
+              <DialogTitle>Novo Programa</DialogTitle>
               <DialogDescription>
-                Adicione uma nova patologia ao sistema
+                Adicione um novo programa ao sistema
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -153,7 +153,7 @@ export default function AdminPathologies() {
                     <FormItem>
                       <FormLabel>Descrição</FormLabel>
                       <FormControl>
-                        <Textarea {...field} rows={3} placeholder="Descrição da patologia" data-testid="input-pathology-description" />
+                        <Textarea {...field} rows={3} placeholder="Descrição do programa" data-testid="input-pathology-description" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -240,7 +240,7 @@ export default function AdminPathologies() {
           <CardContent className="p-12 text-center">
             <Activity className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground">
-              Nenhuma patologia cadastrada
+              Nenhum programa cadastrado
             </p>
           </CardContent>
         </Card>
