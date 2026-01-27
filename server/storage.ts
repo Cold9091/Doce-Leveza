@@ -353,31 +353,45 @@ export class MemStorage implements IStorage {
     const pathologies: Pathology[] = [
       {
         id: 1,
-        slug: "diabetes",
-        title: "Diabetes",
-        description: "Conteúdos especializados para controle e prevenção de diabetes",
-        icon: "Activity"
-      },
-      {
-        id: 2,
-        slug: "emagrecimento",
-        title: "Emagrecimento",
-        description: "Programas e orientações para perda de peso saudável",
+        slug: "programa-perder-peso",
+        title: "Programa de reeducação alimentar para perder de peso",
+        description: "Plano completo para atingir o seu peso ideal de forma saudável.",
         icon: "TrendingDown"
       },
       {
+        id: 2,
+        slug: "programa-perder-peso-diabetes",
+        title: "Programa de reeducação alimentar para perder de peso na diabetes",
+        description: "Orientações específicas para o controlo da glicémia e perda de peso.",
+        icon: "Activity"
+      },
+      {
         id: 3,
-        slug: "hipertensao",
-        title: "Hipertensão",
-        description: "Guias para controle da pressão arterial",
+        slug: "programa-perder-peso-hipertensao",
+        title: "Programa de reeducação alimentar para perder de peso na hipertensão",
+        description: "Estratégias para equilibrar a pressão arterial enquanto perde peso.",
         icon: "HeartPulse"
       },
       {
         id: 4,
-        slug: "gestantes",
-        title: "Gestantes",
-        description: "Nutrição adequada para gestantes e bebês",
+        slug: "programa-perder-peso-gastrite",
+        title: "Programa de reeducação alimentar para perder de peso na gastrite",
+        description: "Alimentação leve e curativa para o sistema digestivo.",
+        icon: "Utensils"
+      },
+      {
+        id: 5,
+        slug: "programa-perder-peso-amamentacao",
+        title: "Programa de reeducação alimentar para perder de peso na amamentação",
+        description: "Nutrição equilibrada para a mãe e o bebé durante a perda de peso.",
         icon: "Baby"
+      },
+      {
+        id: 6,
+        slug: "programa-perder-peso-idosos",
+        title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
+        description: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
+        icon: "Users"
       }
     ];
 
@@ -391,19 +405,19 @@ export class MemStorage implements IStorage {
       {
         id: 1,
         pathologyId: 1,
-        title: "Introdução ao Controle de Diabetes",
-        description: "Aprenda os fundamentos para controlar a diabetes através da alimentação",
+        title: "Introdução ao Programa de Perda de Peso",
+        description: "Aprenda os fundamentos para reeducação alimentar focada em emagrecimento",
         duration: "15:30",
         thumbnailUrl: "https://images.unsplash.com/photo-1505576391880-b3f9d713dc4f?w=400",
         videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        resources: ["PDF: Tabela de Alimentos", "Receitas Diabéticos"],
+        resources: ["PDF: Guia Inicial", "Lista de Compras"],
         viewCount: 245
       },
       {
         id: 2,
-        pathologyId: 1,
-        title: "Alimentos que Controlam o Açúcar",
-        description: "Descubra quais alimentos ajudam a manter o açúcar estável",
+        pathologyId: 2,
+        title: "Diabetes e Alimentação",
+        description: "Como gerir a diabetes enquanto perde peso",
         duration: "12:45",
         thumbnailUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400",
         videoUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
@@ -411,9 +425,9 @@ export class MemStorage implements IStorage {
       },
       {
         id: 3,
-        pathologyId: 2,
-        title: "Estratégias para Emagrecimento Saudável",
-        description: "Métodos comprovados para perder peso de forma sustentável",
+        pathologyId: 3,
+        title: "Hipertensão e Dieta DASH",
+        description: "Estratégias nutricionais para hipertensos",
         duration: "18:20",
         thumbnailUrl: "https://images.unsplash.com/photo-1511688878353-3a2f5be94cd7?w=400",
         videoUrl: "https://www.youtube.com/watch?v=kJQP7kiw5Fk",
@@ -421,9 +435,9 @@ export class MemStorage implements IStorage {
       },
       {
         id: 4,
-        pathologyId: 3,
-        title: "Controlando a Pressão Arterial",
-        description: "Dieta DASH e outras estratégias nutricionais",
+        pathologyId: 4,
+        title: "Cuidados com a Gastrite",
+        description: "Alimentação para alívio dos sintomas da gastrite",
         duration: "14:15",
         thumbnailUrl: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400",
         videoUrl: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
@@ -431,13 +445,23 @@ export class MemStorage implements IStorage {
       },
       {
         id: 5,
-        pathologyId: 4,
-        title: "Nutrição na Gestação",
-        description: "Tudo que você precisa saber sobre alimentação durante a gravidez",
+        pathologyId: 5,
+        title: "Nutrição na Amamentação",
+        description: "Perda de peso segura durante o período de amamentação",
         duration: "20:10",
         thumbnailUrl: "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?w=400",
         videoUrl: "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
         viewCount: 328
+      },
+      {
+        id: 6,
+        pathologyId: 6,
+        title: "Saúde na Terceira Idade",
+        description: "Emagrecimento saudável para idosos",
+        duration: "22:15",
+        thumbnailUrl: "https://images.unsplash.com/photo-1516307364728-25b36c5f400f?w=400",
+        videoUrl: "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
+        viewCount: 142
       }
     ];
 
