@@ -151,6 +151,9 @@ export default function PathologyDetail() {
   });
 
   const pathology = pathologies?.find((p) => p.slug === slug);
+  const pathologyVideos = videos?.filter(
+    (v) => v.pathologyId === pathology?.id
+  );
   const { data: ebooks, isLoading: ebooksLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks", { pathologyId: pathology?.id }],
     enabled: !!pathology,
