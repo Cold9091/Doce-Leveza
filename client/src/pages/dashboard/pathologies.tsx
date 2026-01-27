@@ -90,7 +90,7 @@ export default function Pathologies() {
                   } self-start`}
                   data-testid={`button-pathology-${pathology.slug}`}
                 >
-                  {hasAccess ? "Acessar Programa" : `Comprar por €${pathology.price}`}
+                  {hasAccess ? "Acessar Programa" : `Comprar por ${pathology.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}`}
                 </Button>
               </div>
             </div>
@@ -107,7 +107,7 @@ export default function Pathologies() {
           }
 
           return (
-            <div key={pathology.id} onClick={() => alert(`Para acessar o ${pathology.title}, o valor é €${pathology.price}. Redirecionando para pagamento...`)}>
+            <div key={pathology.id} onClick={() => alert(`Para acessar o ${pathology.title}, o valor é ${pathology.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}. Redirecionando para pagamento...`)}>
               {cardContent}
             </div>
           );

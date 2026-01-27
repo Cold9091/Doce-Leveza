@@ -363,7 +363,7 @@ export class MemStorage implements IStorage {
         title: "Programa de reeducação alimentar para perder de peso",
         description: "Plano completo para atingir o seu peso ideal de forma saudável.",
         icon: "TrendingDown",
-        price: 97.00
+        price: 85000.00
       },
       {
         id: 2,
@@ -371,7 +371,7 @@ export class MemStorage implements IStorage {
         title: "Programa de reeducação alimentar para perder de peso na diabetes",
         description: "Orientações específicas para o controlo da glicémia e perda de peso.",
         icon: "Activity",
-        price: 127.00
+        price: 110000.00
       },
       {
         id: 3,
@@ -379,7 +379,7 @@ export class MemStorage implements IStorage {
         title: "Programa de reeducação alimentar para perder de peso na hipertensão",
         description: "Estratégias para equilibrar a pressão arterial enquanto perde peso.",
         icon: "HeartPulse",
-        price: 127.00
+        price: 110000.00
       },
       {
         id: 4,
@@ -387,7 +387,7 @@ export class MemStorage implements IStorage {
         title: "Programa de reeducação alimentar para perder de peso na gastrite",
         description: "Alimentação leve e curativa para o sistema digestivo.",
         icon: "Utensils",
-        price: 97.00
+        price: 85000.00
       },
       {
         id: 5,
@@ -395,7 +395,7 @@ export class MemStorage implements IStorage {
         title: "Programa de reeducação alimentar para perder de peso na amamentação",
         description: "Nutrição equilibrada para a mãe e o bebé durante a perda de peso.",
         icon: "Baby",
-        price: 97.00
+        price: 85000.00
       },
       {
         id: 6,
@@ -403,7 +403,7 @@ export class MemStorage implements IStorage {
         title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
         description: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
         icon: "Users",
-        price: 97.00
+        price: 85000.00
       }
     ];
 
