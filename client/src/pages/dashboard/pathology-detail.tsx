@@ -159,6 +159,18 @@ export default function PathologyDetail() {
     enabled: !!pathology,
   });
 
+  const { data: userSubscriptions } = useQuery<any>({
+    queryKey: ["/api/subscriptions/user/1"], // Hardcoded user ID for demo
+  });
+
+  const isUnlocked = (pathologyId?: number) => {
+    if (!pathologyId) return true;
+    if (pathologyId === 1) return true; // Demo unlock
+    return userSubscriptions?.pathologyIds?.includes(pathologyId);
+  };
+
+  const filteredEbooks = ebooks?.filter(e => isUnlocked(e.pathologyId));
+
   const currentVideo = pathologyVideos?.[currentVideoIndex];
   const videoId = currentVideo ? getYouTubeVideoId(currentVideo.videoUrl) : null;
   

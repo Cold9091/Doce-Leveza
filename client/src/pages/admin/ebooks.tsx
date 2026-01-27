@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Ebook, InsertEbook } from "@shared/schema";
+import type { Ebook, InsertEbook, Pathology } from "@shared/schema";
 import { Plus, Pencil, Trash2, BookOpen, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -22,6 +22,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertEbookSchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AdminEbooks() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -30,6 +37,10 @@ export default function AdminEbooks() {
 
   const { data: ebooks, isLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks"],
+  });
+
+  const { data: pathologies } = useQuery<Pathology[]>({
+    queryKey: ["/api/pathologies"],
   });
 
   const form = useForm<InsertEbook>({
@@ -41,6 +52,7 @@ export default function AdminEbooks() {
       downloadUrl: "",
       tags: [],
       pages: 0,
+      pathologyId: undefined,
     },
   });
 
@@ -209,6 +221,36 @@ export default function AdminEbooks() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="pathologyId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Programa Relacionado</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(parseInt(value))}
+                        value={field.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um programa" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {pathologies?.map((pathology) => (
+                            <SelectItem
+                              key={pathology.id}
+                              value={pathology.id.toString()}
+                            >
+                              {pathology.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <DialogFooter>
                   <Button
                     type="submit"
@@ -265,6 +307,11 @@ export default function AdminEbooks() {
                         {ebook.description}
                       </p>
                       <div className="flex flex-wrap gap-1 mt-2">
+                        {ebook.pathologyId && pathologies?.find(p => p.id === ebook.pathologyId) && (
+                          <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                            {pathologies.find(p => p.id === ebook.pathologyId)?.title}
+                          </Badge>
+                        )}
                         {ebook.tags.map((tag, idx) => (
                           <Badge key={idx} variant="secondary" className="text-xs">
                             {tag}
