@@ -7,7 +7,6 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarSeparator,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
@@ -17,7 +16,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import logoImage from "@assets/Rectangle__1_-removebg-preview_1763494828422.png";
 
 const mainMenuItems = [
@@ -57,69 +56,76 @@ const bottomMenuItems = [
 ];
 
 export function AppSidebar() {
-  const [location, setLocation] = useLocation();
-  const { state } = useSidebar();
-  const isExpanded = state === "expanded";
-
-  const handleNavigation = (url: string) => {
-    setLocation(url);
-  };
+  const [location] = useLocation();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/40">
-      <SidebarHeader className="p-3 flex items-center justify-center">
-        <button 
-          onClick={() => handleNavigation("/dashboard")}
-          className="cursor-pointer flex items-center justify-center gap-3" 
-          data-testid="sidebar-logo"
-        >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg flex-shrink-0">
-            <img src={logoImage} alt="Doce Leveza" className="h-6 w-auto" />
-          </div>
-          {isExpanded && (
-            <span className="font-heading font-bold text-foreground whitespace-nowrap">
-              Doce Leveza
-            </span>
-          )}
-        </button>
+    <Sidebar className="border-r-0">
+      <SidebarHeader className="px-6 py-6">
+        <Link href="/dashboard">
+          <a className="flex items-center gap-2" data-testid="sidebar-logo">
+            <img src={logoImage} alt="Doce Leveza" className="h-10 w-auto" />
+          </a>
+        </Link>
       </SidebarHeader>
       
-      <SidebarContent className="px-2 py-4">
-        <SidebarMenu className="space-y-2">
+      <SidebarContent className="px-3">
+        <SidebarMenu className="space-y-1">
           {mainMenuItems.map((item) => {
             const isActive = location === item.url || 
               (item.url !== "/dashboard" && location.startsWith(item.url));
-            const Icon = item.icon;
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
-                  tooltip={item.title}
-                  onClick={() => handleNavigation(item.url)}
+                  asChild
                   className={`
-                    relative transition-all duration-200 cursor-pointer
-                    ${isExpanded 
-                      ? "h-11 px-3 mx-0 rounded-lg flex items-center justify-start gap-3" 
-                      : "h-12 w-12 p-0 mx-auto rounded-xl flex items-center justify-center"
-                    }
+                    h-11 px-4 rounded-lg transition-all duration-200
                     ${isActive 
-                      ? "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/25" 
+                      ? "bg-primary text-primary-foreground font-medium" 
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     }
                   `}
-                  data-testid={item.testId}
                 >
-                  <Icon className="h-5 w-5 flex-shrink-0" />
-                  {isExpanded && (
-                    <span className="text-sm font-medium whitespace-nowrap">{item.title}</span>
-                  )}
-                  {item.badge && (
-                    <span className={`
-                      w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium
-                      ${isExpanded ? "ml-auto" : "absolute -top-1 -right-1"}
-                    `}>
-                      {item.badge}
-                    </span>
-                  )}
+                  <Link href={item.url}>
+                    <a
+                      className="flex items-center gap-3 w-full"
+                      data-testid={item.testId}
+                    >
+                      <item.icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
+                      <span className="text-sm">{item.title}</span>
+                    </a>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+
+        <SidebarSeparator className="my-4" />
+
+        <SidebarMenu className="space-y-1">
+          {bottomMenuItems.map((item) => {
+            const isActive = location === item.url;
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  className={`
+                    h-11 px-4 rounded-lg transition-all duration-200
+                    ${isActive 
+                      ? "bg-primary text-primary-foreground font-medium" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }
+                  `}
+                >
+                  <Link href={item.url}>
+                    <a
+                      className="flex items-center gap-3 w-full"
+                      data-testid={item.testId}
+                    >
+                      <item.icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
+                      <span className="text-sm">{item.title}</span>
+                    </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
@@ -127,56 +133,22 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="px-2 py-4">
-        <SidebarSeparator className="mb-4" />
-        <SidebarMenu className="space-y-2">
-          {bottomMenuItems.map((item) => {
-            const isActive = location === item.url;
-            const Icon = item.icon;
-            return (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  tooltip={item.title}
-                  onClick={() => handleNavigation(item.url)}
-                  className={`
-                    transition-all duration-200 cursor-pointer
-                    ${isExpanded 
-                      ? "h-11 px-3 mx-0 rounded-lg flex items-center justify-start gap-3" 
-                      : "h-12 w-12 p-0 mx-auto rounded-xl flex items-center justify-center"
-                    }
-                    ${isActive 
-                      ? "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/25" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }
-                  `}
-                  data-testid={item.testId}
-                >
-                  <Icon className="h-5 w-5 flex-shrink-0" />
-                  {isExpanded && (
-                    <span className="text-sm font-medium whitespace-nowrap">{item.title}</span>
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-          
+      <SidebarFooter className="px-3 py-4">
+        <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              tooltip="Sair da Conta"
-              onClick={() => handleNavigation("/")}
-              className={`
-                transition-all duration-200 cursor-pointer text-muted-foreground hover:text-destructive hover:bg-destructive/10
-                ${isExpanded 
-                  ? "h-11 px-3 mx-0 rounded-lg flex items-center justify-start gap-3" 
-                  : "h-12 w-12 p-0 mx-auto rounded-xl flex items-center justify-center"
-                }
-              `}
-              data-testid="button-logout"
+              asChild
+              className="h-11 px-4 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
             >
-              <LogOut className="h-5 w-5 flex-shrink-0" />
-              {isExpanded && (
-                <span className="text-sm font-medium whitespace-nowrap">Sair da Conta</span>
-              )}
+              <Link href="/">
+                <a
+                  className="flex items-center gap-3 w-full"
+                  data-testid="button-logout"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="text-sm">Sair da Conta</span>
+                </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -27,7 +27,7 @@ export function DashboardHeader({
   return (
     <header className="flex items-center justify-between gap-4 border-b p-4 bg-background">
       <div className="flex items-center gap-4 flex-1">
-        <SidebarTrigger data-testid="button-sidebar-toggle" className="text-muted-foreground hover:text-foreground md:hidden" />
+        <SidebarTrigger data-testid="button-sidebar-toggle" className="text-muted-foreground hover:text-foreground" />
         
         <div className="flex items-center gap-2">
           <span className="text-lg font-semibold text-foreground" data-testid="text-greeting">
