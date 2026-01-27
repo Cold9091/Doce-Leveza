@@ -362,42 +362,48 @@ export class MemStorage implements IStorage {
         slug: "programa-perder-peso",
         title: "Programa de reeducação alimentar para perder de peso",
         description: "Plano completo para atingir o seu peso ideal de forma saudável.",
-        icon: "TrendingDown"
+        icon: "TrendingDown",
+        price: 97.00
       },
       {
         id: 2,
         slug: "programa-perder-peso-diabetes",
         title: "Programa de reeducação alimentar para perder de peso na diabetes",
         description: "Orientações específicas para o controlo da glicémia e perda de peso.",
-        icon: "Activity"
+        icon: "Activity",
+        price: 127.00
       },
       {
         id: 3,
         slug: "programa-perder-peso-hipertensao",
         title: "Programa de reeducação alimentar para perder de peso na hipertensão",
         description: "Estratégias para equilibrar a pressão arterial enquanto perde peso.",
-        icon: "HeartPulse"
+        icon: "HeartPulse",
+        price: 127.00
       },
       {
         id: 4,
         slug: "programa-perder-peso-gastrite",
         title: "Programa de reeducação alimentar para perder de peso na gastrite",
         description: "Alimentação leve e curativa para o sistema digestivo.",
-        icon: "Utensils"
+        icon: "Utensils",
+        price: 97.00
       },
       {
         id: 5,
         slug: "programa-perder-peso-amamentacao",
         title: "Programa de reeducação alimentar para perder de peso na amamentação",
         description: "Nutrição equilibrada para a mãe e o bebé durante a perda de peso.",
-        icon: "Baby"
+        icon: "Baby",
+        price: 97.00
       },
       {
         id: 6,
         slug: "programa-perder-peso-idosos",
         title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
         description: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
-        icon: "Users"
+        icon: "Users",
+        price: 97.00
       }
     ];
 

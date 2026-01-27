@@ -43,6 +43,7 @@ export const pathologySchema = z.object({
   description: z.string(),
   icon: z.string(),
   imageUrl: z.string().optional(),
+  price: z.number().default(0), // Preço individual do programa
 });
 
 export const insertPathologySchema = pathologySchema.omit({ id: true });
