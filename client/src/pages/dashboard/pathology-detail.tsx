@@ -151,9 +151,10 @@ export default function PathologyDetail() {
   });
 
   const pathology = pathologies?.find((p) => p.slug === slug);
-  const pathologyVideos = videos?.filter(
-    (v) => v.pathologyId === pathology?.id
-  );
+  const { data: ebooks, isLoading: ebooksLoading } = useQuery<Ebook[]>({
+    queryKey: ["/api/ebooks", { pathologyId: pathology?.id }],
+    enabled: !!pathology,
+  });
 
   const currentVideo = pathologyVideos?.[currentVideoIndex];
   const videoId = currentVideo ? getYouTubeVideoId(currentVideo.videoUrl) : null;
@@ -381,8 +382,13 @@ export default function PathologyDetail() {
     setSelectedPdf(null);
   };
 
-  const handlePdfSelect = (pdf: typeof mockPdfs[0]) => {
-    setSelectedPdf(pdf);
+  const handlePdfSelect = (ebook: Ebook) => {
+    setSelectedPdf({
+      id: ebook.id,
+      title: ebook.title,
+      pages: ebook.pages,
+      url: ebook.downloadUrl
+    });
     setRightPanelView('pdf');
     setPdfPageNumber(1);
     setPdfLoading(true);
@@ -642,39 +648,52 @@ export default function PathologyDetail() {
               <div className="mt-6">
                 <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  Materiais de Apoio
+                  Materiais do Programa
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {mockPdfs.map((pdf) => (
-                    <Card 
-                      key={pdf.id} 
-                      className="hover-elevate active-elevate-2 cursor-pointer transition-all"
-                      onClick={() => handlePdfSelect(pdf)}
-                      data-testid={`card-pdf-${pdf.id}`}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-12 h-14 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
+                {ebooksLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {[1, 2].map(i => (
+                      <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+                    ))}
+                  </div>
+                ) : ebooks && ebooks.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {ebooks.map((ebook) => (
+                      <Card 
+                        key={ebook.id} 
+                        className="hover-elevate active-elevate-2 cursor-pointer transition-all"
+                        onClick={() => handlePdfSelect(ebook)}
+                        data-testid={`card-pdf-${ebook.id}`}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-12 h-14 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground line-clamp-2">{ebook.title}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{ebook.pages} páginas</p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground line-clamp-2">{pdf.title}</p>
-                            <p className="text-xs text-muted-foreground mt-1">{pdf.pages} páginas</p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full mt-3"
-                          data-testid={`button-read-pdf-${pdf.id}`}
-                        >
-                          <BookOpen className="mr-2 h-4 w-4" />
-                          Ler PDF
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full mt-3"
+                            data-testid={`button-read-pdf-${ebook.id}`}
+                          >
+                            <BookOpen className="mr-2 h-4 w-4" />
+                            Ler PDF
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-muted/30 rounded-lg border border-dashed">
+                    <BookOpen className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
+                    <p className="text-sm text-muted-foreground">Nenhum material disponível para este programa.</p>
+                  </div>
+                )}
               </div>
             </div>
           </ScrollArea>
