@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Activity, BookOpen, Calendar, Video, ArrowRight, Sparkles, TrendingUp, Clock, User } from "lucide-react";
+import { Activity, BookOpen, Calendar, Video, ArrowRight, Sparkles, TrendingUp, Clock, User, Lock, CheckCircle2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import type { Pathology, Ebook, Consultation } from "@shared/schema";
+import type { Pathology, Ebook, Consultation, Subscription } from "@shared/schema";
 
 export default function Overview() {
   const { data: pathologies } = useQuery<Pathology[]>({
@@ -21,7 +21,15 @@ export default function Overview() {
     queryKey: ["/api/consultations/user", userId],
   });
 
+  const { data: subscription } = useQuery<Subscription>({
+    queryKey: ["/api/subscriptions/user", userId],
+  });
+
   const upcomingConsultations = consultations?.filter(c => c.status === "agendada") || [];
+
+  // Logic for active program info
+  const activeSubscription = subscription?.status === "ativa";
+  const firstPathology = pathologies?.[0];
 
   const stats = [
     {
@@ -108,6 +116,40 @@ export default function Overview() {
           </div>
         </div>
       </div>
+
+      {/* Subscription Status Bar */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-full ${activeSubscription ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`}>
+              {activeSubscription ? (
+                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              ) : (
+                <Lock className="h-5 w-5 text-amber-600" />
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-semibold">
+                {activeSubscription 
+                  ? "Assinatura Ativa - Acesso Completo" 
+                  : "Acesso Limitado - Primeiro Programa Liberado"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {activeSubscription 
+                  ? "Você tem acesso a todos os programas e biblioteca." 
+                  : `Programa atual: ${firstPathology?.title || 'Carregando...'}`}
+              </p>
+            </div>
+          </div>
+          {!activeSubscription && (
+            <Link href="/dashboard/programas">
+              <Button size="sm" className="w-full sm:w-auto">
+                Ver outros programas
+              </Button>
+            </Link>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {stats.map((stat) => (
