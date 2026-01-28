@@ -1,6 +1,5 @@
-import { Search, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -33,16 +32,6 @@ export function DashboardHeader({
           <span className="text-lg font-semibold text-foreground" data-testid="text-greeting">
             Olá, {userName}
           </span>
-        </div>
-
-        <div className="hidden sm:flex relative flex-1 max-w-md ml-8">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            type="search"
-            placeholder="Pesquisar..."
-            className="pl-10 bg-muted/50 border-0 h-10"
-            data-testid="input-search"
-          />
         </div>
       </div>
 
