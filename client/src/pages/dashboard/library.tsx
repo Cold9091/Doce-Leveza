@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import type { Ebook } from "@shared/schema";
-import { BookOpen, FileText } from "lucide-react";
+import type { Ebook, Subscription } from "@shared/schema";
+import { BookOpen, FileText, Lock } from "lucide-react";
 import { PdfReader } from "@/components/pdf-reader";
 
 export default function Library() {
@@ -14,6 +14,18 @@ export default function Library() {
   const { data: ebooks, isLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks"],
   });
+
+  const userId = 1; // In a real app, this would come from auth context
+  const { data: subscription } = useQuery<Subscription>({
+    queryKey: ["/api/subscriptions/user", userId],
+  });
+
+  // Access control logic similar to pathologies.tsx
+  const hasAccessToEbook = (pathologyId?: number) => {
+    if (subscription?.status === "ativa") return true;
+    // Demonstration: Only first program (ID 1) is unlocked by default
+    return pathologyId === 1;
+  };
 
   if (isLoading) {
     return (
@@ -40,53 +52,83 @@ export default function Library() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-        {ebooks?.map((ebook) => (
-          <Card
-            key={ebook.id}
-            className="overflow-hidden hover-elevate active-elevate-2 transition-all"
-            data-testid={`card-ebook-${ebook.id}`}
-          >
-            <div className="relative aspect-[3/4] bg-muted">
-              <img
-                src={ebook.coverUrl}
-                alt={ebook.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-2 right-2">
-                <Badge className="bg-black/60 backdrop-blur-sm">
-                  <FileText className="mr-1 h-3 w-3" />
-                  {ebook.pages} páginas
-                </Badge>
-              </div>
-            </div>
-            <CardHeader>
-              <CardTitle className="line-clamp-2">{ebook.title}</CardTitle>
-              <CardDescription className="line-clamp-2">
-                {ebook.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {ebook.tags.map((tag, idx) => (
-                  <Badge key={idx} variant="secondary" className="text-xs">
-                    {tag}
+        {ebooks?.map((ebook) => {
+          const hasAccess = hasAccessToEbook(ebook.pathologyId);
+
+          return (
+            <Card
+              key={ebook.id}
+              className={`overflow-hidden transition-all ${
+                hasAccess ? "hover-elevate active-elevate-2" : "opacity-75 grayscale-[0.5]"
+              }`}
+              data-testid={`card-ebook-${ebook.id}`}
+            >
+              <div className="relative aspect-[3/4] bg-muted">
+                <img
+                  src={ebook.coverUrl}
+                  alt={ebook.title}
+                  className="w-full h-full object-cover"
+                />
+                {!hasAccess && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
+                    <div className="bg-black/60 p-3 rounded-full border border-white/20">
+                      <Lock className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                )}
+                <div className="absolute top-2 right-2">
+                  <Badge className="bg-black/60 backdrop-blur-sm">
+                    <FileText className="mr-1 h-3 w-3" />
+                    {ebook.pages} páginas
                   </Badge>
-                ))}
+                </div>
               </div>
-              <Button 
-                className="w-full" 
-                data-testid={`button-read-ebook-${ebook.id}`}
-                onClick={() => {
-                  setSelectedEbook(ebook);
-                  setReaderOpen(true);
-                }}
-              >
-                <BookOpen className="mr-2 h-4 w-4" />
-                Ler Livro
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+              <CardHeader>
+                <CardTitle className="line-clamp-2 flex items-center gap-2">
+                  {ebook.title}
+                  {!hasAccess && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+                </CardTitle>
+                <CardDescription className="line-clamp-2">
+                  {ebook.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {ebook.tags.map((tag, idx) => (
+                    <Badge key={idx} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                <Button 
+                  className="w-full" 
+                  variant={hasAccess ? "default" : "outline"}
+                  data-testid={`button-read-ebook-${ebook.id}`}
+                  onClick={() => {
+                    if (hasAccess) {
+                      setSelectedEbook(ebook);
+                      setReaderOpen(true);
+                    } else {
+                      alert("Este ebook faz parte de um programa que você ainda não adquiriu.");
+                    }
+                  }}
+                >
+                  {hasAccess ? (
+                    <>
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      Ler Livro
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="mr-2 h-4 w-4" />
+                      Conteúdo Bloqueado
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <PdfReader
