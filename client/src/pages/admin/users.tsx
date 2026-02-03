@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { User, Subscription, Pathology } from "@shared/schema";
+import type { User, Subscription, Pathology, UserAccess } from "@shared/schema";
 import { Search, Plus, Pencil, Trash2, UserCircle, Calendar, Package, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -32,8 +32,9 @@ export default function AdminUsers() {
     enabled: !!selectedUser,
   });
 
-  const { data: pathologies } = useQuery<Pathology[]>({
-    queryKey: ["/api/pathologies"],
+  const { data: userAccess } = useQuery<UserAccess[]>({
+    queryKey: ["/api/admin/users", selectedUser?.id, "access"],
+    enabled: !!selectedUser,
   });
 
   const deleteMutation = useMutation({
@@ -236,11 +237,40 @@ export default function AdminUsers() {
                   Programas e Acessos
                 </h4>
                 <div className="space-y-2">
-                  {subscription ? (
+                  {userAccess && userAccess.length > 0 ? (
+                    userAccess.map((access) => (
+                      <div key={access.id} className="border rounded-lg overflow-hidden mb-2">
+                        <div className="bg-muted/50 p-3 border-b flex items-center justify-between">
+                          <span className="font-medium text-sm">
+                            {getProgramTitle(access.pathologyId)}
+                          </span>
+                          <Badge variant="outline" className="text-[10px] uppercase">
+                            {access.status}
+                          </Badge>
+                        </div>
+                        <div className="p-3 grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Início do Acesso</p>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3.5 w-3.5 text-primary" />
+                              {format(new Date(access.startDate), "dd/MM/yyyy")}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Expiração</p>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3.5 w-3.5 text-orange-500" />
+                              {format(new Date(access.expiryDate), "dd/MM/yyyy")}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : subscription ? (
                     <div className="border rounded-lg overflow-hidden">
                       <div className="bg-muted/50 p-3 border-b flex items-center justify-between">
                         <span className="font-medium text-sm">
-                          {getProgramTitle(subscription.pathologyId)}
+                          Acesso Geral (Assinatura)
                         </span>
                         <Badge variant="outline" className="text-[10px] uppercase">
                           {subscription.plan}
