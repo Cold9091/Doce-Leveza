@@ -60,10 +60,7 @@ export default function AdminVideos() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertVideo) => {
-      await apiRequest("/api/admin/videos", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      await apiRequest("POST", "/api/admin/videos", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
@@ -85,10 +82,7 @@ export default function AdminVideos() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: InsertVideo }) => {
-      await apiRequest(`/api/admin/videos/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      });
+      await apiRequest("PATCH", `/api/admin/videos/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
@@ -111,9 +105,7 @@ export default function AdminVideos() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/api/admin/videos/${id}`, {
-        method: "DELETE",
-      });
+      await apiRequest("DELETE", `/api/admin/videos/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });

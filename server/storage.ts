@@ -74,6 +74,8 @@ export interface IStorage {
   getAdminByEmail(email: string): Promise<AdminUser | null>;
   getStatistics(): Promise<Statistics>;
   getUserAccess(userId: number): Promise<UserAccess[]>;
+  createUserAccess(data: any): Promise<UserAccess>;
+  updateUserAccess(id: number, data: any): Promise<UserAccess | null>;
 }
 
 export class MemStorage implements IStorage {
@@ -424,6 +426,21 @@ export class MemStorage implements IStorage {
 
   async getUserAccess(userId: number): Promise<UserAccess[]> {
     return Array.from(this.userAccess.values()).filter(a => a.userId === userId);
+  }
+
+  async createUserAccess(data: any): Promise<UserAccess> {
+    const id = this.userAccessIdCounter++;
+    const access: UserAccess = { id, ...data };
+    this.userAccess.set(id, access);
+    return access;
+  }
+
+  async updateUserAccess(id: number, data: any): Promise<UserAccess | null> {
+    const access = this.userAccess.get(id);
+    if (!access) return null;
+    const updated = { ...access, ...data };
+    this.userAccess.set(id, updated);
+    return updated;
   }
 
   // Seed data

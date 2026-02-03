@@ -46,10 +46,7 @@ export default function AdminPathologies() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertPathology) => {
-      await apiRequest("/api/admin/pathologies", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      await apiRequest("POST", "/api/admin/pathologies", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
@@ -71,10 +68,7 @@ export default function AdminPathologies() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: InsertPathology }) => {
-      await apiRequest(`/api/admin/pathologies/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
+      await apiRequest("PUT", `/api/admin/pathologies/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
@@ -97,9 +91,7 @@ export default function AdminPathologies() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/api/admin/pathologies/${id}`, {
-        method: "DELETE",
-      });
+      await apiRequest("DELETE", `/api/admin/pathologies/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
