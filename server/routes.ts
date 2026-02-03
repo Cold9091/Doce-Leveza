@@ -37,19 +37,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users/:userId/access", async (req, res) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ error: "Invalid user ID" });
-      }
-      const access = await storage.getUserAccess(userId);
-      res.json(access);
-    } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-
   // Create a new lead (from CTA button captures)
   app.post("/api/leads", async (req, res) => {
     try {
