@@ -10,11 +10,46 @@ import {
   insertVideoSchema,
   insertEbookSchema,
   insertConsultationSchema,
-  insertSubscriptionSchema
+  insertSubscriptionSchema,
+  systemSettingsSchema
 } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // ... (existing routes)
+
+  // Admin - Settings management
+  app.get("/api/admin/settings", async (_req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/settings", async (req, res) => {
+    try {
+      const settings = await storage.updateSettings(req.body);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/users/:userId/access", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      const access = await storage.getUserAccess(userId);
+      res.json(access);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Create a new lead (from CTA button captures)
   app.post("/api/leads", async (req, res) => {
     try {

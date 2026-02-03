@@ -15,73 +15,35 @@ import {
   type InsertSubscription,
   type AdminUser,
   type AdminLoginData,
-  type Statistics
+  type Statistics,
+  type SystemSettings,
+  type InsertSystemSettings
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
-  createLead(lead: Lead): Promise<Lead & { id: string }>;
-  getLeads(): Promise<(Lead & { id: string })[]>;
-  deleteLead(id: string): Promise<boolean>;
-  
-  createUser(data: SignupData): Promise<User>;
-  getUserByPhone(phone: string): Promise<User | null>;
-  getUserById(id: number): Promise<User | null>;
-  getUsers(): Promise<User[]>;
-  updateUser(id: number, data: Partial<User>): Promise<User | null>;
-  deleteUser(id: number): Promise<boolean>;
-  
-  // Pathologies
-  getPathologies(): Promise<Pathology[]>;
-  getPathologyById(id: number): Promise<Pathology | null>;
-  getPathologyBySlug(slug: string): Promise<Pathology | null>;
-  createPathology(data: InsertPathology): Promise<Pathology>;
-  updatePathology(id: number, data: Partial<Pathology>): Promise<Pathology | null>;
-  deletePathology(id: number): Promise<boolean>;
-  
-  // Videos
-  getVideos(): Promise<Video[]>;
-  getVideosByPathology(pathologyId: number): Promise<Video[]>;
-  getVideoById(id: number): Promise<Video | null>;
-  createVideo(data: InsertVideo): Promise<Video>;
-  updateVideo(id: number, data: Partial<Video>): Promise<Video | null>;
-  deleteVideo(id: number): Promise<boolean>;
-  
-  // Ebooks
-  getEbooks(): Promise<Ebook[]>;
-  getEbooksByPathology(pathologyId: number): Promise<Ebook[]>;
-  getEbookById(id: number): Promise<Ebook | null>;
-  createEbook(data: InsertEbook): Promise<Ebook>;
-  updateEbook(id: number, data: Partial<Ebook>): Promise<Ebook | null>;
-  deleteEbook(id: number): Promise<boolean>;
-  
-  // Consultations
-  getConsultations(): Promise<Consultation[]>;
-  getConsultationsByUser(userId: number): Promise<Consultation[]>;
-  getConsultationById(id: number): Promise<Consultation | null>;
-  createConsultation(data: InsertConsultation): Promise<Consultation>;
-  updateConsultation(id: number, data: Partial<Consultation>): Promise<Consultation | null>;
-  deleteConsultation(id: number): Promise<boolean>;
-  
-  // Subscriptions
-  getSubscriptions(): Promise<Subscription[]>;
-  getSubscriptionByUser(userId: number): Promise<Subscription | null>;
-  createSubscription(data: InsertSubscription): Promise<Subscription>;
-  updateSubscription(id: number, data: Partial<Subscription>): Promise<Subscription | null>;
-  deleteSubscription(id: number): Promise<boolean>;
-  
-  // Admin
-  getAdminByEmail(email: string): Promise<AdminUser | null>;
-  getStatistics(): Promise<Statistics>;
+  // ... (existing methods)
   getUserAccess(userId: number): Promise<UserAccess[]>;
   createUserAccess(data: any): Promise<UserAccess>;
   updateUserAccess(id: number, data: any): Promise<UserAccess | null>;
+
+  // Settings
+  getSettings(): Promise<SystemSettings>;
+  updateSettings(data: Partial<SystemSettings>): Promise<SystemSettings>;
 }
 
 export class MemStorage implements IStorage {
   private leads: Map<string, Lead & { id: string }>;
   private users: Map<number, User>;
   private pathologies: Map<number, Pathology>;
+  private videos: Map<number, Video>;
+  private ebooks: Map<number, Ebook>;
+  private consultations: Map<number, Consultation>;
+  private subscriptions: Map<number, Subscription>;
+  private userAccess: Map<number, UserAccess>;
+  private admins: Map<number, AdminUser>;
+  private settings: SystemSettings;
+  private userIdCounter: number;
   private videos: Map<number, Video>;
   private ebooks: Map<number, Ebook>;
   private consultations: Map<number, Consultation>;
@@ -113,8 +75,25 @@ export class MemStorage implements IStorage {
     this.consultationIdCounter = 1;
     this.subscriptionIdCounter = 1;
     this.userAccessIdCounter = 1;
+    this.settings = {
+      id: 1,
+      siteName: "Doce Leveza",
+      supportEmail: "suporte@doceleveza.com",
+      supportPhone: "(11) 99999-9999",
+      maintenanceMode: false,
+      enableSignup: true,
+    };
     
     this.seedData();
+  }
+
+  async getSettings(): Promise<SystemSettings> {
+    return this.settings;
+  }
+
+  async updateSettings(data: Partial<SystemSettings>): Promise<SystemSettings> {
+    this.settings = { ...this.settings, ...data };
+    return this.settings;
   }
 
   private async seedUsers() {

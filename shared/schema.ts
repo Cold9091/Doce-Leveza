@@ -145,6 +145,28 @@ export const insertUserAccessSchema = userAccessSchema.omit({ id: true });
 export type UserAccess = z.infer<typeof userAccessSchema>;
 export type InsertUserAccess = z.infer<typeof insertUserAccessSchema>;
 
+// System Settings schema
+export const systemSettingsSchema = z.object({
+  id: z.number(),
+  siteName: z.string().default("Doce Leveza"),
+  supportEmail: z.string().email().default("suporte@doceleveza.com"),
+  supportPhone: z.string().default("(11) 99999-9999"),
+  maintenanceMode: z.boolean().default(false),
+  enableSignup: z.boolean().default(true),
+  // Advanced Settings
+  apiBaseUrl: z.string().url().optional(),
+  googleAnalyticsId: z.string().optional(),
+  facebookPixelId: z.string().optional(),
+  smtpHost: z.string().optional(),
+  smtpPort: z.number().optional(),
+  smtpUser: z.string().optional(),
+  smtpPass: z.string().optional(),
+});
+
+export const insertSystemSettingsSchema = systemSettingsSchema.omit({ id: true });
+export type SystemSettings = z.infer<typeof systemSettingsSchema>;
+export type InsertSystemSettings = z.infer<typeof insertSystemSettingsSchema>;
+
 // Statistics schema for admin dashboard
 export const statisticsSchema = z.object({
   totalUsers: z.number(),
