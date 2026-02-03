@@ -234,8 +234,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Subscriptions routes
   app.get("/api/subscriptions/user/:userId", async (req, res) => {
     try {
-      const subscription = await storage.getSubscriptionByUser(parseInt(req.params.userId));
-      res.json(subscription);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      const subscription = await storage.getSubscriptionByUser(userId);
+      res.json(subscription || null);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
