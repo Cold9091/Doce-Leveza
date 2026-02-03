@@ -19,7 +19,7 @@ import { ptBR } from "date-fns/locale";
 
 export default function AdminSubscriptions() {
   const { toast } = useToast();
-  const [selectedUser, setSelectedUser] = useState<Omit<User, "password"> | null>(null);
+  const [selectedSubscriptionUser, setSelectedSubscriptionUser] = useState<Omit<User, "password"> | null>(null);
 
   const { data: subscriptions, isLoading } = useQuery<Subscription[]>({
     queryKey: ["/api/admin/subscriptions"],
@@ -34,13 +34,13 @@ export default function AdminSubscriptions() {
   });
 
   const { data: userAccess } = useQuery<UserAccess[]>({
-    queryKey: ["/api/admin/users", selectedUser?.id, "access"],
-    enabled: !!selectedUser,
+    queryKey: ["/api/admin/users", selectedSubscriptionUser?.id, "access"],
+    enabled: !!selectedSubscriptionUser,
   });
 
   const { data: selectedUserSubscription } = useQuery<Subscription | null>({
-    queryKey: ["/api/subscriptions/user", selectedUser?.id],
-    enabled: !!selectedUser,
+    queryKey: ["/api/subscriptions/user", selectedSubscriptionUser?.id],
+    enabled: !!selectedSubscriptionUser,
   });
 
   const getProgramTitle = (pathologyId?: number) => {
@@ -149,7 +149,7 @@ export default function AdminSubscriptions() {
                           className="flex items-center gap-2"
                           onClick={() => {
                             const user = users?.find(u => u.id === subscription.userId);
-                            if (user) setSelectedUser(user);
+                            if (user) setSelectedSubscriptionUser(user);
                           }}
                         >
                           <Settings className="h-4 w-4" />
@@ -185,145 +185,106 @@ export default function AdminSubscriptions() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
+      <Dialog open={!!selectedSubscriptionUser} onOpenChange={(open) => !open && setSelectedSubscriptionUser(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl">
-              <UserCircle className="h-6 w-6 text-primary" />
-              Detalhes do Aluno
+              <CreditCard className="h-6 w-6 text-primary" />
+              Gestão de Assinatura
             </DialogTitle>
             <DialogDescription>
-              Informações completas e histórico de acessos
+              Informações de pagamento e programas contratados
             </DialogDescription>
           </DialogHeader>
 
-          {selectedUser && (
+          {selectedSubscriptionUser && (
             <div className="space-y-6 py-4">
-              {/* Seção 1: Informações Pessoais */}
+              {/* Seção 1: Identificação do Assinante */}
               <section className="space-y-3">
                 <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <Info className="h-4 w-4" />
-                  Informações Pessoais
+                  <UserCircle className="h-4 w-4" />
+                  Assinante
                 </h4>
-                <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Nome Completo</p>
-                    <p className="font-medium">{selectedUser.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Telefone</p>
-                    <p className="font-medium">{selectedUser.phone}</p>
-                  </div>
-                  <div className="col-span-2 border-t pt-2 mt-2">
-                    <p className="text-xs text-muted-foreground">Endereço</p>
-                    <p className="font-medium">{selectedUser.address}</p>
-                  </div>
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <p className="font-medium text-lg">{selectedSubscriptionUser.name}</p>
+                  <p className="text-sm text-muted-foreground">{selectedSubscriptionUser.phone}</p>
                 </div>
               </section>
 
-              {/* Seção 2: Status da Conta */}
+              {/* Seção 2: Detalhes do Plano e Tempo Restante */}
               <section className="space-y-3">
                 <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Status da Conta
+                  Plano e Vigência
                 </h4>
-                <div className="flex items-center justify-between bg-muted/30 p-4 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Badge className={selectedUserSubscription?.status === 'ativa' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-orange-500'}>
-                      {selectedUserSubscription?.status === 'ativa' ? 'Assinatura Ativa' : (selectedUserSubscription ? 'Inativa' : 'Sem Assinatura')}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground capitalize">
-                      Plano {selectedUserSubscription?.plan || 'N/A'}
-                    </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-muted/30 p-4 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Status e Plano</p>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(selectedUserSubscription?.status || "expirada")}
+                      <span className="text-sm font-medium capitalize">
+                        {selectedUserSubscription?.plan || 'N/A'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">Cadastrado em</p>
-                    <p className="text-sm font-medium">
-                      {format(new Date(selectedUser.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                    </p>
+                  <div className="bg-muted/30 p-4 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Tempo Restante</p>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-orange-500" />
+                      <span className="font-medium">
+                        {selectedUserSubscription ? (
+                          (() => {
+                            const now = new Date();
+                            const renewal = new Date(selectedUserSubscription.renewalDate);
+                            const diffTime = renewal.getTime() - now.getTime();
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            return diffDays > 0 ? `${diffDays} dias restantes` : "Expirado";
+                          })()
+                        ) : "N/A"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </section>
 
-              {/* Seção 3: Programas e Acessos */}
+              {/* Seção 3: Programas Contratados */}
               <section className="space-y-3">
                 <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Programas e Acessos
+                  <Info className="h-4 w-4" />
+                  Programas Ativos
                 </h4>
                 <div className="space-y-2">
                   {userAccess && userAccess.length > 0 ? (
                     userAccess.map((access) => (
-                      <div key={access.id} className="border rounded-lg overflow-hidden mb-2">
-                        <div className="bg-muted/50 p-3 border-b flex items-center justify-between">
+                      <div key={access.id} className="flex items-center justify-between p-3 border rounded-lg bg-card">
+                        <div className="flex flex-col">
                           <span className="font-medium text-sm">
                             {getProgramTitle(access.pathologyId)}
                           </span>
-                          <Badge variant="outline" className="text-[10px] uppercase">
-                            {access.status}
-                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            Expira em: {format(new Date(access.expiryDate), "dd/MM/yyyy")}
+                          </span>
                         </div>
-                        <div className="p-3 grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Início do Acesso</p>
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-3.5 w-3.5 text-primary" />
-                              {format(new Date(access.startDate), "dd/MM/yyyy")}
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Expiração</p>
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-3.5 w-3.5 text-orange-500" />
-                              {format(new Date(access.expiryDate), "dd/MM/yyyy")}
-                            </div>
-                          </div>
-                        </div>
+                        <Badge variant="outline" className="text-[10px] uppercase">
+                          {access.status}
+                        </Badge>
                       </div>
                     ))
                   ) : selectedUserSubscription ? (
-                    <div className="border rounded-lg overflow-hidden">
-                      <div className="bg-muted/50 p-3 border-b flex items-center justify-between">
-                        <span className="font-medium text-sm">
-                          Acesso Geral (Assinatura)
-                        </span>
-                        <Badge variant="outline" className="text-[10px] uppercase">
-                          {selectedUserSubscription.plan}
-                        </Badge>
-                      </div>
-                      <div className="p-3 grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-1">Início do Acesso</p>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-3.5 w-3.5 text-primary" />
-                            {format(new Date(selectedUserSubscription.startDate), "dd/MM/yyyy")}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-1">Próxima Renovação</p>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-3.5 w-3.5 text-orange-500" />
-                            {format(new Date(selectedUserSubscription.renewalDate), "dd/MM/yyyy")}
-                          </div>
-                        </div>
-                        <div className="col-span-2 pt-2">
-                          <p className="text-xs text-muted-foreground mb-2">Método de Pagamento</p>
-                          <Badge variant="secondary" className="font-normal">
-                            {selectedUserSubscription.paymentMethod}
-                          </Badge>
-                        </div>
-                      </div>
+                    <div className="p-3 border rounded-lg bg-card flex items-center justify-between">
+                      <span className="font-medium text-sm">Acesso Geral via Assinatura</span>
+                      <Badge variant="outline" className="text-[10px] uppercase">Ativo</Badge>
                     </div>
                   ) : (
                     <div className="text-center py-6 border-2 border-dashed rounded-lg">
-                      <p className="text-sm text-muted-foreground">Nenhum programa ativo no momento</p>
+                      <p className="text-sm text-muted-foreground">Nenhum programa vinculado</p>
                     </div>
                   )}
                 </div>
               </section>
 
               <div className="flex justify-end pt-4">
-                <Button variant="outline" onClick={() => setSelectedUser(null)}>
+                <Button variant="outline" onClick={() => setSelectedSubscriptionUser(null)}>
                   Fechar
                 </Button>
               </div>
