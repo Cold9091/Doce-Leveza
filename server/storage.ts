@@ -317,7 +317,11 @@ export class MemStorage implements IStorage {
 
   async createConsultation(data: InsertConsultation): Promise<Consultation> {
     const id = this.consultationIdCounter++;
-    const consultation: Consultation = { id, ...data };
+    const consultation: Consultation = { 
+      id, 
+      ...data,
+      status: data.status || "agendada"
+    };
     this.consultations.set(id, consultation);
     return consultation;
   }
@@ -384,10 +388,10 @@ export class MemStorage implements IStorage {
     return {
       totalUsers: this.users.size,
       activeSubscriptions,
-      totalVideos: this.videos.size,
-      totalEbooks: this.ebooks.size,
-      totalConsultations: this.consultations.size,
-      totalLeads: this.leads.size,
+      totalVideos: 0,
+      totalEbooks: 0,
+      totalConsultations: 0,
+      totalLeads: 0,
       recentUsers,
     };
   }

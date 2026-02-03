@@ -17,20 +17,15 @@ import { useToast } from "@/hooks/use-toast";
 import type { Consultation } from "@shared/schema";
 
 const scheduleFormSchema = z.object({
-  professionalName: z.string().min(1, "Selecione um profissional"),
-  professionalSpecialty: z.string().min(1, "Especialidade é obrigatória"),
   date: z.string().min(1, "Selecione uma data"),
   time: z.string().min(1, "Selecione um horário"),
-  notes: z.string().optional(),
+  notes: z.string().min(5, "A descrição (motivo) da consulta é obrigatória"),
 });
 
 type ScheduleFormData = z.infer<typeof scheduleFormSchema>;
 
 const professionals = [
-  { name: "Dra. Camila Monteiro", specialty: "Nutricionista Clínica", avatar: "CM" },
-  { name: "Dra. Ana Costa", specialty: "Nutricionista Funcional", avatar: "AC" },
-  { name: "Dr. Ricardo Santos", specialty: "Nutricionista Esportivo", avatar: "RS" },
-  { name: "Dra. Fernanda Lima", specialty: "Nutricionista Comportamental", avatar: "FL" },
+  { name: "Dr. Doce Leveza", specialty: "Equipe de Saúde", avatar: "DL" },
 ];
 
 const availableTimes = [
@@ -50,8 +45,6 @@ export default function Consultations() {
   const form = useForm<ScheduleFormData>({
     resolver: zodResolver(scheduleFormSchema),
     defaultValues: {
-      professionalName: "",
-      professionalSpecialty: "",
       date: "",
       time: "",
       notes: "",
@@ -63,11 +56,9 @@ export default function Consultations() {
       const datetime = `${data.date}T${data.time}:00`;
       const response = await apiRequest("POST", "/api/consultations", {
         userId,
-        professionalName: data.professionalName,
-        professionalSpecialty: data.professionalSpecialty,
         datetime,
         status: "agendada",
-        notes: data.notes || "",
+        notes: data.notes,
       });
       return response;
     },
@@ -170,59 +161,6 @@ export default function Consultations() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="professionalName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Profissional</FormLabel>
-                  <Select onValueChange={handleProfessionalChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-professional">
-                        <SelectValue placeholder="Selecione um profissional" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {professionals.map((prof) => (
-                        <SelectItem key={prof.name} value={prof.name} data-testid={`option-professional-${prof.name.replace(/\s/g, '-')}`}>
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-xs font-medium text-primary-foreground">
-                              {prof.avatar}
-                            </div>
-                            <div className="flex flex-col items-start">
-                              <span className="font-medium">{prof.name}</span>
-                              <span className="text-xs text-muted-foreground">{prof.specialty}</span>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="professionalSpecialty"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Especialidade</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field} 
-                      disabled 
-                      placeholder="A especialidade será preenchida automaticamente"
-                      className="bg-muted"
-                      data-testid="input-specialty"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -274,11 +212,11 @@ export default function Consultations() {
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Observações (opcional)</FormLabel>
+                  <FormLabel>Descrição / Motivo da Consulta</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Descreva o motivo da consulta ou informações relevantes..."
-                      className="resize-none"
+                      placeholder="Descreva detalhadamente o motivo da sua consulta. Esta informação é essencial para o agendamento."
+                      className="min-h-[120px] resize-none"
                       {...field}
                       data-testid="input-notes"
                     />
@@ -400,10 +338,10 @@ export default function Consultations() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <CardTitle className="text-lg">{consultation.professionalName}</CardTitle>
+                              <CardTitle className="text-lg">Consulta de Saúde</CardTitle>
                               {getStatusBadge(consultation.status)}
                             </div>
-                            <CardDescription className="mt-1">{consultation.professionalSpecialty}</CardDescription>
+                            <CardDescription className="mt-1">Atendimento Equipe Doce Leveza</CardDescription>
                           </div>
                         </div>
                         <div className="flex flex-col sm:items-end gap-1 sm:text-right">
@@ -454,10 +392,10 @@ export default function Consultations() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <CardTitle className="text-base">{consultation.professionalName}</CardTitle>
+                              <CardTitle className="text-base">Consulta de Saúde</CardTitle>
                               {getStatusBadge(consultation.status)}
                             </div>
-                            <CardDescription className="text-sm">{consultation.professionalSpecialty}</CardDescription>
+                            <CardDescription className="text-sm">Atendimento Equipe Doce Leveza</CardDescription>
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground">

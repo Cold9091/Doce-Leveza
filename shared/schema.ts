@@ -87,11 +87,9 @@ export type InsertEbook = z.infer<typeof insertEbookSchema>;
 export const consultationSchema = z.object({
   id: z.number(),
   userId: z.number(),
-  professionalName: z.string(),
-  professionalSpecialty: z.string(),
   datetime: z.string(),
   status: z.enum(["agendada", "concluida", "cancelada"]),
-  notes: z.string().optional(),
+  notes: z.string().min(5, "A descrição (motivo) da consulta é obrigatória"),
 });
 
 export const insertConsultationSchema = consultationSchema.omit({ id: true });
