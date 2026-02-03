@@ -38,9 +38,7 @@ export default function AdminUsers() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/api/admin/users/${id}`, {
-        method: "DELETE",
-      });
+      await apiRequest("DELETE", `/api/admin/users/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
