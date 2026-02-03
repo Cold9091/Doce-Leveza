@@ -8,6 +8,7 @@ import {
   type Ebook,
   type Consultation,
   type Subscription,
+  type UserAccess,
   type InsertVideo,
   type InsertEbook,
   type InsertConsultation,
@@ -72,6 +73,7 @@ export interface IStorage {
   // Admin
   getAdminByEmail(email: string): Promise<AdminUser | null>;
   getStatistics(): Promise<Statistics>;
+  getUserAccess(userId: number): Promise<UserAccess[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -82,6 +84,7 @@ export class MemStorage implements IStorage {
   private ebooks: Map<number, Ebook>;
   private consultations: Map<number, Consultation>;
   private subscriptions: Map<number, Subscription>;
+  private userAccess: Map<number, UserAccess>;
   private admins: Map<number, AdminUser>;
   private userIdCounter: number;
   private pathologyIdCounter: number;
@@ -89,6 +92,7 @@ export class MemStorage implements IStorage {
   private ebookIdCounter: number;
   private consultationIdCounter: number;
   private subscriptionIdCounter: number;
+  private userAccessIdCounter: number;
 
   constructor() {
     this.leads = new Map();
@@ -98,6 +102,7 @@ export class MemStorage implements IStorage {
     this.ebooks = new Map();
     this.consultations = new Map();
     this.subscriptions = new Map();
+    this.userAccess = new Map();
     this.admins = new Map();
     this.userIdCounter = 1;
     this.pathologyIdCounter = 1;
@@ -105,6 +110,7 @@ export class MemStorage implements IStorage {
     this.ebookIdCounter = 1;
     this.consultationIdCounter = 1;
     this.subscriptionIdCounter = 1;
+    this.userAccessIdCounter = 1;
     
     this.seedData();
   }
@@ -416,6 +422,10 @@ export class MemStorage implements IStorage {
     };
   }
 
+  async getUserAccess(userId: number): Promise<UserAccess[]> {
+    return Array.from(this.userAccess.values()).filter(a => a.userId === userId);
+  }
+
   // Seed data
   private seedData() {
     // Seed pathologies
@@ -596,6 +606,17 @@ export class MemStorage implements IStorage {
     this.admins.set(admin.id, admin);
 
     this.seedUsers();
+    
+    // Seed user access for Maria Silva (userId: 1)
+    const mariaAccess: UserAccess = {
+      id: this.userAccessIdCounter++,
+      userId: 1,
+      pathologyId: 2, // Programa de reeducação alimentar para perder de peso na diabetes
+      startDate: new Date().toISOString(),
+      expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      status: "activo",
+    };
+    this.userAccess.set(mariaAccess.id, mariaAccess);
   }
 }
 

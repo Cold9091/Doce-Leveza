@@ -32,6 +32,10 @@ export default function AdminUsers() {
     enabled: !!selectedUser,
   });
 
+  const { data: pathologies } = useQuery<Pathology[]>({
+    queryKey: ["/api/pathologies"],
+  });
+
   const { data: userAccess } = useQuery<UserAccess[]>({
     queryKey: ["/api/admin/users", selectedUser?.id, "access"],
     enabled: !!selectedUser,

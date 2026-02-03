@@ -562,7 +562,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
+  app.get("/api/admin/users/:userId/access", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      const access = await storage.getUserAccess(userId);
+      res.json(access);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
+  const httpServer = createServer(app);
   return httpServer;
 }
