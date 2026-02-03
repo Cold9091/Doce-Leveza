@@ -42,8 +42,7 @@ export default function AdminUsers() {
   const filteredUsers = users?.filter(
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone.includes(searchTerm) ||
-      user.address.toLowerCase().includes(searchTerm.toLowerCase())
+      user.phone.includes(searchTerm)
   );
 
   return (
@@ -57,10 +56,6 @@ export default function AdminUsers() {
             Visualize e gerencie todos os alunos cadastrados
           </p>
         </div>
-        <Button data-testid="button-add-user">
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Aluno
-        </Button>
       </div>
 
       <Card>
@@ -69,7 +64,7 @@ export default function AdminUsers() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por nome, telefone ou endereço..."
+                placeholder="Buscar por nome ou telefone..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -88,7 +83,7 @@ export default function AdminUsers() {
           ) : filteredUsers && filteredUsers.length > 0 ? (
             <div className="space-y-3">
               {filteredUsers.map((user) => (
-                <Card key={user.id} data-testid={`card-user-${user.id}`}>
+                <Card key={user.id} data-testid={`card-user-${user.id}`} className="hover-elevate cursor-pointer">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4 flex-1">
@@ -99,31 +94,19 @@ export default function AdminUsers() {
                           <h3 className="font-semibold truncate">{user.name}</h3>
                           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                             <span>{user.phone}</span>
-                            <span className="truncate">{user.address}</span>
-                          </div>
-                          <div className="mt-1">
-                            <Badge variant="secondary" className="text-xs">
-                              Cadastrado em {new Date(user.createdAt).toLocaleDateString('pt-BR')}
-                            </Badge>
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="text-xs border-emerald-500/50 text-emerald-600 bg-emerald-500/5">
+                          Ativo
+                        </Badge>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          data-testid={`button-edit-user-${user.id}`}
+                          data-testid={`button-view-user-${user.id}`}
                         >
                           <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => deleteMutation.mutate(user.id)}
-                          disabled={deleteMutation.isPending}
-                          data-testid={`button-delete-user-${user.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
