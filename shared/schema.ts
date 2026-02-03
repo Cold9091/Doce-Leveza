@@ -138,7 +138,7 @@ export const userAccessSchema = z.object({
   pathologyId: z.number(),
   startDate: z.string(),
   expiryDate: z.string(),
-  status: z.enum(["ativo", "expirado", "removido"]),
+  status: z.enum(["activo", "expirado", "removido", "pendente", "inativo"]),
 });
 
 export const insertUserAccessSchema = userAccessSchema.omit({ id: true });
