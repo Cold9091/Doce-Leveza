@@ -131,6 +131,20 @@ export const adminLoginSchema = z.object({
 export type AdminUser = z.infer<typeof adminUserSchema>;
 export type AdminLoginData = z.infer<typeof adminLoginSchema>;
 
+// User Access to Pathologies/Programs
+export const userAccessSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  pathologyId: z.number(),
+  startDate: z.string(),
+  expiryDate: z.string(),
+  status: z.enum(["ativo", "expirado", "removido"]),
+});
+
+export const insertUserAccessSchema = userAccessSchema.omit({ id: true });
+export type UserAccess = z.infer<typeof userAccessSchema>;
+export type InsertUserAccess = z.infer<typeof insertUserAccessSchema>;
+
 // Statistics schema for admin dashboard
 export const statisticsSchema = z.object({
   totalUsers: z.number(),
