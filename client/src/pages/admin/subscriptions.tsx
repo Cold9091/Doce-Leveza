@@ -251,35 +251,40 @@ export default function AdminSubscriptions() {
               <section className="space-y-3">
                 <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                   <Info className="h-4 w-4" />
-                  Programas Ativos
+                  Programas e Status
                 </h4>
                 <div className="space-y-2">
-                  {userAccess && userAccess.length > 0 ? (
-                    userAccess.map((access) => (
-                      <div key={access.id} className="flex items-center justify-between p-3 border rounded-lg bg-card">
+                  {pathologies?.map((pathology) => {
+                    const access = userAccess?.find(a => a.pathologyId === pathology.id);
+                    const status = access?.status || "inativo";
+                    
+                    const statusConfig: Record<string, { label: string, variant: "default" | "secondary" | "outline" | "destructive" }> = {
+                      activo: { label: "Pago", variant: "default" },
+                      pendente: { label: "Pendente", variant: "secondary" },
+                      inativo: { label: "Inativo", variant: "outline" },
+                      expirado: { label: "Expirado", variant: "destructive" },
+                    };
+
+                    const config = statusConfig[status] || statusConfig.inativo;
+
+                    return (
+                      <div key={pathology.id} className="flex items-center justify-between p-3 border rounded-lg bg-card">
                         <div className="flex flex-col">
                           <span className="font-medium text-sm">
-                            {getProgramTitle(access.pathologyId)}
+                            {pathology.title}
                           </span>
-                          <span className="text-xs text-muted-foreground">
-                            Expira em: {format(new Date(access.expiryDate), "dd/MM/yyyy")}
-                          </span>
+                          {access && (
+                            <span className="text-xs text-muted-foreground">
+                              Expira em: {format(new Date(access.expiryDate), "dd/MM/yyyy")}
+                            </span>
+                          )}
                         </div>
-                        <Badge variant="outline" className="text-[10px] uppercase">
-                          {access.status}
+                        <Badge variant={config.variant} className="text-[10px] uppercase">
+                          {config.label}
                         </Badge>
                       </div>
-                    ))
-                  ) : selectedUserSubscription ? (
-                    <div className="p-3 border rounded-lg bg-card flex items-center justify-between">
-                      <span className="font-medium text-sm">Acesso Geral via Assinatura</span>
-                      <Badge variant="outline" className="text-[10px] uppercase">Ativo</Badge>
-                    </div>
-                  ) : (
-                    <div className="text-center py-6 border-2 border-dashed rounded-lg">
-                      <p className="text-sm text-muted-foreground">Nenhum programa vinculado</p>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
               </section>
 
