@@ -20,6 +20,8 @@ import { ptBR } from "date-fns/locale";
 export default function AdminSubscriptions() {
   const { toast } = useToast();
   const [selectedSubscriptionUser, setSelectedSubscriptionUser] = useState<Omit<User, "password"> | null>(null);
+  const [editingAccess, setEditingAccess] = useState<{ id?: number, pathologyId: number, status: string } | null>(null);
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
 
   const { data: subscriptions, isLoading } = useQuery<Subscription[]>({
     queryKey: ["/api/admin/subscriptions"],
@@ -47,6 +49,48 @@ export default function AdminSubscriptions() {
     if (!pathologyId) return "Acesso Geral";
     return pathologies?.find(p => p.id === pathologyId)?.title || "Programa";
   };
+
+  const updateAccessMutation = useMutation({
+    mutationFn: async (data: { id?: number, pathologyId: number, status: string }) => {
+      if (data.id) {
+        await apiRequest(`/api/admin/user-access/${data.id}`, {
+          method: "PATCH",
+          body: { status: data.status },
+        });
+      } else {
+        await apiRequest("/api/admin/user-access", {
+          method: "POST",
+          body: {
+            userId: selectedSubscriptionUser?.id,
+            pathologyId: data.pathologyId,
+            status: data.status,
+            startDate: new Date().toISOString(),
+            expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days default
+          },
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users", selectedSubscriptionUser?.id, "access"] });
+      setEditingAccess(null);
+      toast({ title: "Sucesso", description: "Status do programa atualizado" });
+    },
+  });
+
+  const updateSubscriptionMutation = useMutation({
+    mutationFn: async (data: { id: number, status: string }) => {
+      await apiRequest(`/api/admin/subscriptions/${data.id}`, {
+        method: "PATCH",
+        body: { status: data.status },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user", selectedSubscriptionUser?.id] });
+      setEditingSubscription(null);
+      toast({ title: "Sucesso", description: "Status da assinatura atualizado" });
+    },
+  });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -218,8 +262,8 @@ export default function AdminSubscriptions() {
                   Plano e Vigência
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-muted/30 p-4 rounded-lg">
-                    <p className="text-xs text-muted-foreground mb-1">Status e Plano</p>
+                  <div className="bg-muted/30 p-4 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => selectedUserSubscription && setEditingSubscription(selectedUserSubscription)}>
+                    <p className="text-xs text-muted-foreground mb-1">Status e Plano (Clique para editar)</p>
                     <div className="flex items-center gap-2">
                       {getStatusBadge(selectedUserSubscription?.status || "expirada")}
                       <span className="text-sm font-medium capitalize">
@@ -268,7 +312,11 @@ export default function AdminSubscriptions() {
                     const config = statusConfig[status] || statusConfig.inativo;
 
                     return (
-                      <div key={pathology.id} className="flex items-center justify-between p-3 border rounded-lg bg-card">
+                      <div 
+                        key={pathology.id} 
+                        className="flex items-center justify-between p-3 border rounded-lg bg-card cursor-pointer hover:bg-muted/20 transition-colors"
+                        onClick={() => setEditingAccess({ id: access?.id, pathologyId: pathology.id, status })}
+                      >
                         <div className="flex flex-col">
                           <span className="font-medium text-sm">
                             {pathology.title}
@@ -295,6 +343,69 @@ export default function AdminSubscriptions() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Pop-up de Edição de Status do Programa */}
+      <Dialog open={!!editingAccess} onOpenChange={(open) => !open && setEditingAccess(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Alterar Status do Programa</DialogTitle>
+            <DialogDescription>
+              Selecione o novo status para o programa: {pathologies?.find(p => p.id === editingAccess?.pathologyId)?.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { val: "activo", label: "Pago", variant: "default" },
+                { val: "pendente", label: "Pendente", variant: "secondary" },
+                { val: "inativo", label: "Inativo", variant: "outline" },
+                { val: "expirado", label: "Expirado", variant: "destructive" }
+              ].map((s) => (
+                <Button
+                  key={s.val}
+                  variant={editingAccess?.status === s.val ? (s.variant as any) : "ghost"}
+                  className={editingAccess?.status === s.val ? "ring-2 ring-primary ring-offset-2" : ""}
+                  onClick={() => editingAccess && updateAccessMutation.mutate({ ...editingAccess, status: s.val })}
+                  disabled={updateAccessMutation.isPending}
+                >
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pop-up de Edição de Status da Assinatura */}
+      <Dialog open={!!editingSubscription} onOpenChange={(open) => !open && setEditingSubscription(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Alterar Status da Assinatura</DialogTitle>
+            <DialogDescription>
+              Selecione o novo status para a assinatura do aluno
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { val: "ativa", label: "Ativa", variant: "default" },
+                { val: "cancelada", label: "Cancelada", variant: "destructive" },
+                { val: "expirada", label: "Expirada", variant: "secondary" }
+              ].map((s) => (
+                <Button
+                  key={s.val}
+                  variant={editingSubscription?.status === s.val ? (s.variant as any) : "ghost"}
+                  className={editingSubscription?.status === s.val ? "ring-2 ring-primary ring-offset-2" : ""}
+                  onClick={() => editingSubscription && updateSubscriptionMutation.mutate({ id: editingSubscription.id, status: s.val as any })}
+                  disabled={updateSubscriptionMutation.isPending}
+                >
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
