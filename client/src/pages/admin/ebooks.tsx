@@ -32,6 +32,7 @@ import {
 
 export default function AdminEbooks() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingEbook, setEditingEbook] = useState<Ebook | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
@@ -58,10 +59,7 @@ export default function AdminEbooks() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertEbook) => {
-      await apiRequest("/api/admin/ebooks", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      await apiRequest("POST", "/api/admin/ebooks", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ebooks"] });
@@ -74,11 +72,25 @@ export default function AdminEbooks() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: InsertEbook }) => {
+      await apiRequest("PUT", `/api/admin/ebooks/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ebooks"] });
+      toast({
+        title: "Sucesso",
+        description: "Ebook atualizado com sucesso",
+      });
+      setIsDialogOpen(false);
+      setEditingEbook(null);
+      form.reset();
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/api/admin/ebooks/${id}`, {
-        method: "DELETE",
-      });
+      await apiRequest("DELETE", `/api/admin/ebooks/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ebooks"] });
@@ -95,7 +107,41 @@ export default function AdminEbooks() {
   );
 
   const onSubmit = (data: InsertEbook) => {
-    createMutation.mutate(data);
+    if (editingEbook) {
+      updateMutation.mutate({ id: editingEbook.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  const handleEdit = (ebook: Ebook) => {
+    setEditingEbook(ebook);
+    form.reset({
+      title: ebook.title,
+      description: ebook.description,
+      coverUrl: ebook.coverUrl,
+      downloadUrl: ebook.downloadUrl,
+      tags: ebook.tags,
+      pages: ebook.pages,
+      pathologyId: ebook.pathologyId,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      setEditingEbook(null);
+      form.reset({
+        title: "",
+        description: "",
+        coverUrl: "",
+        downloadUrl: "",
+        tags: [],
+        pages: 0,
+        pathologyId: undefined,
+      });
+    }
   };
 
   return (
@@ -109,7 +155,7 @@ export default function AdminEbooks() {
             Adicione e gerencie os ebooks do sistema
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <Button data-testid="button-add-ebook">
               <Plus className="mr-2 h-4 w-4" />
@@ -118,9 +164,9 @@ export default function AdminEbooks() {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Novo Ebook</DialogTitle>
+              <DialogTitle>{editingEbook ? "Editar Ebook" : "Novo Ebook"}</DialogTitle>
               <DialogDescription>
-                Adicione um novo ebook ao sistema
+                {editingEbook ? "Atualize as informações do ebook" : "Adicione um novo ebook ao sistema"}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -254,10 +300,10 @@ export default function AdminEbooks() {
                 <DialogFooter>
                   <Button
                     type="submit"
-                    disabled={createMutation.isPending}
+                    disabled={createMutation.isPending || updateMutation.isPending}
                     data-testid="button-submit-ebook"
                   >
-                    {createMutation.isPending ? "Salvando..." : "Salvar"}
+                    {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -324,6 +370,7 @@ export default function AdminEbooks() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
+                        onClick={() => handleEdit(ebook)}
                         data-testid={`button-edit-ebook-${ebook.id}`}
                       >
                         <Pencil className="mr-2 h-3 w-3" />
