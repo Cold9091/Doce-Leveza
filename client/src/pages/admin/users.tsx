@@ -239,7 +239,9 @@ export default function AdminUsers() {
                   {subscription ? (
                     <div className="border rounded-lg overflow-hidden">
                       <div className="bg-muted/50 p-3 border-b flex items-center justify-between">
-                        <span className="font-medium text-sm">Acesso Master (Premium)</span>
+                        <span className="font-medium text-sm">
+                          {getProgramTitle(subscription.pathologyId)}
+                        </span>
                         <Badge variant="outline" className="text-[10px] uppercase">
                           {subscription.plan}
                         </Badge>
