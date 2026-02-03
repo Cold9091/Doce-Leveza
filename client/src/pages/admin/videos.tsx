@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function AdminVideos() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<Video | null>(null);
   const [filterPathology, setFilterPathology] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
@@ -82,6 +83,32 @@ export default function AdminVideos() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: InsertVideo }) => {
+      await apiRequest(`/api/admin/videos/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+      toast({
+        title: "Sucesso",
+        description: "Vídeo atualizado com sucesso",
+      });
+      setIsDialogOpen(false);
+      setEditingVideo(null);
+      form.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar vídeo",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest(`/api/admin/videos/${id}`, {
@@ -107,7 +134,41 @@ export default function AdminVideos() {
   });
 
   const onSubmit = (data: InsertVideo) => {
-    createMutation.mutate(data);
+    if (editingVideo) {
+      updateMutation.mutate({ id: editingVideo.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  const handleEdit = (video: Video) => {
+    setEditingVideo(video);
+    form.reset({
+      pathologyId: video.pathologyId,
+      title: video.title,
+      description: video.description,
+      duration: video.duration,
+      thumbnailUrl: video.thumbnailUrl,
+      videoUrl: video.videoUrl,
+      resources: video.resources || [],
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      setEditingVideo(null);
+      form.reset({
+        pathologyId: 0,
+        title: "",
+        description: "",
+        duration: "",
+        thumbnailUrl: "",
+        videoUrl: "",
+        resources: [],
+      });
+    }
   };
 
   return (
@@ -121,7 +182,7 @@ export default function AdminVideos() {
             Adicione e gerencie os vídeos do sistema
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <Button data-testid="button-add-video">
               <Plus className="mr-2 h-4 w-4" />
@@ -130,9 +191,9 @@ export default function AdminVideos() {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Novo Vídeo</DialogTitle>
+              <DialogTitle>{editingVideo ? "Editar Vídeo" : "Novo Vídeo"}</DialogTitle>
               <DialogDescription>
-                Adicione um novo vídeo ao sistema
+                {editingVideo ? "Atualize as informações do vídeo" : "Adicione um novo vídeo ao sistema"}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -234,10 +295,10 @@ export default function AdminVideos() {
                 <DialogFooter>
                   <Button
                     type="submit"
-                    disabled={createMutation.isPending}
+                    disabled={createMutation.isPending || updateMutation.isPending}
                     data-testid="button-submit-video"
                   >
-                    {createMutation.isPending ? "Salvando..." : "Salvar"}
+                    {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -310,6 +371,7 @@ export default function AdminVideos() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
+                        onClick={() => handleEdit(video)}
                         data-testid={`button-edit-video-${video.id}`}
                       >
                         <Pencil className="mr-2 h-3 w-3" />

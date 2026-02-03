@@ -402,6 +402,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/admin/videos/:id", async (req, res) => {
+    try {
+      const video = await storage.updateVideo(parseInt(req.params.id), req.body);
+      if (!video) {
+        return res.status(404).json({ error: "Video not found" });
+      }
+      res.json(video);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.delete("/api/admin/videos/:id", async (req, res) => {
     try {
       const success = await storage.deleteVideo(parseInt(req.params.id));
