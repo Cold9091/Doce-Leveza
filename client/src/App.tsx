@@ -25,7 +25,6 @@ import AdminVideos from "@/pages/admin/videos";
 import AdminEbooks from "@/pages/admin/ebooks";
 import AdminConsultations from "@/pages/admin/consultations";
 import AdminSubscriptions from "@/pages/admin/subscriptions";
-import AdminLeads from "@/pages/admin/leads";
 import AdminSettings from "@/pages/admin/settings";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -173,13 +172,6 @@ function Router() {
         {() => (
           <AdminLayout>
             <AdminSubscriptions />
-          </AdminLayout>
-        )}
-      </Route>
-      <Route path="/admin/leads">
-        {() => (
-          <AdminLayout>
-            <AdminLeads />
           </AdminLayout>
         )}
       </Route>

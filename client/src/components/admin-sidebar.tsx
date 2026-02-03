@@ -71,12 +71,6 @@ const secondaryMenuItems = [
     testId: "nav-admin-subscriptions",
   },
   {
-    title: "Leads",
-    url: "/admin/leads",
-    icon: Mail,
-    testId: "nav-admin-leads",
-  },
-  {
     title: "Configurações",
     url: "/admin/configuracoes",
     icon: Settings,
