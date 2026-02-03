@@ -109,6 +109,69 @@ export class MemStorage implements IStorage {
     this.seedData();
   }
 
+  private async seedUsers() {
+    const demoUsers: User[] = [
+      {
+        id: this.userIdCounter++,
+        name: "Maria Silva",
+        phone: "912345678",
+        address: "Rua das Flores, 123, Luanda",
+        password: "password123",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: this.userIdCounter++,
+        name: "João Pereira",
+        phone: "923456789",
+        address: "Av. Independência, 45, Talatona",
+        password: "password123",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: this.userIdCounter++,
+        name: "Ana Santos",
+        phone: "934567890",
+        address: "Bairro Alvalade, Luanda",
+        password: "password123",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: this.userIdCounter++,
+        name: "Carlos Gomes",
+        phone: "945678901",
+        address: "Centralidade do Kilamba, Bloco A",
+        password: "password123",
+        createdAt: new Date().toISOString(),
+      }
+    ];
+
+    demoUsers.forEach(u => this.users.set(u.id, u));
+
+    // Seed subscriptions for some users
+    const demoSubscriptions: Subscription[] = [
+      {
+        id: this.subscriptionIdCounter++,
+        userId: 1,
+        plan: "mensal",
+        status: "ativa",
+        startDate: new Date().toISOString(),
+        renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        paymentMethod: "Transferência",
+      },
+      {
+        id: this.subscriptionIdCounter++,
+        userId: 2,
+        plan: "anual",
+        status: "ativa",
+        startDate: new Date().toISOString(),
+        renewalDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        paymentMethod: "Referência",
+      }
+    ];
+
+    demoSubscriptions.forEach(s => this.subscriptions.set(s.id, s));
+  }
+
   async createLead(lead: Lead): Promise<Lead & { id: string }> {
     const id = randomUUID();
     const leadWithId = { ...lead, id };
@@ -531,6 +594,8 @@ export class MemStorage implements IStorage {
       createdAt: new Date().toISOString(),
     };
     this.admins.set(admin.id, admin);
+
+    this.seedUsers();
   }
 }
 
