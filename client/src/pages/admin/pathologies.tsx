@@ -25,6 +25,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 export default function AdminPathologies() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingPathology, setEditingPathology] = useState<Pathology | null>(null);
   const { toast } = useToast();
 
   const { data: pathologies, isLoading } = useQuery<Pathology[]>({
@@ -68,6 +69,32 @@ export default function AdminPathologies() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: InsertPathology }) => {
+      await apiRequest(`/api/admin/pathologies/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
+      toast({
+        title: "Sucesso",
+        description: "Programa atualizado com sucesso",
+      });
+      setIsDialogOpen(false);
+      setEditingPathology(null);
+      form.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar programa",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest(`/api/admin/pathologies/${id}`, {
@@ -91,7 +118,39 @@ export default function AdminPathologies() {
   });
 
   const onSubmit = (data: InsertPathology) => {
-    createMutation.mutate(data);
+    if (editingPathology) {
+      updateMutation.mutate({ id: editingPathology.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  const handleEdit = (pathology: Pathology) => {
+    setEditingPathology(pathology);
+    form.reset({
+      slug: pathology.slug,
+      title: pathology.title,
+      description: pathology.description,
+      icon: pathology.icon,
+      imageUrl: pathology.imageUrl || "",
+      price: pathology.price,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      setEditingPathology(null);
+      form.reset({
+        slug: "",
+        title: "",
+        description: "",
+        icon: "Activity",
+        imageUrl: "",
+        price: 0,
+      });
+    }
   };
 
   return (
@@ -105,7 +164,7 @@ export default function AdminPathologies() {
             Adicione e gerencie os programas do sistema
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <Button data-testid="button-add-pathology">
               <Plus className="mr-2 h-4 w-4" />
@@ -114,9 +173,9 @@ export default function AdminPathologies() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Novo Programa</DialogTitle>
+              <DialogTitle>{editingPathology ? "Editar Programa" : "Novo Programa"}</DialogTitle>
               <DialogDescription>
-                Adicione um novo programa ao sistema
+                {editingPathology ? "Atualize as informações do programa" : "Adicione um novo programa ao sistema"}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -195,10 +254,10 @@ export default function AdminPathologies() {
                 <DialogFooter>
                   <Button
                     type="submit"
-                    disabled={createMutation.isPending}
+                    disabled={createMutation.isPending || updateMutation.isPending}
                     data-testid="button-submit-pathology"
                   >
-                    {createMutation.isPending ? "Salvando..." : "Salvar"}
+                    {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -239,6 +298,7 @@ export default function AdminPathologies() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
+                    onClick={() => handleEdit(pathology)}
                     data-testid={`button-edit-pathology-${pathology.id}`}
                   >
                     <Pencil className="mr-2 h-3 w-3" />
