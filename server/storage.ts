@@ -38,6 +38,7 @@ export class MemStorage implements IStorage {
   private pathologies: Map<number, Pathology>;
   private userAccess: Map<number, UserAccess>;
   private admins: Map<number, AdminUser>;
+  private notifications: Map<number, Notification>;
   private settings: SystemSettings;
   private userIdCounter: number;
   private pathologyIdCounter: number;
@@ -46,6 +47,7 @@ export class MemStorage implements IStorage {
   private consultationIdCounter: number;
   private subscriptionIdCounter: number;
   private userAccessIdCounter: number;
+  private notificationIdCounter: number;
 
   constructor() {
     this.leads = new Map();
@@ -57,6 +59,7 @@ export class MemStorage implements IStorage {
     this.subscriptions = new Map();
     this.userAccess = new Map();
     this.admins = new Map();
+    this.notifications = new Map();
     this.userIdCounter = 1;
     this.pathologyIdCounter = 1;
     this.videoIdCounter = 1;
@@ -64,6 +67,7 @@ export class MemStorage implements IStorage {
     this.consultationIdCounter = 1;
     this.subscriptionIdCounter = 1;
     this.userAccessIdCounter = 1;
+    this.notificationIdCounter = 1;
     this.settings = {
       id: 1,
       siteName: "Doce Leveza",
@@ -415,6 +419,27 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  // Notifications
+  async getNotificationsByUser(userId: number): Promise<Notification[]> {
+    return Array.from(this.notifications.values())
+      .filter(n => n.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async createNotification(data: InsertNotification): Promise<Notification> {
+    const id = this.notificationIdCounter++;
+    const notification: Notification = { id, ...data };
+    this.notifications.set(id, notification);
+    return notification;
+  }
+
+  async markNotificationRead(id: number): Promise<boolean> {
+    const notification = this.notifications.get(id);
+    if (!notification) return false;
+    notification.read = true;
+    return true;
+  }
+
   // Seed data
   private seedData() {
     // Seed pathologies
@@ -593,6 +618,38 @@ export class MemStorage implements IStorage {
       createdAt: new Date().toISOString(),
     };
     this.admins.set(admin.id, admin);
+
+    // Seed notifications for user 1
+    const demoNotifications: Notification[] = [
+      {
+        id: this.notificationIdCounter++,
+        userId: 1,
+        title: "Consulta Agendada",
+        message: "Lembrete: Você tem uma consulta de saúde amanhã às 09:00.",
+        type: "consultation",
+        read: false,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: this.notificationIdCounter++,
+        userId: 1,
+        title: "Novo Conteúdo",
+        message: "Um novo vídeo sobre Reeducação Alimentar foi adicionado à biblioteca.",
+        type: "content",
+        read: false,
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+      },
+      {
+        id: this.notificationIdCounter++,
+        userId: 1,
+        title: "Bem-vindo!",
+        message: "Bem-vindo à plataforma Doce Leveza. Explore seus conteúdos exclusivos.",
+        type: "system",
+        read: true,
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+      }
+    ];
+    demoNotifications.forEach(n => this.notifications.set(n.id, n));
 
     this.seedUsers();
     

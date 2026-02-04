@@ -178,3 +178,18 @@ export const statisticsSchema = z.object({
 });
 
 export type Statistics = z.infer<typeof statisticsSchema>;
+
+// Notification schema
+export const notificationSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  title: z.string(),
+  message: z.string(),
+  type: z.enum(["consultation", "content", "system"]),
+  read: z.boolean().default(false),
+  createdAt: z.string(),
+});
+
+export const insertNotificationSchema = notificationSchema.omit({ id: true });
+export type Notification = z.infer<typeof notificationSchema>;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
