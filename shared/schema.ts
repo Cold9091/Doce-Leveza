@@ -105,6 +105,7 @@ export const subscriptionSchema = z.object({
   startDate: z.string(),
   renewalDate: z.string(),
   paymentMethod: z.string(),
+  proofUrl: z.string().optional(),
 });
 
 export const insertSubscriptionSchema = subscriptionSchema.omit({ id: true });

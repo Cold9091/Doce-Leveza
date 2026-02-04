@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Subscription, User, Pathology, UserAccess, AdminNotification } from "@shared/schema";
-import { CreditCard, Trash2, User as UserIcon, Settings, UserCircle, Calendar, Info, Package, ExternalLink, Bell, Check, Search, X } from "lucide-react";
+import { CreditCard, Trash2, User as UserIcon, Settings, UserCircle, Calendar, Info, Package, ExternalLink, Bell, Check, Search, X, FileText, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -14,6 +14,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import {
   Popover,
   PopoverContent,
@@ -400,108 +406,181 @@ export default function AdminSubscriptions() {
             </DialogHeader>
           </div>
 
-          {selectedSubscriptionUser && (
-            <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-2 gap-4">
-                <div 
-                  className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group" 
-                  onClick={() => selectedUserSubscription && setEditingSubscription(selectedUserSubscription)}
+          <Tabs defaultValue="overview" className="w-full">
+            <div className="px-6 border-b">
+              <TabsList className="w-full justify-start h-12 bg-transparent p-0 gap-6">
+                <TabsTrigger 
+                  value="overview" 
+                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 text-sm font-semibold"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Plano Atual</p>
-                    <ExternalLink className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {getStatusBadge(selectedUserSubscription?.status || "expirada")}
-                    <span className="text-sm font-semibold capitalize text-foreground">
-                      {selectedUserSubscription?.plan || 'N/A'}
-                    </span>
-                  </div>
-                </div>
-
-                <div 
-                  className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group" 
-                  onClick={() => selectedUserSubscription && setEditingRenewal(selectedUserSubscription)}
+                  Visão Geral
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="proof" 
+                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 text-sm font-semibold flex gap-2"
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 flex items-center justify-between">
-                    Renovação
-                    <ExternalLink className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-semibold text-foreground">
-                      {selectedUserSubscription ? (
-                        (() => {
-                          const now = new Date();
-                          const renewal = new Date(selectedUserSubscription.renewalDate);
-                          const diffTime = renewal.getTime() - now.getTime();
-                          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                          return diffDays > 0 ? `${diffDays} dias` : "Expirado";
-                        })()
-                      ) : "N/A"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 flex items-center gap-2">
-                    <Package className="h-3.5 w-3.5" />
-                    Acesso aos Programas
-                  </h4>
-                  <Badge variant="outline" className="text-[10px] py-0 h-5 px-2 bg-muted/50">
-                    {pathologies?.length || 0} Total
-                  </Badge>
-                </div>
-                
-                <div className="grid gap-2">
-                  {pathologies?.map((pathology) => {
-                    const access = userAccess?.find(a => a.pathologyId === pathology.id);
-                    const status = access?.status || "inativo";
-                    
-                    const statusConfig: Record<string, { label: string, variant: "default" | "secondary" | "outline" | "destructive" }> = {
-                      activo: { label: "Pago", variant: "default" },
-                      pendente: { label: "Pendente", variant: "secondary" },
-                      inativo: { label: "Inativo", variant: "outline" },
-                      expirado: { label: "Expirado", variant: "destructive" },
-                    };
-
-                    const config = statusConfig[status] || statusConfig.inativo;
-
-                    return (
-                      <div 
-                        key={pathology.id} 
-                        className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-muted/30 cursor-pointer hover:bg-accent/40 transition-all hover-elevate group"
-                        onClick={() => setEditingAccess({ id: access?.id, pathologyId: pathology.id, status })}
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-sm group-hover:text-primary transition-colors">
-                            {pathology.title}
-                          </span>
-                          {access && (
-                            <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                              <Calendar className="h-3 w-3" />
-                              Expira em: {format(new Date(access.expiryDate), "dd/MM/yyyy")}
-                            </span>
-                          )}
-                        </div>
-                        <Badge variant={config.variant} className="text-[10px] px-2 py-0 h-5 font-bold uppercase tracking-tight">
-                          {config.label}
-                        </Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 pt-4">
-                <Button variant="outline" className="flex-1 h-11" onClick={() => setSelectedSubscriptionUser(null)}>
-                  Fechar Painel
-                </Button>
-              </div>
+                  <FileText className="h-4 w-4" />
+                  Comprovante
+                </TabsTrigger>
+              </TabsList>
             </div>
-          )}
+
+            <TabsContent value="overview" className="m-0">
+              {selectedSubscriptionUser && (
+                <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div 
+                      className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group" 
+                      onClick={() => selectedUserSubscription && setEditingSubscription(selectedUserSubscription)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Plano Atual</p>
+                        <ExternalLink className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(selectedUserSubscription?.status || "expirada")}
+                        <span className="text-sm font-semibold capitalize text-foreground">
+                          {selectedUserSubscription?.plan || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div 
+                      className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group" 
+                      onClick={() => selectedUserSubscription && setEditingRenewal(selectedUserSubscription)}
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 flex items-center justify-between">
+                        Renovação
+                        <ExternalLink className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-semibold text-foreground">
+                          {selectedUserSubscription ? (
+                            (() => {
+                              const now = new Date();
+                              const renewal = new Date(selectedUserSubscription.renewalDate);
+                              const diffTime = renewal.getTime() - now.getTime();
+                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                              return diffDays > 0 ? `${diffDays} dias` : "Expirado";
+                            })()
+                          ) : "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 flex items-center gap-2">
+                        <Package className="h-3.5 w-3.5" />
+                        Acesso aos Programas
+                      </h4>
+                      <Badge variant="outline" className="text-[10px] py-0 h-5 px-2 bg-muted/50">
+                        {pathologies?.length || 0} Total
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      {pathologies?.map((pathology) => {
+                        const access = userAccess?.find(a => a.pathologyId === pathology.id);
+                        const status = access?.status || "inativo";
+                        
+                        const statusConfig: Record<string, { label: string, variant: "default" | "secondary" | "outline" | "destructive" }> = {
+                          activo: { label: "Pago", variant: "default" },
+                          pendente: { label: "Pendente", variant: "secondary" },
+                          inativo: { label: "Inativo", variant: "outline" },
+                          expirado: { label: "Expirado", variant: "destructive" },
+                        };
+
+                        const config = statusConfig[status] || statusConfig.inativo;
+
+                        return (
+                          <div 
+                            key={pathology.id} 
+                            className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-muted/30 cursor-pointer hover:bg-accent/40 transition-all hover-elevate group"
+                            onClick={() => setEditingAccess({ id: access?.id, pathologyId: pathology.id, status })}
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-sm group-hover:text-primary transition-colors">
+                                {pathology.title}
+                              </span>
+                              {access && (
+                                <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                                  <Calendar className="h-3 w-3" />
+                                  Expira em: {format(new Date(access.expiryDate), "dd/MM/yyyy")}
+                                </span>
+                              )}
+                            </div>
+                            <Badge variant={config.variant} className="text-[10px] px-2 py-0 h-5 font-bold uppercase tracking-tight">
+                              {config.label}
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-4">
+                    <Button variant="outline" className="flex-1 h-11" onClick={() => setSelectedSubscriptionUser(null)}>
+                      Fechar Painel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="proof" className="m-0">
+              <div className="p-6 space-y-4 min-h-[400px]">
+                <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 flex items-center gap-2">
+                  <ImageIcon className="h-3.5 w-3.5" />
+                  Comprovante de Pagamento
+                </h4>
+                
+                {selectedUserSubscription?.proofUrl ? (
+                  <div className="space-y-4">
+                    <div className="border-2 border-dashed rounded-xl overflow-hidden bg-muted/20 aspect-[4/3] flex items-center justify-center relative group">
+                      <img 
+                        src={selectedUserSubscription.proofUrl} 
+                        alt="Comprovante de Pagamento" 
+                        className="max-w-full max-h-full object-contain"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button variant="secondary" size="sm" asChild>
+                          <a href={selectedUserSubscription.proofUrl} target="_blank" rel="noopener noreferrer" className="flex gap-2">
+                            <ExternalLink className="h-4 w-4" />
+                            Ver em tamanho real
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="bg-primary/5 p-4 rounded-lg border border-primary/10 flex gap-3">
+                      <Info className="h-5 w-5 text-primary shrink-0" />
+                      <p className="text-sm text-primary/80 leading-tight">
+                        Este é o último comprovante enviado pelo aluno. Verifique os dados antes de aprovar acessos manuais.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-[300px] bg-muted/20 border-2 border-dashed rounded-xl text-center p-6">
+                    <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                      <FileText className="h-8 w-8 text-muted-foreground/40" />
+                    </div>
+                    <p className="text-muted-foreground font-medium">Nenhum comprovante enviado</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1 max-w-[200px]">
+                      O aluno ainda não realizou o upload do comprovante de pagamento para esta assinatura.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 pt-4">
+                  <Button variant="outline" className="flex-1 h-11" onClick={() => setSelectedSubscriptionUser(null)}>
+                    Fechar Painel
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
 
