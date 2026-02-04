@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Subscription, User, Pathology, UserAccess, AdminNotification } from "@shared/schema";
-import { CreditCard, Trash2, User as UserIcon, Settings, UserCircle, Calendar, Info, Package, ExternalLink, Bell, Check } from "lucide-react";
+import { CreditCard, Trash2, User as UserIcon, Settings, UserCircle, Calendar, Info, Package, ExternalLink, Bell, Check, Search, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -23,6 +23,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 
 export default function AdminSubscriptions() {
   const { toast } = useToast();
@@ -30,16 +31,63 @@ export default function AdminSubscriptions() {
   const [editingAccess, setEditingAccess] = useState<{ id?: number, pathologyId: number, status: string } | null>(null);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [editingRenewal, setEditingRenewal] = useState<Subscription | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: subscriptions, isLoading } = useQuery<Subscription[]>({
     queryKey: ["/api/admin/subscriptions"],
+  });
+
+  const { data: users } = useQuery<Omit<User, "password">[]>({
+    queryKey: ["/api/admin/users"],
   });
 
   const { data: adminNotifications } = useQuery<AdminNotification[]>({
     queryKey: ["/api/admin/notifications"],
   });
 
+  const filteredSubscriptions = useMemo(() => {
+    if (!subscriptions || !users) return [];
+    if (!searchQuery.trim()) return subscriptions;
+
+    const query = searchQuery.toLowerCase().trim();
+    return subscriptions.filter(sub => {
+      const user = users.find(u => u.id === sub.userId);
+      if (!user) return false;
+      return (
+        user.name.toLowerCase().includes(query) ||
+        user.phone.toLowerCase().includes(query) ||
+        sub.paymentMethod.toLowerCase().includes(query) ||
+        sub.plan.toLowerCase().includes(query)
+      );
+    });
+  }, [subscriptions, users, searchQuery]);
+
   const unreadCount = adminNotifications?.filter(n => !n.read).length || 0;
+
+  const handleNotificationClick = (notification: AdminNotification) => {
+    // Marcar como lida
+    if (!notification.read) {
+      markReadMutation.mutate(notification.id);
+    }
+
+    // Extrair nome do usuário da mensagem se possível
+    // Ex: "Maria Silva realizou um pagamento..."
+    const message = notification.message;
+    // Tenta pegar as primeiras palavras que parecem um nome (capitalizadas)
+    const match = message.match(/^([A-Z][a-zÀ-ÿ]+\s+[A-Z][a-zÀ-ÿ]+)/);
+    if (match && match[1]) {
+      setSearchQuery(match[1]);
+    } else if (notification.relatedId) {
+      // Se tiver relatedId (assinatura), busca o usuário associado
+      const sub = subscriptions?.find(s => s.id === notification.relatedId);
+      if (sub) {
+        const user = users?.find(u => u.id === sub.userId);
+        if (user) {
+          setSearchQuery(user.name);
+        }
+      }
+    }
+  };
 
   const markReadMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -48,10 +96,6 @@ export default function AdminSubscriptions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
     },
-  });
-
-  const { data: users } = useQuery<Omit<User, "password">[]>({
-    queryKey: ["/api/admin/users"],
   });
 
   const { data: pathologies } = useQuery<Pathology[]>({
@@ -183,22 +227,15 @@ export default function AdminSubscriptions() {
                   {adminNotifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`flex flex-col gap-1 border-b p-4 text-sm transition-colors hover:bg-muted/50 ${
+                      className={`flex flex-col gap-1 border-b p-4 text-sm transition-colors hover:bg-muted/50 cursor-pointer ${
                         !notification.read ? "bg-primary/5" : ""
                       }`}
+                      onClick={() => handleNotificationClick(notification)}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-semibold">{notification.title}</span>
                         {!notification.read && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => markReadMutation.mutate(notification.id)}
-                            disabled={markReadMutation.isPending}
-                          >
-                            <Check className="h-3 w-3" />
-                          </Button>
+                          <div className="h-2 w-2 rounded-full bg-primary" />
                         )}
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
@@ -221,85 +258,131 @@ export default function AdminSubscriptions() {
         </Popover>
       </div>
 
-      <Card className="border-border/40 shadow-sm">
-        <CardHeader className="pb-4">
-          <div className="text-sm text-muted-foreground font-medium">
-            Total de {subscriptions?.length || 0} assinaturas
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 animate-pulse bg-muted rounded-lg" />
-              ))}
+      <div className="grid gap-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Pesquisar por nome, telefone ou plano..."
+            className="pl-10 h-12 bg-card border-border/60 shadow-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
+        </div>
+
+        <Card className="border-border/40 shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground font-medium">
+                {searchQuery ? (
+                  <>Total de {filteredSubscriptions.length} resultados encontrados</>
+                ) : (
+                  <>Total de {subscriptions?.length || 0} assinaturas</>
+                )}
+              </div>
             </div>
-          ) : subscriptions && subscriptions.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-              {subscriptions.map((subscription) => (
-                <Card key={subscription.id} className="hover-elevate transition-all border-border/60" data-testid={`card-subscription-${subscription.id}`}>
-                  <CardContent className="p-4 sm:p-5">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-primary/5 flex items-center justify-center border border-primary/10">
-                          <UserIcon className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg leading-tight">
-                            {users?.find((u) => u.id === subscription.userId)?.name || `Usuário #${subscription.userId}`}
-                          </h3>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold">
-                              {subscription.paymentMethod}
-                            </Badge>
-                            {getPlanBadge(subscription.plan)}
-                            {getStatusBadge(subscription.status)}
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-24 animate-pulse bg-muted rounded-lg" />
+                ))}
+              </div>
+            ) : filteredSubscriptions && filteredSubscriptions.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                {filteredSubscriptions.map((subscription) => (
+                  <Card key={subscription.id} className="hover-elevate transition-all border-border/60" data-testid={`card-subscription-${subscription.id}`}>
+                    <CardContent className="p-4 sm:p-5">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-full bg-primary/5 flex items-center justify-center border border-primary/10">
+                            <UserIcon className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-lg leading-tight">
+                              {users?.find((u) => u.id === subscription.userId)?.name || `Usuário #${subscription.userId}`}
+                            </h3>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold">
+                                {subscription.paymentMethod}
+                              </Badge>
+                              {getPlanBadge(subscription.plan)}
+                              {getStatusBadge(subscription.status)}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 sm:flex-none gap-2"
+                            onClick={() => {
+                              const user = users?.find(u => u.id === subscription.userId);
+                              if (user) setSelectedSubscriptionUser(user);
+                            }}
+                          >
+                            <Settings className="h-4 w-4" />
+                            Gerenciar
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-9 w-9"
+                            onClick={() => {
+                              if (confirm("Tem certeza que deseja remover esta assinatura?")) {
+                                deleteMutation.mutate(subscription.id);
+                              }
+                            }}
+                            disabled={deleteMutation.isPending}
+                            data-testid={`button-delete-subscription-${subscription.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 sm:flex-none gap-2"
-                          onClick={() => {
-                            const user = users?.find(u => u.id === subscription.userId);
-                            if (user) setSelectedSubscriptionUser(user);
-                          }}
-                        >
-                          <Settings className="h-4 w-4" />
-                          Gerenciar
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="h-9 w-9"
-                          onClick={() => {
-                            if (confirm("Tem certeza que deseja remover esta assinatura?")) {
-                              deleteMutation.mutate(subscription.id);
-                            }
-                          }}
-                          disabled={deleteMutation.isPending}
-                          data-testid={`button-delete-subscription-${subscription.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-muted/20 rounded-xl border-2 border-dashed">
-              <CreditCard className="mx-auto h-12 w-12 text-muted-foreground/40 mb-4" />
-              <p className="text-muted-foreground font-medium">
-                Nenhuma assinatura cadastrada
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-muted/20 rounded-xl border-2 border-dashed">
+                {searchQuery ? (
+                  <>
+                    <Search className="mx-auto h-12 w-12 text-muted-foreground/40 mb-4" />
+                    <p className="text-muted-foreground font-medium">
+                      Nenhum aluno encontrado para "{searchQuery}"
+                    </p>
+                    <Button 
+                      variant="ghost" 
+                      className="mt-2 text-primary hover:bg-primary/10"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      Limpar pesquisa
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="mx-auto h-12 w-12 text-muted-foreground/40 mb-4" />
+                    <p className="text-muted-foreground font-medium">
+                      Nenhuma assinatura cadastrada
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <Dialog open={!!selectedSubscriptionUser} onOpenChange={(open) => !open && setSelectedSubscriptionUser(null)}>
         <DialogContent className="max-w-lg p-0 overflow-hidden sm:rounded-xl">
