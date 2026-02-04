@@ -23,6 +23,7 @@ export default function AdminSubscriptions() {
   const [selectedSubscriptionUser, setSelectedSubscriptionUser] = useState<Omit<User, "password"> | null>(null);
   const [editingAccess, setEditingAccess] = useState<{ id?: number, pathologyId: number, status: string } | null>(null);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [editingRenewal, setEditingRenewal] = useState<Subscription | null>(null);
 
   const { data: subscriptions, isLoading } = useQuery<Subscription[]>({
     queryKey: ["/api/admin/subscriptions"],
@@ -75,7 +76,8 @@ export default function AdminSubscriptions() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/subscriptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user", selectedSubscriptionUser?.id] });
       setEditingSubscription(null);
-      toast({ title: "Sucesso", description: "Status da assinatura atualizado" });
+      setEditingRenewal(null);
+      toast({ title: "Sucesso", description: "Assinatura atualizada com sucesso" });
     },
   });
 
@@ -248,8 +250,14 @@ export default function AdminSubscriptions() {
                   </div>
                 </div>
 
-                <div className="bg-card border p-4 rounded-xl">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2">Renovação</p>
+                <div 
+                  className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group" 
+                  onClick={() => selectedUserSubscription && setEditingRenewal(selectedUserSubscription)}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 flex items-center justify-between">
+                    Renovação
+                    <ExternalLink className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                  </p>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-primary" />
                     <span className="text-sm font-semibold text-foreground">
@@ -375,6 +383,40 @@ export default function AdminSubscriptions() {
                 disabled={updateSubscriptionMutation.isPending}
               >
                 {s.label}
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Pop-up de Edição de Renovação - Compacto */}
+      <Dialog open={!!editingRenewal} onOpenChange={(open) => !open && setEditingRenewal(null)}>
+        <DialogContent className="sm:max-w-[320px] p-0 overflow-hidden">
+          <div className="p-4 border-b bg-muted/30">
+            <DialogTitle className="text-base font-bold">Alterar Prazo de Renovação</DialogTitle>
+          </div>
+          <div className="p-3 grid grid-cols-1 gap-2">
+            {[
+              { days: 15, label: "15 Dias" },
+              { days: 30, label: "30 Dias" },
+              { days: 365, label: "365 Dias (1 Ano)" }
+            ].map((opt) => (
+              <Button
+                key={opt.days}
+                variant="ghost"
+                className="h-11 font-bold uppercase tracking-widest hover:bg-primary/10 hover:text-primary"
+                onClick={() => {
+                  if (editingRenewal) {
+                    const newRenewalDate = new Date();
+                    newRenewalDate.setDate(newRenewalDate.getDate() + opt.days);
+                    updateSubscriptionMutation.mutate({ 
+                      id: editingRenewal.id, 
+                      renewalDate: newRenewalDate.toISOString() 
+                    } as any);
+                  }
+                }}
+                disabled={updateSubscriptionMutation.isPending}
+              >
+                {opt.label}
               </Button>
             ))}
           </div>
