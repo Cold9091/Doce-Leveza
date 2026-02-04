@@ -185,7 +185,7 @@ export const notificationSchema = z.object({
   userId: z.number(),
   title: z.string(),
   message: z.string(),
-  type: z.enum(["consultation", "content", "system"]),
+  type: z.enum(["consultation", "content", "system", "payment"]),
   read: z.boolean().default(false),
   createdAt: z.string(),
 });
@@ -193,3 +193,18 @@ export const notificationSchema = z.object({
 export const insertNotificationSchema = notificationSchema.omit({ id: true });
 export type Notification = z.infer<typeof notificationSchema>;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+// Admin Notification schema
+export const adminNotificationSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  message: z.string(),
+  type: z.enum(["payment", "renewal", "system"]),
+  relatedId: z.number().optional(), // ID da assinatura ou acesso relacionado
+  read: z.boolean().default(false),
+  createdAt: z.string(),
+});
+
+export const insertAdminNotificationSchema = adminNotificationSchema.omit({ id: true });
+export type AdminNotification = z.infer<typeof adminNotificationSchema>;
+export type InsertAdminNotification = z.infer<typeof insertAdminNotificationSchema>;

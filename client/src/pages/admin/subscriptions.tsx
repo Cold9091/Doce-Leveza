@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Subscription, User, Pathology, UserAccess } from "@shared/schema";
-import { CreditCard, Trash2, User as UserIcon, Settings, UserCircle, Calendar, Info, Package, ExternalLink } from "lucide-react";
+import type { Subscription, User, Pathology, UserAccess, AdminNotification } from "@shared/schema";
+import { CreditCard, Trash2, User as UserIcon, Settings, UserCircle, Calendar, Info, Package, ExternalLink, Bell, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -14,9 +14,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AdminSubscriptions() {
   const { toast } = useToast();
@@ -27,6 +33,21 @@ export default function AdminSubscriptions() {
 
   const { data: subscriptions, isLoading } = useQuery<Subscription[]>({
     queryKey: ["/api/admin/subscriptions"],
+  });
+
+  const { data: adminNotifications } = useQuery<AdminNotification[]>({
+    queryKey: ["/api/admin/notifications"],
+  });
+
+  const unreadCount = adminNotifications?.filter(n => !n.read).length || 0;
+
+  const markReadMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("PATCH", `/api/admin/notifications/${id}/read`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+    },
   });
 
   const { data: users } = useQuery<Omit<User, "password">[]>({
@@ -126,13 +147,78 @@ export default function AdminSubscriptions() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-heading font-bold text-foreground" data-testid="heading-admin-subscriptions">
-          Gerenciar Assinaturas
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Visualize e gerencie todas as assinaturas do sistema
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-heading font-bold text-foreground" data-testid="heading-admin-subscriptions">
+            Gerenciar Assinaturas
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Visualize e gerencie todas as assinaturas do sistema
+          </p>
+        </div>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="icon" className="relative h-10 w-10">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
+                  {unreadCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0" align="end">
+            <div className="flex items-center justify-between border-b px-4 py-2">
+              <h4 className="text-sm font-semibold">Notificações</h4>
+              {unreadCount > 0 && (
+                <Badge variant="secondary" className="text-[10px]">
+                  {unreadCount} novas
+                </Badge>
+              )}
+            </div>
+            <ScrollArea className="h-[300px]">
+              {adminNotifications && adminNotifications.length > 0 ? (
+                <div className="flex flex-col">
+                  {adminNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`flex flex-col gap-1 border-b p-4 text-sm transition-colors hover:bg-muted/50 ${
+                        !notification.read ? "bg-primary/5" : ""
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold">{notification.title}</span>
+                        {!notification.read && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => markReadMutation.mutate(notification.id)}
+                            disabled={markReadMutation.isPending}
+                          >
+                            <Check className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {notification.message}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground/60 mt-1">
+                        {format(new Date(notification.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex h-[200px] flex-col items-center justify-center p-4 text-center">
+                  <Bell className="mb-2 h-8 w-8 text-muted-foreground/20" />
+                  <p className="text-sm text-muted-foreground">Sem novas notificações</p>
+                </div>
+              )}
+            </ScrollArea>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <Card className="border-border/40 shadow-sm">

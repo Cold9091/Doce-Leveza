@@ -602,6 +602,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/admin/subscriptions/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteSubscription(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin Notifications
+  app.get("/api/admin/notifications", async (_req, res) => {
+    const notifications = await storage.getAdminNotifications();
+    res.json(notifications);
+  });
+
+  app.patch("/api/admin/notifications/:id/read", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const success = await storage.markAdminNotificationRead(id);
+    if (!success) return res.status(404).send("Notification not found");
+    res.sendStatus(204);
+  });
+
   app.post("/api/admin/user-access", async (req, res) => {
     try {
       const access = await storage.createUserAccess(req.body);

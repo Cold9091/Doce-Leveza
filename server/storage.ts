@@ -17,7 +17,9 @@ import {
   type AdminLoginData,
   type Statistics,
   type SystemSettings,
-  type InsertSystemSettings
+  type InsertSystemSettings,
+  type AdminNotification,
+  type InsertAdminNotification
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -26,6 +28,11 @@ export interface IStorage {
   getUserAccess(userId: number): Promise<UserAccess[]>;
   createUserAccess(data: any): Promise<UserAccess>;
   updateUserAccess(id: number, data: any): Promise<UserAccess | null>;
+
+  // Admin Notifications
+  getAdminNotifications(): Promise<AdminNotification[]>;
+  createAdminNotification(data: InsertAdminNotification): Promise<AdminNotification>;
+  markAdminNotificationRead(id: number): Promise<boolean>;
 
   // Settings
   getSettings(): Promise<SystemSettings>;
@@ -39,6 +46,7 @@ export class MemStorage implements IStorage {
   private userAccess: Map<number, UserAccess>;
   private admins: Map<number, AdminUser>;
   private notifications: Map<number, Notification>;
+  private adminNotifications: Map<number, AdminNotification>;
   private settings: SystemSettings;
   private userIdCounter: number;
   private pathologyIdCounter: number;
@@ -48,6 +56,7 @@ export class MemStorage implements IStorage {
   private subscriptionIdCounter: number;
   private userAccessIdCounter: number;
   private notificationIdCounter: number;
+  private adminNotificationIdCounter: number;
 
   constructor() {
     this.leads = new Map();
@@ -60,6 +69,7 @@ export class MemStorage implements IStorage {
     this.userAccess = new Map();
     this.admins = new Map();
     this.notifications = new Map();
+    this.adminNotifications = new Map();
     this.userIdCounter = 1;
     this.pathologyIdCounter = 1;
     this.videoIdCounter = 1;
@@ -68,6 +78,7 @@ export class MemStorage implements IStorage {
     this.subscriptionIdCounter = 1;
     this.userAccessIdCounter = 1;
     this.notificationIdCounter = 1;
+    this.adminNotificationIdCounter = 1;
     this.settings = {
       id: 1,
       siteName: "Doce Leveza",
@@ -440,6 +451,26 @@ export class MemStorage implements IStorage {
     return true;
   }
 
+  // Admin Notifications
+  async getAdminNotifications(): Promise<AdminNotification[]> {
+    return Array.from(this.adminNotifications.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async createAdminNotification(data: InsertAdminNotification): Promise<AdminNotification> {
+    const id = this.adminNotificationIdCounter++;
+    const notification: AdminNotification = { id, ...data };
+    this.adminNotifications.set(id, notification);
+    return notification;
+  }
+
+  async markAdminNotificationRead(id: number): Promise<boolean> {
+    const notification = this.adminNotifications.get(id);
+    if (!notification) return false;
+    notification.read = true;
+    return true;
+  }
+
   // Seed data
   private seedData() {
     // Seed pathologies
@@ -650,6 +681,29 @@ export class MemStorage implements IStorage {
       }
     ];
     demoNotifications.forEach(n => this.notifications.set(n.id, n));
+
+    // Seed admin notifications
+    const demoAdminNotifications: AdminNotification[] = [
+      {
+        id: this.adminNotificationIdCounter++,
+        title: "Novo Pagamento",
+        message: "Maria Silva realizou um pagamento de subscrição mensal.",
+        type: "payment",
+        relatedId: 1,
+        read: false,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: this.adminNotificationIdCounter++,
+        title: "Renovação Pendente",
+        message: "João Pereira solicitou renovação do plano anual.",
+        type: "renewal",
+        relatedId: 2,
+        read: false,
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+      }
+    ];
+    demoAdminNotifications.forEach(n => this.adminNotifications.set(n.id, n));
 
     this.seedUsers();
     
