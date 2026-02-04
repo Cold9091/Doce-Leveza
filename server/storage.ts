@@ -148,6 +148,7 @@ export class MemStorage implements IStorage {
         startDate: new Date().toISOString(),
         renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         paymentMethod: "Transferência",
+        proofUrl: "https://images.unsplash.com/photo-1554224155-1696413565d3?w=800&q=80",
       },
       {
         id: this.subscriptionIdCounter++,
@@ -157,6 +158,7 @@ export class MemStorage implements IStorage {
         startDate: new Date().toISOString(),
         renewalDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
         paymentMethod: "Referência",
+        proofUrl: "https://images.unsplash.com/photo-1554224155-1696413565d3?w=800&q=80",
       }
     ];
 
