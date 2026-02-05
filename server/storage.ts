@@ -158,8 +158,6 @@ export class MemStorage implements IStorage {
       maintenanceMode: false,
       enableSignup: true,
     };
-    
-    this.seedData();
   }
 
   async getSettings(): Promise<SystemSettings> {
@@ -584,62 +582,6 @@ export class MemStorage implements IStorage {
     if (!notification) return false;
     notification.read = true;
     return true;
-  }
-
-  private seedData() {
-    const pathologies: Pathology[] = [
-      {
-        id: 1,
-        slug: "programa-perder-peso",
-        title: "Programa de reeducação alimentar para perder de peso",
-        description: "Plano completo para atingir o seu peso ideal de forma saudável.",
-        icon: "TrendingDown",
-        price: 85000.00
-      },
-      {
-        id: 2,
-        slug: "programa-perder-peso-diabetes",
-        title: "Programa de reeducação alimentar para perder de peso na diabetes",
-        description: "Orientações específicas para o controlo da glicémia e perda de peso.",
-        icon: "Activity",
-        price: 110000.00
-      },
-      {
-        id: 3,
-        slug: "programa-perder-peso-hipertensao",
-        title: "Programa de reeducação alimentar para perder de peso na hipertensão",
-        description: "Estratégias para equilibrar a pressão arterial enquanto perde peso.",
-        icon: "HeartPulse",
-        price: 110000.00
-      }
-    ];
-
-    pathologies.forEach(p => {
-      this.pathologies.set(p.id, p);
-      this.pathologyIdCounter = Math.max(this.pathologyIdCounter, p.id + 1);
-    });
-
-    const admins: AdminUser[] = [
-      {
-        id: 1,
-        name: "Admin",
-        email: "admin@doceleveza.com",
-        password: "admin123",
-        role: "super_admin",
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        name: "Administrador Teste",
-        email: "teste_admin@doceleveza.com",
-        password: "senha_admin_teste",
-        role: "admin",
-        createdAt: new Date().toISOString(),
-      }
-    ];
-    admins.forEach(a => this.admins.set(a.id, a));
-
-    this.seedUsers();
   }
 }
 
