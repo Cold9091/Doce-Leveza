@@ -108,7 +108,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/dashboard">
         {() => {
-          const { data: user, isLoading } = useQuery({
+          const { data: user, isLoading } = useQuery<{ role?: string }>({
             queryKey: ["/api/auth/me"],
             retry: false,
           });
