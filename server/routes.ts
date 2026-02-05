@@ -203,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (admin && admin.password === password) {
           req.session.adminId = admin.id;
           const { password: _, ...adminWithoutPassword } = admin;
-          return res.json({ success: true, data: adminWithoutPassword });
+          return res.json({ success: true, data: { ...adminWithoutPassword, role: "admin" } });
         }
         
         // Se não for admin, talvez seja um lead/usuário? 
