@@ -158,6 +158,30 @@ export class MemStorage implements IStorage {
       maintenanceMode: false,
       enableSignup: true,
     };
+
+    this.seedAdmins();
+  }
+
+  private seedAdmins() {
+    const admins: AdminUser[] = [
+      {
+        id: 1,
+        name: "Admin",
+        email: "admin@doceleveza.com",
+        password: "admin123",
+        role: "super_admin",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        name: "Administrador Teste",
+        email: "teste_admin@doceleveza.com",
+        password: "senha_admin_teste",
+        role: "admin",
+        createdAt: new Date().toISOString(),
+      }
+    ];
+    admins.forEach(a => this.admins.set(a.id, a));
   }
 
   async getSettings(): Promise<SystemSettings> {
