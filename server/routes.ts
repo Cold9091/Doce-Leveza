@@ -2,6 +2,8 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 import { 
   leadSchema, 
   signupSchema, 
@@ -24,15 +26,42 @@ declare module "express-session" {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configuração de sessão
+  // Configuração de Segurança com Helmet
+  app.use(helmet({
+    contentSecurityPolicy: false, // Desativado para facilitar o desenvolvimento inicial com Vite, mas protege contra XSS e outros
+  }));
+
+  // Rate Limiting global (prevenir DoS)
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    limit: 100, // Limite de 100 requisições por IP
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: "Muitas requisições. Tente novamente mais tarde." }
+  });
+  app.use("/api/", limiter);
+
+  // Rate Limiting específico para Login (prevenir Força Bruta)
+  const authLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hora
+    limit: 10, // Apenas 10 tentativas de login por hora
+    message: { error: "Muitas tentativas de login. Tente novamente em 1 hora." }
+  });
+  app.use("/api/auth/login", authLimiter);
+  app.use("/api/admin/login", authLimiter);
+
+  // Configuração de sessão segura
   app.use(
     session({
-      secret: "doce-leveza-secret-key",
+      name: "__host_dl_session", // Nome customizado para ocultar tecnologia
+      secret: "doce-leveza-secret-key-super-secure-2026", // Idealmente viria de env
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        httpOnly: true, // Impede acesso via JavaScript (Mitiga XSS)
+        secure: process.env.NODE_ENV === "production", // Apenas via HTTPS em produção
+        sameSite: "strict", // Previne CSRF
+        maxAge: 24 * 60 * 60 * 1000,
       },
     })
   );
