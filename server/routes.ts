@@ -76,6 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
     if (!req.session.adminId) {
+      console.warn(`Tentativa de acesso não autorizado à rota administrativa: ${req.path} de ${req.ip}`);
       return res.status(401).json({ success: false, error: "Acesso negado. Apenas administradores." });
     }
     next();

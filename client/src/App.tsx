@@ -36,8 +36,8 @@ function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode
   const { data: user, isLoading } = useQuery({
     queryKey: [endpoint],
     retry: false,
-    staleTime: 0,
-    gcTime: 0, // Evitar cache de sessões anteriores
+    staleTime: 1000 * 30, // 30 segundos de cache para segurança/performance
+    gcTime: 1000 * 60,
   });
 
   if (isLoading) {
@@ -49,7 +49,7 @@ function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode
   }
 
   if (!user) {
-    setLocation("/");
+    window.location.href = "/"; // Forçar redirecionamento total para limpar estado
     return null;
   }
 
