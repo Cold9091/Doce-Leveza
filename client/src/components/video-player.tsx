@@ -200,6 +200,7 @@ export function VideoPlayer({ video, open, onOpenChange, userIdentifier = "Usuá
           height: '100%',
           playerVars: {
             autoplay: 1,
+            mute: 1,
             controls: 0,
             modestbranding: 1,
             rel: 0,
@@ -214,6 +215,7 @@ export function VideoPlayer({ video, open, onOpenChange, userIdentifier = "Usuá
               setPlayerReady(true);
               setDuration(event.target.getDuration());
               event.target.setVolume(volume);
+              event.target.playVideo();
             },
             onStateChange: (event: any) => {
               const playing = event.data === window.YT.PlayerState.PLAYING;
