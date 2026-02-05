@@ -54,11 +54,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Rotas de Auth - Sessão
   app.get("/api/auth/me", async (req, res) => {
+    // Check for admin session first if path is sensitive, or just return admin if session exists
+    if (req.session.adminId) {
+      const admin = await storage.getAdminById(req.session.adminId);
+      if (admin) {
+        const { password, ...adminWithoutPassword } = admin;
+        return res.json({ ...adminWithoutPassword, role: admin.role || "admin" });
+      }
+    }
+    
     if (!req.session.userId) return res.status(401).json(null);
     const user = await storage.getUserById(req.session.userId);
     if (!user) return res.status(401).json(null);
     const { password, ...userWithoutPassword } = user;
-    res.json(userWithoutPassword);
+    res.json({ ...userWithoutPassword, role: "user" });
   });
 
   app.get("/api/admin/me", async (req, res) => {

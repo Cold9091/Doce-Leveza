@@ -108,9 +108,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
       // Redirecionar imediatamente baseado no papel do usuário
       const userData = response.data;
       if (userData?.role === "admin" || userData?.role === "super_admin") {
-        window.location.replace("/admin");
+        window.location.href = "/admin";
       } else {
-        window.location.replace("/dashboard");
+        window.location.href = "/dashboard";
       }
       
       onOpenChange(false);

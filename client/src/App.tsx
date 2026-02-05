@@ -111,9 +111,15 @@ function Router() {
           const { data: user, isLoading } = useQuery<{ role?: string }>({
             queryKey: ["/api/auth/me"],
             retry: false,
+            staleTime: 0,
           });
 
-          if (isLoading) return null;
+          if (isLoading) return (
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          );
+
           if (user?.role === "admin" || user?.role === "super_admin") {
             window.location.replace("/admin");
             return null;

@@ -1,81 +1,32 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Video, BookOpen, Calendar, CreditCard, Mail, TrendingUp, Activity } from "lucide-react";
+import { Users, Video, BookOpen, Calendar, CreditCard, Mail, TrendingUp, Activity, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Statistics } from "@shared/schema";
 
 export default function AdminDashboard() {
-  const { data: stats, isLoading } = useQuery<Statistics>({
+  const { data: stats, isLoading, error } = useQuery<Statistics>({
     queryKey: ["/api/admin/statistics"],
+    retry: 1,
   });
-
-  const statCards = [
-    {
-      title: "Total de Alunos",
-      value: stats?.totalUsers || 0,
-      icon: Users,
-      color: "text-blue-600 dark:text-blue-400",
-      testId: "stat-total-users",
-    },
-    {
-      title: "Assinaturas Ativas",
-      value: stats?.activeSubscriptions || 0,
-      icon: CreditCard,
-      color: "text-green-600 dark:text-green-400",
-      testId: "stat-active-subscriptions",
-    },
-    {
-      title: "Total de Vídeos",
-      value: stats?.totalVideos || 0,
-      icon: Video,
-      color: "text-purple-600 dark:text-purple-400",
-      testId: "stat-total-videos",
-    },
-    {
-      title: "Total de Ebooks",
-      value: stats?.totalEbooks || 0,
-      icon: BookOpen,
-      color: "text-orange-600 dark:text-orange-400",
-      testId: "stat-total-ebooks",
-    },
-    {
-      title: "Total de Consultas",
-      value: stats?.totalConsultations || 0,
-      icon: Calendar,
-      color: "text-pink-600 dark:text-pink-400",
-      testId: "stat-total-consultations",
-    },
-    {
-      title: "Total de Leads",
-      value: stats?.totalLeads || 0,
-      icon: Mail,
-      color: "text-cyan-600 dark:text-cyan-400",
-      testId: "stat-total-leads",
-    },
-    {
-      title: "Novos Alunos (30 dias)",
-      value: stats?.recentUsers || 0,
-      icon: TrendingUp,
-      color: "text-emerald-600 dark:text-emerald-400",
-      testId: "stat-recent-users",
-    },
-    {
-      title: "Atividade",
-      value: "100%",
-      icon: Activity,
-      color: "text-indigo-600 dark:text-indigo-400",
-      testId: "stat-activity",
-    },
-  ];
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-heading font-bold">Dashboard Administrativo</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <Card key={i} className="h-32 animate-pulse bg-muted" />
-          ))}
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground animate-pulse">Carregando estatísticas...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="pt-6">
+            <p className="text-destructive font-medium">Erro ao carregar dados do dashboard.</p>
+            <p className="text-sm text-muted-foreground mt-1">Por favor, verifique se você tem permissões de administrador.</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
