@@ -109,7 +109,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
         loginForm.reset();
         
         // Redirecionar baseado no papel do usuário
-        if (response.data?.role === "admin" || response.data?.role === "super_admin") {
+        // O backend agora retorna o papel correto (role) para administradores
+        const userData = response.data;
+        if (userData?.role === "admin" || userData?.role === "super_admin") {
           window.location.href = "/admin";
         } else {
           window.location.href = "/dashboard";

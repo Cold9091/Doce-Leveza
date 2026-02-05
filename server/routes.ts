@@ -230,7 +230,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Don't send password back
       const { password: _, ...userWithoutPassword } = user;
       
-      res.json({ success: true, data: userWithoutPassword });
+      // Adicionar role de usuário padrão para o frontend
+      res.json({ success: true, data: { ...userWithoutPassword, role: "user" } });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({
