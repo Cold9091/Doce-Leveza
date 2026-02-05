@@ -17,6 +17,7 @@ import PathologyDetail from "@/pages/dashboard/pathology-detail";
 import Library from "@/pages/dashboard/library";
 import Consultations from "@/pages/dashboard/consultations";
 import Settings from "@/pages/dashboard/settings";
+import Profile from "@/pages/dashboard/profile";
 import Subscription from "@/pages/dashboard/subscription";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminUsers from "@/pages/admin/users";
@@ -102,6 +103,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <Library />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/perfil">
+        {() => (
+          <DashboardLayout>
+            <Profile />
           </DashboardLayout>
         )}
       </Route>
