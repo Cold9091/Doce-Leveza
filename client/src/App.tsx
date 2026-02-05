@@ -107,13 +107,26 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard">
-        {() => (
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Overview />
-            </DashboardLayout>
-          </ProtectedRoute>
-        )}
+        {() => {
+          const { data: user, isLoading } = useQuery({
+            queryKey: ["/api/auth/me"],
+            retry: false,
+          });
+
+          if (isLoading) return null;
+          if (user?.role === "admin" || user?.role === "super_admin") {
+            window.location.replace("/admin");
+            return null;
+          }
+
+          return (
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Overview />
+              </DashboardLayout>
+            </ProtectedRoute>
+          );
+        }}
       </Route>
       <Route path="/dashboard/programas">
         {() => (

@@ -104,18 +104,17 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
         title: "Login realizado!",
         description: "Bem-vindo de volta ao DOCE LEVEZA.",
       });
-      setTimeout(() => {
-        onOpenChange(false);
-        loginForm.reset();
-        
-        // Redirecionar baseado no papel do usuário
-        const userData = response.data;
-        if (userData?.role === "admin" || userData?.role === "super_admin") {
-          window.location.href = "/admin";
-        } else {
-          window.location.href = "/dashboard";
-        }
-      }, 1000);
+      
+      // Redirecionar imediatamente baseado no papel do usuário
+      const userData = response.data;
+      if (userData?.role === "admin" || userData?.role === "super_admin") {
+        window.location.replace("/admin");
+      } else {
+        window.location.replace("/dashboard");
+      }
+      
+      onOpenChange(false);
+      loginForm.reset();
     },
     onError: (error: any) => {
       toast({
