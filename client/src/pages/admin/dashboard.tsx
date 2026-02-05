@@ -31,6 +31,65 @@ export default function AdminDashboard() {
     );
   }
 
+  const statCards = [
+    {
+      title: "Total de Alunos",
+      value: stats?.totalUsers || 0,
+      icon: Users,
+      color: "text-blue-600 dark:text-blue-400",
+      testId: "stat-total-users",
+    },
+    {
+      title: "Assinaturas Ativas",
+      value: stats?.activeSubscriptions || 0,
+      icon: CreditCard,
+      color: "text-green-600 dark:text-green-400",
+      testId: "stat-active-subscriptions",
+    },
+    {
+      title: "Total de Vídeos",
+      value: stats?.totalVideos || 0,
+      icon: Video,
+      color: "text-purple-600 dark:text-purple-400",
+      testId: "stat-total-videos",
+    },
+    {
+      title: "Total de Ebooks",
+      value: stats?.totalEbooks || 0,
+      icon: BookOpen,
+      color: "text-orange-600 dark:text-orange-400",
+      testId: "stat-total-ebooks",
+    },
+    {
+      title: "Total de Consultas",
+      value: stats?.totalConsultations || 0,
+      icon: Calendar,
+      color: "text-pink-600 dark:text-pink-400",
+      testId: "stat-total-consultations",
+    },
+    {
+      title: "Total de Leads",
+      value: stats?.totalLeads || 0,
+      icon: Mail,
+      color: "text-cyan-600 dark:text-cyan-400",
+      testId: "stat-total-leads",
+    },
+    {
+      title: "Novos Alunos (30 dias)",
+      value: stats?.recentUsers || 0,
+      icon: TrendingUp,
+      color: "text-emerald-600 dark:text-emerald-400",
+      testId: "stat-recent-users",
+    },
+    {
+      title: "Atividade",
+      value: "100%",
+      icon: Activity,
+      color: "text-indigo-600 dark:text-indigo-400",
+      testId: "stat-activity",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
