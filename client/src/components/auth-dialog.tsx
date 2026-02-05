@@ -101,7 +101,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
     mutationFn: async (data: LoginData) => {
       return await apiRequest("POST", "/api/auth/login", data);
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       toast({
         title: "Login realizado!",
         description: "Bem-vindo de volta ao DOCE LEVEZA.",
@@ -109,7 +109,13 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
       setTimeout(() => {
         onOpenChange(false);
         loginForm.reset();
-        // Redirecionar para área de membros
+        
+        // Redirecionar baseado no papel do usuário
+        if (response.data?.role === "admin" || response.data?.role === "super_admin") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/dashboard";
+        }
       }, 1000);
     },
     onError: (error: any) => {
