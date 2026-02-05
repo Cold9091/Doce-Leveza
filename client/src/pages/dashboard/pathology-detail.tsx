@@ -261,7 +261,8 @@ export default function PathologyDetail() {
           width: '100%',
           height: '100%',
           playerVars: {
-            autoplay: 0,
+            autoplay: 1,
+            mute: 1,
             controls: 0,
             modestbranding: 1,
             rel: 0,
@@ -276,6 +277,7 @@ export default function PathologyDetail() {
               setPlayerReady(true);
               setDuration(event.target.getDuration());
               event.target.setVolume(volume);
+              event.target.playVideo();
             },
             onStateChange: (event: any) => {
               const playing = event.data === window.YT.PlayerState.PLAYING;
@@ -509,12 +511,24 @@ export default function PathologyDetail() {
                       className="absolute inset-0 w-full h-full"
                     />
                     
+                    {/* Thumbnail overlay when paused or loading */}
+                    {(!isPlaying || !playerReady) && currentVideo.thumbnailUrl && (
+                      <div className="absolute inset-0 z-10">
+                        <img 
+                          src={currentVideo.thumbnailUrl} 
+                          alt={currentVideo.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/20" />
+                      </div>
+                    )}
+                    
                     <ProtectionOverlay userIdentifier="Usuário" showWatermark={true} />
                     
-                    <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-10" />
+                    <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-30" />
 
                     <div 
-                      className={`absolute inset-0 z-20 transition-opacity duration-300 ${
+                      className={`absolute inset-0 z-40 transition-opacity duration-300 ${
                         showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
                       }`}
                     >
