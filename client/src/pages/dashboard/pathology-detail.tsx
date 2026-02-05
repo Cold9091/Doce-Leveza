@@ -199,12 +199,22 @@ export default function PathologyDetail() {
 
   const updateProgress = useCallback(() => {
     if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-      setCurrentTime(playerRef.current.getCurrentTime());
+      const time = playerRef.current.getCurrentTime();
+      setCurrentTime(time);
+      
+      // Auto-switch to next video if near the end (15 seconds before)
+      if (duration > 0 && duration - time <= 15) {
+        if (pathologyVideos && currentVideoIndex < pathologyVideos.length - 1) {
+          handleVideoSelect(currentVideoIndex + 1);
+        } else {
+          setShowCourseView(false);
+        }
+      }
     }
     if (isPlaying) {
       animationRef.current = requestAnimationFrame(updateProgress);
     }
-  }, [isPlaying]);
+  }, [isPlaying, duration, pathologyVideos, currentVideoIndex]);
 
   useEffect(() => {
     if (isPlaying) {
