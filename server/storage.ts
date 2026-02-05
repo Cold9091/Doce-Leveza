@@ -133,10 +133,58 @@ export class MemStorage implements IStorage {
         address: "Centralidade do Kilamba, Bloco A",
         password: "password123",
         createdAt: new Date().toISOString(),
+      },
+      {
+        id: this.userIdCounter++,
+        name: "Aluna Multi Programas",
+        phone: "999000111",
+        address: "Teste Endereço, Luanda",
+        password: "senha123",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: this.userIdCounter++,
+        name: "Aluna Programa Único",
+        phone: "999000222",
+        address: "Teste Endereço, Luanda",
+        password: "senha123",
+        createdAt: new Date().toISOString(),
       }
     ];
 
     demoUsers.forEach(u => this.users.set(u.id, u));
+
+    // Seed User Access (Programas)
+    const multiProgramUserId = 5;
+    const singleProgramUserId = 6;
+
+    const demoAccess: UserAccess[] = [
+      {
+        id: this.userAccessIdCounter++,
+        userId: multiProgramUserId,
+        pathologyId: 1,
+        startDate: new Date().toISOString(),
+        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        status: "activo",
+      },
+      {
+        id: this.userAccessIdCounter++,
+        userId: multiProgramUserId,
+        pathologyId: 2,
+        startDate: new Date().toISOString(),
+        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        status: "activo",
+      },
+      {
+        id: this.userAccessIdCounter++,
+        userId: singleProgramUserId,
+        pathologyId: 3,
+        startDate: new Date().toISOString(),
+        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        status: "activo",
+      }
+    ];
+    demoAccess.forEach(a => this.userAccess.set(a.id, a));
 
     // Seed subscriptions for some users
     const demoSubscriptions: Subscription[] = [
@@ -652,15 +700,25 @@ export class MemStorage implements IStorage {
     });
 
     // Seed admin user
-    const admin: AdminUser = {
-      id: 1,
-      name: "Admin",
-      email: "admin@doceleveza.com",
-      password: "admin123",
-      role: "super_admin",
-      createdAt: new Date().toISOString(),
-    };
-    this.admins.set(admin.id, admin);
+    const admins: AdminUser[] = [
+      {
+        id: 1,
+        name: "Admin",
+        email: "admin@doceleveza.com",
+        password: "admin123",
+        role: "super_admin",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        name: "Administrador Teste",
+        email: "teste_admin@doceleveza.com",
+        password: "senha_admin_teste",
+        role: "admin",
+        createdAt: new Date().toISOString(),
+      }
+    ];
+    admins.forEach(a => this.admins.set(a.id, a));
 
     // Seed notifications for user 1
     const demoNotifications: Notification[] = [
