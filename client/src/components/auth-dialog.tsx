@@ -40,9 +40,7 @@ const signupSchema = z.object({
 });
 
 const loginSchema = z.object({
-  phone: z.string()
-    .min(9, "Telefone é obrigatório")
-    .regex(/^(\+244)?[0-9]{9}$/, "Formato: +244 9XX XXX XXX"),
+  identifier: z.string().min(3, "Digite seu telefone ou email"),
   password: z.string().min(6, "Senha é obrigatória"),
 });
 
@@ -67,7 +65,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   const loginForm = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      phone: "",
+      identifier: "",
       password: "",
     },
   });
@@ -266,27 +264,16 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                   >
                     <FormField
                       control={loginForm.control}
-                      name="phone"
+                      name="identifier"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Telefone*</FormLabel>
+                          <FormLabel>Telefone ou Email*</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                +244
-                              </span>
-                              <Input
-                                type="tel"
-                                placeholder="9XX XXX XXX"
-                                {...field}
-                                className="pl-16"
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '');
-                                  field.onChange(value);
-                                }}
-                                data-testid="input-login-phone"
-                              />
-                            </div>
+                            <Input
+                              placeholder="Digite seu telefone ou email"
+                              {...field}
+                              data-testid="input-login-identifier"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

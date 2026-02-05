@@ -189,11 +189,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User login
   app.post("/api/auth/login", async (req, res) => {
     try {
-      const validatedData = loginSchema.parse(req.body);
+      const { identifier, password } = req.body;
       
-      const user = await storage.getUserByPhone(validatedData.phone);
+      if (!identifier || !password) {
+        return res.status(400).json({ success: false, error: "Credenciais incompletas" });
+      }
+
+      let user;
+      // Verificar se é email ou telefone
+      if (identifier.includes("@")) {
+        // Tentar encontrar admin pelo email primeiro
+        const admin = await storage.getAdminByEmail(identifier);
+        if (admin && admin.password === password) {
+          req.session.adminId = admin.id;
+          const { password: _, ...adminWithoutPassword } = admin;
+          return res.json({ success: true, data: adminWithoutPassword });
+        }
+        
+        // Se não for admin, talvez seja um lead/usuário? 
+        // No esquema atual apenas AdminUser tem email.
+        return res.status(401).json({
+          success: false,
+          error: "Credenciais inválidas",
+        });
+      } else {
+        // Tratar como telefone
+        user = await storage.getUserByPhone(identifier);
+      }
       
-      if (!user || user.password !== validatedData.password) {
+      if (!user || user.password !== password) {
         return res.status(401).json({
           success: false,
           error: "Telefone ou senha incorretos",
@@ -204,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.userId = user.id;
 
       // Don't send password back
-      const { password, ...userWithoutPassword } = user;
+      const { password: _, ...userWithoutPassword } = user;
       
       res.json({ success: true, data: userWithoutPassword });
     } catch (error) {
