@@ -1,6 +1,6 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Loader2 } from "lucide-react";
 
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
@@ -27,6 +28,32 @@ import AdminEbooks from "@/pages/admin/ebooks";
 import AdminConsultations from "@/pages/admin/consultations";
 import AdminSubscriptions from "@/pages/admin/subscriptions";
 import AdminSettings from "@/pages/admin/settings";
+
+function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode, type?: "user" | "admin" }) {
+  const [, setLocation] = useLocation();
+  const endpoint = type === "admin" ? "/api/admin/me" : "/api/auth/me";
+  
+  const { data: user, isLoading } = useQuery({
+    queryKey: [endpoint],
+    retry: false,
+    staleTime: 0,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    setLocation("/");
+    return null;
+  }
+
+  return <>{children}</>;
+}
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const style = {
@@ -80,114 +107,146 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/dashboard">
         {() => (
-          <DashboardLayout>
-            <Overview />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Overview />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/dashboard/programas">
         {() => (
-          <DashboardLayout>
-            <Pathologies />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Pathologies />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/dashboard/programas/:slug">
         {() => (
-          <DashboardLayout>
-            <PathologyDetail />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <PathologyDetail />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/dashboard/biblioteca">
         {() => (
-          <DashboardLayout>
-            <Library />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Library />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/dashboard/perfil">
         {() => (
-          <DashboardLayout>
-            <Profile />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Profile />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/dashboard/consultas">
         {() => (
-          <DashboardLayout>
-            <Consultations />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Consultations />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/dashboard/configuracoes">
         {() => (
-          <DashboardLayout>
-            <Settings />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Settings />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/dashboard/assinatura">
         {() => (
-          <DashboardLayout>
-            <Subscription />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Subscription />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/admin">
         {() => (
-          <AdminLayout>
-            <AdminDashboard />
-          </AdminLayout>
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/admin/alunos">
         {() => (
-          <AdminLayout>
-            <AdminUsers />
-          </AdminLayout>
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminUsers />
+            </AdminLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/admin/programas">
         {() => (
-          <AdminLayout>
-            <AdminPathologies />
-          </AdminLayout>
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminPathologies />
+            </AdminLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/admin/videos">
         {() => (
-          <AdminLayout>
-            <AdminVideos />
-          </AdminLayout>
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminVideos />
+            </AdminLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/admin/ebooks">
         {() => (
-          <AdminLayout>
-            <AdminEbooks />
-          </AdminLayout>
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminEbooks />
+            </AdminLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/admin/consultas">
         {() => (
-          <AdminLayout>
-            <AdminConsultations />
-          </AdminLayout>
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminConsultations />
+            </AdminLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/admin/assinaturas">
         {() => (
-          <AdminLayout>
-            <AdminSubscriptions />
-          </AdminLayout>
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminSubscriptions />
+            </AdminLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/admin/configuracoes">
         {() => (
-          <AdminLayout>
-            <AdminSettings />
-          </AdminLayout>
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminSettings />
+            </AdminLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route component={NotFound} />

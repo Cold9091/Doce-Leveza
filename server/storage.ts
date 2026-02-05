@@ -19,15 +19,79 @@ import {
   type SystemSettings,
   type InsertSystemSettings,
   type AdminNotification,
-  type InsertAdminNotification
+  type InsertAdminNotification,
+  type Notification,
+  type InsertNotification
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
-  // ... (existing methods)
+  // Leads
+  createLead(lead: Lead): Promise<Lead & { id: string }>;
+  getLeads(): Promise<(Lead & { id: string })[]>;
+  deleteLead(id: string): Promise<boolean>;
+
+  // Users
+  createUser(data: SignupData): Promise<User>;
+  getUserByPhone(phone: string): Promise<User | null>;
+  getUsers(): Promise<User[]>;
+  getUserById(id: number): Promise<User | null>;
+  updateUser(id: number, data: Partial<User>): Promise<User | null>;
+  deleteUser(id: number): Promise<boolean>;
+
+  // Pathologies/Programs
+  getPathologies(): Promise<Pathology[]>;
+  getPathologyById(id: number): Promise<Pathology | null>;
+  getPathologyBySlug(slug: string): Promise<Pathology | null>;
+  createPathology(data: InsertPathology): Promise<Pathology>;
+  updatePathology(id: number, data: Partial<Pathology>): Promise<Pathology | null>;
+  deletePathology(id: number): Promise<boolean>;
+
+  // Videos
+  getVideos(): Promise<Video[]>;
+  getVideosByPathology(pathologyId: number): Promise<Video[]>;
+  getVideoById(id: number): Promise<Video | null>;
+  createVideo(data: InsertVideo): Promise<Video>;
+  updateVideo(id: number, data: Partial<Video>): Promise<Video | null>;
+  deleteVideo(id: number): Promise<boolean>;
+
+  // Ebooks
+  getEbooks(): Promise<Ebook[]>;
+  getEbooksByPathology(pathologyId: number): Promise<Ebook[]>;
+  getEbookById(id: number): Promise<Ebook | null>;
+  createEbook(data: InsertEbook): Promise<Ebook>;
+  updateEbook(id: number, data: Partial<Ebook>): Promise<Ebook | null>;
+  deleteEbook(id: number): Promise<boolean>;
+
+  // Consultations
+  getConsultations(): Promise<Consultation[]>;
+  getConsultationsByUser(userId: number): Promise<Consultation[]>;
+  getConsultationById(id: number): Promise<Consultation | null>;
+  createConsultation(data: InsertConsultation): Promise<Consultation>;
+  updateConsultation(id: number, data: Partial<Consultation>): Promise<Consultation | null>;
+  deleteConsultation(id: number): Promise<boolean>;
+
+  // Subscriptions
+  getSubscriptions(): Promise<Subscription[]>;
+  getSubscriptionByUser(userId: number): Promise<Subscription | null>;
+  createSubscription(data: InsertSubscription): Promise<Subscription>;
+  updateSubscription(id: number, data: Partial<Subscription>): Promise<Subscription | null>;
+  deleteSubscription(id: number): Promise<boolean>;
+
+  // User Access
   getUserAccess(userId: number): Promise<UserAccess[]>;
   createUserAccess(data: any): Promise<UserAccess>;
   updateUserAccess(id: number, data: any): Promise<UserAccess | null>;
+
+  // Notifications
+  getNotificationsByUser(userId: number): Promise<Notification[]>;
+  createNotification(data: InsertNotification): Promise<Notification>;
+  markNotificationRead(id: number): Promise<boolean>;
+
+  // Admin
+  getAdminById(id: number): Promise<AdminUser | null>;
+  getAdminByEmail(email: string): Promise<AdminUser | null>;
+  getStatistics(): Promise<Statistics>;
 
   // Admin Notifications
   getAdminNotifications(): Promise<AdminNotification[]>;
@@ -43,11 +107,16 @@ export class MemStorage implements IStorage {
   private leads: Map<string, Lead & { id: string }>;
   private users: Map<number, User>;
   private pathologies: Map<number, Pathology>;
+  private videos: Map<number, Video>;
+  private ebooks: Map<number, Ebook>;
+  private consultations: Map<number, Consultation>;
+  private subscriptions: Map<number, Subscription>;
   private userAccess: Map<number, UserAccess>;
   private admins: Map<number, AdminUser>;
   private notifications: Map<number, Notification>;
   private adminNotifications: Map<number, AdminNotification>;
   private settings: SystemSettings;
+
   private userIdCounter: number;
   private pathologyIdCounter: number;
   private videoIdCounter: number;
@@ -70,6 +139,7 @@ export class MemStorage implements IStorage {
     this.admins = new Map();
     this.notifications = new Map();
     this.adminNotifications = new Map();
+
     this.userIdCounter = 1;
     this.pathologyIdCounter = 1;
     this.videoIdCounter = 1;
@@ -79,6 +149,7 @@ export class MemStorage implements IStorage {
     this.userAccessIdCounter = 1;
     this.notificationIdCounter = 1;
     this.adminNotificationIdCounter = 1;
+
     this.settings = {
       id: 1,
       siteName: "Doce Leveza",
@@ -154,7 +225,7 @@ export class MemStorage implements IStorage {
 
     demoUsers.forEach(u => this.users.set(u.id, u));
 
-    // Seed User Access (Programas)
+    // Seed User Access
     const multiProgramUserId = 5;
     const singleProgramUserId = 6;
 
@@ -186,7 +257,6 @@ export class MemStorage implements IStorage {
     ];
     demoAccess.forEach(a => this.userAccess.set(a.id, a));
 
-    // Seed subscriptions for some users
     const demoSubscriptions: Subscription[] = [
       {
         id: this.subscriptionIdCounter++,
@@ -209,7 +279,6 @@ export class MemStorage implements IStorage {
         proofUrl: "https://images.unsplash.com/photo-1554224155-1696413565d3?w=800&q=80",
       }
     ];
-
     demoSubscriptions.forEach(s => this.subscriptions.set(s.id, s));
   }
 
@@ -267,7 +336,6 @@ export class MemStorage implements IStorage {
     return this.users.delete(id);
   }
 
-  // Pathologies
   async getPathologies(): Promise<Pathology[]> {
     return Array.from(this.pathologies.values());
   }
@@ -300,7 +368,6 @@ export class MemStorage implements IStorage {
     return this.pathologies.delete(id);
   }
 
-  // Videos
   async getVideos(): Promise<Video[]> {
     return Array.from(this.videos.values());
   }
@@ -333,7 +400,6 @@ export class MemStorage implements IStorage {
     return this.videos.delete(id);
   }
 
-  // Ebooks
   async getEbooks(): Promise<Ebook[]> {
     return Array.from(this.ebooks.values());
   }
@@ -366,7 +432,6 @@ export class MemStorage implements IStorage {
     return this.ebooks.delete(id);
   }
 
-  // Consultations
   async getConsultations(): Promise<Consultation[]> {
     return Array.from(this.consultations.values());
   }
@@ -403,7 +468,6 @@ export class MemStorage implements IStorage {
     return this.consultations.delete(id);
   }
 
-  // Subscriptions
   async getSubscriptions(): Promise<Subscription[]> {
     return Array.from(this.subscriptions.values());
   }
@@ -432,35 +496,6 @@ export class MemStorage implements IStorage {
     return this.subscriptions.delete(id);
   }
 
-  // Admin
-  async getAdminByEmail(email: string): Promise<AdminUser | null> {
-    const admins = Array.from(this.admins.values());
-    return admins.find(a => a.email === email) || null;
-  }
-
-  async getStatistics(): Promise<Statistics> {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const recentUsers = Array.from(this.users.values()).filter(
-      u => new Date(u.createdAt) >= thirtyDaysAgo
-    ).length;
-
-    const activeSubscriptions = Array.from(this.subscriptions.values()).filter(
-      s => s.status === "ativa"
-    ).length;
-
-    return {
-      totalUsers: this.users.size,
-      activeSubscriptions,
-      totalVideos: 0,
-      totalEbooks: 0,
-      totalConsultations: 0,
-      totalLeads: 0,
-      recentUsers,
-    };
-  }
-
   async getUserAccess(userId: number): Promise<UserAccess[]> {
     return Array.from(this.userAccess.values()).filter(a => a.userId === userId);
   }
@@ -480,7 +515,6 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  // Notifications
   async getNotificationsByUser(userId: number): Promise<Notification[]> {
     return Array.from(this.notifications.values())
       .filter(n => n.userId === userId)
@@ -501,7 +535,38 @@ export class MemStorage implements IStorage {
     return true;
   }
 
-  // Admin Notifications
+  async getAdminById(id: number): Promise<AdminUser | null> {
+    return this.admins.get(id) || null;
+  }
+
+  async getAdminByEmail(email: string): Promise<AdminUser | null> {
+    const admins = Array.from(this.admins.values());
+    return admins.find(a => a.email === email) || null;
+  }
+
+  async getStatistics(): Promise<Statistics> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentUsers = Array.from(this.users.values()).filter(
+      u => new Date(u.createdAt) >= thirtyDaysAgo
+    ).length;
+
+    const activeSubscriptions = Array.from(this.subscriptions.values()).filter(
+      s => s.status === "ativa"
+    ).length;
+
+    return {
+      totalUsers: this.users.size,
+      activeSubscriptions,
+      totalVideos: this.videos.size,
+      totalEbooks: this.ebooks.size,
+      totalConsultations: this.consultations.size,
+      totalLeads: this.leads.size,
+      recentUsers,
+    };
+  }
+
   async getAdminNotifications(): Promise<AdminNotification[]> {
     return Array.from(this.adminNotifications.values())
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -521,9 +586,7 @@ export class MemStorage implements IStorage {
     return true;
   }
 
-  // Seed data
   private seedData() {
-    // Seed pathologies
     const pathologies: Pathology[] = [
       {
         id: 1,
@@ -548,30 +611,6 @@ export class MemStorage implements IStorage {
         description: "Estratégias para equilibrar a pressão arterial enquanto perde peso.",
         icon: "HeartPulse",
         price: 110000.00
-      },
-      {
-        id: 4,
-        slug: "programa-perder-peso-gastrite",
-        title: "Programa de reeducação alimentar para perder de peso na gastrite",
-        description: "Alimentação leve e curativa para o sistema digestivo.",
-        icon: "Utensils",
-        price: 85000.00
-      },
-      {
-        id: 5,
-        slug: "programa-perder-peso-amamentacao",
-        title: "Programa de reeducação alimentar para perder de peso na amamentação",
-        description: "Nutrição equilibrada para a mãe e o bebé durante a perda de peso.",
-        icon: "Baby",
-        price: 85000.00
-      },
-      {
-        id: 6,
-        slug: "programa-perder-peso-idosos",
-        title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
-        description: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
-        icon: "Users",
-        price: 85000.00
       }
     ];
 
@@ -580,126 +619,6 @@ export class MemStorage implements IStorage {
       this.pathologyIdCounter = Math.max(this.pathologyIdCounter, p.id + 1);
     });
 
-    // Seed videos
-    const videos: Video[] = [
-      {
-        id: 1,
-        pathologyId: 1,
-        title: "Introdução ao Programa de Perda de Peso",
-        description: "Aprenda os fundamentos para reeducação alimentar focada em emagrecimento",
-        duration: "15:30",
-        thumbnailUrl: "https://images.unsplash.com/photo-1505576391880-b3f9d713dc4f?w=400",
-        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        resources: ["PDF: Guia Inicial", "Lista de Compras"],
-        viewCount: 245
-      },
-      {
-        id: 7,
-        pathologyId: 1,
-        title: "Módulo 2: Planeamento de Refeições",
-        description: "Como organizar a sua semana para manter a consistência",
-        duration: "10:45",
-        thumbnailUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400",
-        videoUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
-        viewCount: 150
-      },
-      {
-        id: 2,
-        pathologyId: 2,
-        title: "Diabetes e Alimentação",
-        description: "Como gerir a diabetes enquanto perde peso",
-        duration: "12:45",
-        thumbnailUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400",
-        videoUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
-        viewCount: 189
-      },
-      {
-        id: 3,
-        pathologyId: 3,
-        title: "Hipertensão e Dieta DASH",
-        description: "Estratégias nutricionais para hipertensos",
-        duration: "18:20",
-        thumbnailUrl: "https://images.unsplash.com/photo-1511688878353-3a2f5be94cd7?w=400",
-        videoUrl: "https://www.youtube.com/watch?v=kJQP7kiw5Fk",
-        viewCount: 512
-      },
-      {
-        id: 4,
-        pathologyId: 4,
-        title: "Cuidados com a Gastrite",
-        description: "Alimentação para alívio dos sintomas da gastrite",
-        duration: "14:15",
-        thumbnailUrl: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400",
-        videoUrl: "https://www.youtube.com/watch?v=JGwWNGJdvx8",
-        viewCount: 156
-      },
-      {
-        id: 5,
-        pathologyId: 5,
-        title: "Nutrição na Amamentação",
-        description: "Perda de peso segura durante o período de amamentação",
-        duration: "20:10",
-        thumbnailUrl: "https://images.unsplash.com/photo-1493894473891-10fc1e5dbd22?w=400",
-        videoUrl: "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
-        viewCount: 328
-      },
-      {
-        id: 6,
-        pathologyId: 6,
-        title: "Saúde na Terceira Idade",
-        description: "Emagrecimento saudável para idosos",
-        duration: "22:15",
-        thumbnailUrl: "https://images.unsplash.com/photo-1516307364728-25b36c5f400f?w=400",
-        videoUrl: "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
-        viewCount: 142
-      }
-    ];
-
-    videos.forEach(v => {
-      this.videos.set(v.id, v);
-      this.videoIdCounter = Math.max(this.videoIdCounter, v.id + 1);
-    });
-
-    // Seed ebooks
-    const ebooks: Ebook[] = [
-      {
-        id: 1,
-        pathologyId: 1,
-        title: "Manual de Reeducação Alimentar",
-        description: "Guia prático para emagrecimento saudável",
-        coverUrl: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
-        downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
-        tags: ["emagrecimento", "guia", "nutrição"],
-        pages: 45
-      },
-      {
-        id: 2,
-        pathologyId: 2,
-        title: "30 Dias de Emagrecimento Saudável (Diabetes)",
-        description: "Plano alimentar completo para diabéticos",
-        coverUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400",
-        downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
-        tags: ["diabetes", "emagrecimento", "plano alimentar"],
-        pages: 85
-      },
-      {
-        id: 3,
-        pathologyId: 3,
-        title: "Receitas de Baixo Sódio",
-        description: "50 receitas deliciosas para hipertensos",
-        coverUrl: "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=400",
-        downloadUrl: "/assets/A-ARTE-DA-GUERRA_1765386889371.pdf",
-        tags: ["receitas", "hipertensão", "saúde"],
-        pages: 95
-      }
-    ];
-
-    ebooks.forEach(e => {
-      this.ebooks.set(e.id, e);
-      this.ebookIdCounter = Math.max(this.ebookIdCounter, e.id + 1);
-    });
-
-    // Seed admin user
     const admins: AdminUser[] = [
       {
         id: 1,
@@ -720,73 +639,7 @@ export class MemStorage implements IStorage {
     ];
     admins.forEach(a => this.admins.set(a.id, a));
 
-    // Seed notifications for user 1
-    const demoNotifications: Notification[] = [
-      {
-        id: this.notificationIdCounter++,
-        userId: 1,
-        title: "Consulta Agendada",
-        message: "Lembrete: Você tem uma consulta de saúde amanhã às 09:00.",
-        type: "consultation",
-        read: false,
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: this.notificationIdCounter++,
-        userId: 1,
-        title: "Novo Conteúdo",
-        message: "Um novo vídeo sobre Reeducação Alimentar foi adicionado à biblioteca.",
-        type: "content",
-        read: false,
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-      },
-      {
-        id: this.notificationIdCounter++,
-        userId: 1,
-        title: "Bem-vindo!",
-        message: "Bem-vindo à plataforma Doce Leveza. Explore seus conteúdos exclusivos.",
-        type: "system",
-        read: true,
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-      }
-    ];
-    demoNotifications.forEach(n => this.notifications.set(n.id, n));
-
-    // Seed admin notifications
-    const demoAdminNotifications: AdminNotification[] = [
-      {
-        id: this.adminNotificationIdCounter++,
-        title: "Novo Pagamento",
-        message: "Maria Silva realizou um pagamento de subscrição mensal.",
-        type: "payment",
-        relatedId: 1,
-        read: false,
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: this.adminNotificationIdCounter++,
-        title: "Renovação Pendente",
-        message: "João Pereira solicitou renovação do plano anual.",
-        type: "renewal",
-        relatedId: 2,
-        read: false,
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-      }
-    ];
-    demoAdminNotifications.forEach(n => this.adminNotifications.set(n.id, n));
-
     this.seedUsers();
-    
-    // Seed user access for Maria Silva (userId: 1)
-    const mariaAccess: UserAccess = {
-      id: this.userAccessIdCounter++,
-      userId: 1,
-      pathologyId: 2, // Programa de reeducação alimentar para perder de peso na diabetes
-      startDate: new Date().toISOString(),
-      expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      status: "activo",
-    };
-    this.userAccess.set(mariaAccess.id, mariaAccess);
   }
 }
 

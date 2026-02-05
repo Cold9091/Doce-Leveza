@@ -1,6 +1,7 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import session from "express-session";
 import { 
   leadSchema, 
   signupSchema, 
@@ -15,8 +16,64 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+    adminId?: number;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // ... (existing routes)
+  // Configuração de sessão
+  app.use(
+    session({
+      secret: "doce-leveza-secret-key",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+      },
+    })
+  );
+
+  // Middlewares de Proteção
+  const requireUser = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ success: false, error: "Acesso negado. Por favor, faça login." });
+    }
+    next();
+  };
+
+  const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ success: false, error: "Acesso negado. Apenas administradores." });
+    }
+    next();
+  };
+
+  // Rotas de Auth - Sessão
+  app.get("/api/auth/me", async (req, res) => {
+    if (!req.session.userId) return res.status(401).json(null);
+    const user = await storage.getUserById(req.session.userId);
+    if (!user) return res.status(401).json(null);
+    const { password, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+  });
+
+  app.get("/api/admin/me", async (req, res) => {
+    if (!req.session.adminId) return res.status(401).json(null);
+    const admin = await storage.getAdminById(req.session.adminId);
+    if (!admin) return res.status(401).json(null);
+    const { password, ...adminWithoutPassword } = admin;
+    res.json(adminWithoutPassword);
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy(() => {
+      res.json({ success: true });
+    });
+  });
 
   // Admin - Settings management
   app.get("/api/admin/settings", async (_req, res) => {
@@ -143,6 +200,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Iniciar sessão
+      req.session.userId = user.id;
+
       // Don't send password back
       const { password, ...userWithoutPassword } = user;
       
@@ -164,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Pathologies routes
-  app.get("/api/pathologies", async (_req, res) => {
+  app.get("/api/pathologies", requireUser, async (_req, res) => {
     try {
       const pathologies = await storage.getPathologies();
       res.json(pathologies);
@@ -173,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pathologies/:slug", async (req, res) => {
+  app.get("/api/pathologies/:slug", requireUser, async (req, res) => {
     try {
       const pathology = await storage.getPathologyBySlug(req.params.slug);
       if (!pathology) {
@@ -305,6 +365,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Iniciar sessão admin
+      req.session.adminId = admin.id;
+
       const { password, ...adminWithoutPassword } = admin;
       res.json({ success: true, data: adminWithoutPassword });
     } catch (error) {
@@ -321,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin statistics
-  app.get("/api/admin/statistics", async (_req, res) => {
+  app.get("/api/admin/statistics", requireAdmin, async (_req, res) => {
     try {
       const stats = await storage.getStatistics();
       res.json(stats);
@@ -331,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Users management
-  app.get("/api/admin/users", async (_req, res) => {
+  app.get("/api/admin/users", requireAdmin, async (_req, res) => {
     try {
       const users = await storage.getUsers();
       const usersWithoutPassword = users.map(({ password, ...user }) => user);
@@ -341,7 +404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users/:id", async (req, res) => {
+  app.get("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const user = await storage.getUserById(parseInt(req.params.id));
       if (!user) {
@@ -354,7 +417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/users/:id", async (req, res) => {
+  app.put("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const user = await storage.updateUser(parseInt(req.params.id), req.body);
       if (!user) {
@@ -367,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/users/:id", async (req, res) => {
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const success = await storage.deleteUser(parseInt(req.params.id));
       if (!success) {
@@ -380,7 +443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Pathologies management
-  app.post("/api/admin/pathologies", async (req, res) => {
+  app.post("/api/admin/pathologies", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertPathologySchema.parse(req.body);
       const pathology = await storage.createPathology(validatedData);
@@ -394,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/pathologies/:id", async (req, res) => {
+  app.put("/api/admin/pathologies/:id", requireAdmin, async (req, res) => {
     try {
       const pathology = await storage.updatePathology(parseInt(req.params.id), req.body);
       if (!pathology) {
@@ -406,7 +469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/pathologies/:id", async (req, res) => {
+  app.delete("/api/admin/pathologies/:id", requireAdmin, async (req, res) => {
     try {
       const success = await storage.deletePathology(parseInt(req.params.id));
       if (!success) {
@@ -419,7 +482,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Videos management
-  app.post("/api/admin/videos", async (req, res) => {
+  app.post("/api/admin/videos", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertVideoSchema.parse(req.body);
       const video = await storage.createVideo(validatedData);
@@ -433,7 +496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/videos/:id", async (req, res) => {
+  app.put("/api/admin/videos/:id", requireAdmin, async (req, res) => {
     try {
       const video = await storage.updateVideo(parseInt(req.params.id), req.body);
       if (!video) {
@@ -445,7 +508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/videos/:id", async (req, res) => {
+  app.patch("/api/admin/videos/:id", requireAdmin, async (req, res) => {
     try {
       const video = await storage.updateVideo(parseInt(req.params.id), req.body);
       if (!video) {
@@ -457,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/videos/:id", async (req, res) => {
+  app.delete("/api/admin/videos/:id", requireAdmin, async (req, res) => {
     try {
       const success = await storage.deleteVideo(parseInt(req.params.id));
       if (!success) {
@@ -470,7 +533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Ebooks management
-  app.post("/api/admin/ebooks", async (req, res) => {
+  app.post("/api/admin/ebooks", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertEbookSchema.parse(req.body);
       const ebook = await storage.createEbook(validatedData);
@@ -484,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/ebooks/:id", async (req, res) => {
+  app.put("/api/admin/ebooks/:id", requireAdmin, async (req, res) => {
     try {
       const ebook = await storage.updateEbook(parseInt(req.params.id), req.body);
       if (!ebook) {
@@ -496,7 +559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/ebooks/:id", async (req, res) => {
+  app.delete("/api/admin/ebooks/:id", requireAdmin, async (req, res) => {
     try {
       const success = await storage.deleteEbook(parseInt(req.params.id));
       if (!success) {
@@ -509,7 +572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Consultations management
-  app.get("/api/admin/consultations", async (_req, res) => {
+  app.get("/api/admin/consultations", requireAdmin, async (_req, res) => {
     try {
       const consultations = await storage.getConsultations();
       res.json(consultations);
@@ -518,7 +581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/consultations", async (req, res) => {
+  app.post("/api/admin/consultations", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertConsultationSchema.parse(req.body);
       const consultation = await storage.createConsultation(validatedData);
@@ -532,7 +595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/consultations/:id", async (req, res) => {
+  app.put("/api/admin/consultations/:id", requireAdmin, async (req, res) => {
     try {
       const consultation = await storage.updateConsultation(parseInt(req.params.id), req.body);
       if (!consultation) {
@@ -544,7 +607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/consultations/:id", async (req, res) => {
+  app.delete("/api/admin/consultations/:id", requireAdmin, async (req, res) => {
     try {
       const success = await storage.deleteConsultation(parseInt(req.params.id));
       if (!success) {
@@ -557,7 +620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Subscriptions management
-  app.get("/api/admin/subscriptions", async (_req, res) => {
+  app.get("/api/admin/subscriptions", requireAdmin, async (_req, res) => {
     try {
       const subscriptions = await storage.getSubscriptions();
       res.json(subscriptions);
@@ -566,7 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/subscriptions", async (req, res) => {
+  app.post("/api/admin/subscriptions", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertSubscriptionSchema.parse(req.body);
       const subscription = await storage.createSubscription(validatedData);
@@ -580,7 +643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/subscriptions/:id", async (req, res) => {
+  app.put("/api/admin/subscriptions/:id", requireAdmin, async (req, res) => {
     try {
       const subscription = await storage.updateSubscription(parseInt(req.params.id), req.body);
       if (!subscription) {
@@ -592,7 +655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/subscriptions/:id", async (req, res) => {
+  app.patch("/api/admin/subscriptions/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updated = await storage.updateSubscription(id, req.body);
@@ -602,7 +665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/subscriptions/:id", async (req, res) => {
+  app.delete("/api/admin/subscriptions/:id", requireAdmin, async (req, res) => {
     try {
       const success = await storage.deleteSubscription(parseInt(req.params.id));
       if (!success) {
@@ -615,19 +678,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Notifications
-  app.get("/api/admin/notifications", async (_req, res) => {
+  app.get("/api/admin/notifications", requireAdmin, async (_req, res) => {
     const notifications = await storage.getAdminNotifications();
     res.json(notifications);
   });
 
-  app.patch("/api/admin/notifications/:id/read", async (req, res) => {
+  app.patch("/api/admin/notifications/:id/read", requireAdmin, async (req, res) => {
     const id = parseInt(req.params.id);
     const success = await storage.markAdminNotificationRead(id);
     if (!success) return res.status(404).send("Notification not found");
     res.sendStatus(204);
   });
 
-  app.post("/api/admin/user-access", async (req, res) => {
+  app.post("/api/admin/user-access", requireAdmin, async (req, res) => {
     try {
       const access = await storage.createUserAccess(req.body);
       res.json(access);
@@ -636,7 +699,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/user-access/:id", async (req, res) => {
+  app.patch("/api/admin/user-access/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updated = await storage.updateUserAccess(id, req.body);
