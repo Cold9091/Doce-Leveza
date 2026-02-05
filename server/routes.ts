@@ -232,18 +232,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true, data: userWithoutPassword });
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({
-          success: false,
-          error: "Validation error",
-          details: error.errors,
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          error: "Internal server error",
-        });
-      }
+      console.error("Login error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Erro interno no servidor",
+      });
     }
   });
 
