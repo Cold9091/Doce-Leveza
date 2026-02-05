@@ -37,6 +37,7 @@ function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode
     queryKey: [endpoint],
     retry: false,
     staleTime: 0,
+    gcTime: 0, // Evitar cache de sessões anteriores
   });
 
   if (isLoading) {
