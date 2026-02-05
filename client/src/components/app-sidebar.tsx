@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
+  User,
   Activity,
   Calendar,
   BookOpen,
@@ -25,6 +26,12 @@ const mainMenuItems = [
     url: "/dashboard",
     icon: LayoutDashboard,
     testId: "nav-overview",
+  },
+  {
+    title: "Meu Perfil",
+    url: "/dashboard/perfil",
+    icon: User,
+    testId: "nav-profile",
   },
   {
     title: "Programas",
