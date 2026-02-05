@@ -546,6 +546,16 @@ export class MemStorage implements IStorage {
         viewCount: 245
       },
       {
+        id: 7,
+        pathologyId: 1,
+        title: "Módulo 2: Planeamento de Refeições",
+        description: "Como organizar a sua semana para manter a consistência",
+        duration: "10:45",
+        thumbnailUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400",
+        videoUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
+        viewCount: 150
+      },
+      {
         id: 2,
         pathologyId: 2,
         title: "Diabetes e Alimentação",
