@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rate Limiting global (prevenir DoS)
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    limit: 100, // Limite de 100 requisições por IP
+    limit: 500, // Aumentado de 100 para 500 para evitar bloqueios legítimos no dashboard
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: { error: "Muitas requisições. Tente novamente mais tarde." }
@@ -44,7 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rate Limiting específico para Login (prevenir Força Bruta)
   const authLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hora
-    limit: 10, // Apenas 10 tentativas de login por hora
+    limit: 50, // Aumentado de 10 para 50 tentativas por hora
     message: { error: "Muitas tentativas de login. Tente novamente em 1 hora." }
   });
   app.use("/api/auth/login", authLimiter);

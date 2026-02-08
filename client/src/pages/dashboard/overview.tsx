@@ -5,9 +5,13 @@ import { Progress } from "@/components/ui/progress";
 import { Activity, BookOpen, Calendar, Video, ArrowRight, Sparkles, TrendingUp, Clock, User, Lock, CheckCircle2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import type { Pathology, Ebook, Consultation, Subscription } from "@shared/schema";
+import type { Pathology, Ebook, Consultation, Subscription, User as UserType } from "@shared/schema";
 
 export default function Overview() {
+  const { data: user } = useQuery<UserType>({
+    queryKey: ["/api/auth/me"],
+  });
+
   const { data: pathologies } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
   });
@@ -16,13 +20,15 @@ export default function Overview() {
     queryKey: ["/api/ebooks"],
   });
 
-  const userId = 1;
+  const userId = user?.id || 1;
   const { data: consultations } = useQuery<Consultation[]>({
     queryKey: ["/api/consultations/user", userId],
+    enabled: !!user?.id,
   });
 
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
+    enabled: !!user?.id,
   });
 
   const upcomingConsultations = consultations?.filter(c => c.status === "agendada") || [];
