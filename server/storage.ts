@@ -160,6 +160,7 @@ export class MemStorage implements IStorage {
     };
 
     this.seedAdmins();
+    this.seedTestUsers();
   }
 
   private seedAdmins() {
@@ -182,6 +183,18 @@ export class MemStorage implements IStorage {
       }
     ];
     admins.forEach(a => this.admins.set(a.id, a));
+  }
+
+  private seedTestUsers() {
+    const testUser: User = {
+      id: this.userIdCounter++,
+      name: "Aluno Teste",
+      phone: "11988887777",
+      address: "Rua Teste, 123",
+      password: "aluno123",
+      createdAt: new Date().toISOString(),
+    };
+    this.users.set(testUser.id, testUser);
   }
 
   async getSettings(): Promise<SystemSettings> {
