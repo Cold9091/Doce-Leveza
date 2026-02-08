@@ -30,7 +30,6 @@ import AdminSubscriptions from "@/pages/admin/subscriptions";
 import AdminSettings from "@/pages/admin/settings";
 
 function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode, type?: "user" | "admin" }) {
-  const [, setLocation] = useLocation();
   const endpoint = type === "admin" ? "/api/admin/me" : "/api/auth/me";
   
   const { data: user, isLoading } = useQuery({

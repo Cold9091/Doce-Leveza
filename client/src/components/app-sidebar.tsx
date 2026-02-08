@@ -67,13 +67,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r-0">
-      <SidebarHeader className="px-6 py-6">
-        <Link href="/dashboard">
-          <a className="flex items-center gap-2" data-testid="sidebar-logo">
+        <SidebarHeader className="px-6 py-6">
+          <div className="flex items-center gap-2" data-testid="sidebar-logo">
             <img src={logoImage} alt="Doce Leveza" className="h-10 w-auto" />
-          </a>
-        </Link>
-      </SidebarHeader>
+          </div>
+        </SidebarHeader>
       
       <SidebarContent className="px-3">
         <SidebarMenu className="space-y-1">
@@ -93,13 +91,13 @@ export function AppSidebar() {
                   `}
                 >
                   <Link href={item.url}>
-                    <a
-                      className="flex items-center gap-3 w-full"
+                    <span 
+                      className="flex items-center gap-3 w-full cursor-pointer"
                       data-testid={item.testId}
                     >
                       <item.icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
                       <span className="text-sm">{item.title}</span>
-                    </a>
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -125,13 +123,13 @@ export function AppSidebar() {
                   `}
                 >
                   <Link href={item.url}>
-                    <a
-                      className="flex items-center gap-3 w-full"
+                    <span 
+                      className="flex items-center gap-3 w-full cursor-pointer"
                       data-testid={item.testId}
                     >
                       <item.icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
                       <span className="text-sm">{item.title}</span>
-                    </a>
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -148,13 +146,13 @@ export function AppSidebar() {
               className="h-11 px-4 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
             >
               <Link href="/">
-                <a
-                  className="flex items-center gap-3 w-full"
+                <span
+                  className="flex items-center gap-3 w-full cursor-pointer"
                   data-testid="button-logout"
                 >
                   <LogOut className="h-5 w-5" />
                   <span className="text-sm">Sair da Conta</span>
-                </a>
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
