@@ -85,11 +85,7 @@ export default function Consultations() {
   };
 
   const handleProfessionalChange = (name: string) => {
-    const professional = professionals.find(p => p.name === name);
-    if (professional) {
-      form.setValue("professionalName", professional.name, { shouldValidate: true, shouldDirty: true });
-      form.setValue("professionalSpecialty", professional.specialty, { shouldValidate: true, shouldDirty: true });
-    }
+    // This is no longer needed as we use static defaults
   };
 
   const getStatusBadge = (status: string) => {
@@ -128,19 +124,10 @@ export default function Consultations() {
     return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').filter(n => n.length > 2).slice(0, 2).map(n => n[0]).join('').toUpperCase();
-  };
-
   const today = new Date().toISOString().split('T')[0];
 
   const upcomingConsultations = consultations.filter(c => c.status === "agendada");
   const pastConsultations = consultations.filter(c => c.status !== "agendada");
-
-  const getInitials = (name: string) => {
-    if (!name) return "DL";
-    return name.split(' ').filter(n => n.length > 2).slice(0, 2).map(n => n[0]).join('').toUpperCase() || "DL";
-  };
 
   const ScheduleDialog = () => (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
