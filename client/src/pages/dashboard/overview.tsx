@@ -270,9 +270,9 @@ export default function Overview() {
                       <User className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{consultation.professionalName}</p>
+                      <p className="text-sm font-medium truncate">Equipe Doce Leveza</p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {consultation.professionalSpecialty}
+                        Atendimento Especializado
                       </p>
                     </div>
                     <div className="text-right">

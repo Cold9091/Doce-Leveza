@@ -137,6 +137,11 @@ export default function Consultations() {
   const upcomingConsultations = consultations.filter(c => c.status === "agendada");
   const pastConsultations = consultations.filter(c => c.status !== "agendada");
 
+  const getInitials = (name: string) => {
+    if (!name) return "DL";
+    return name.split(' ').filter(n => n.length > 2).slice(0, 2).map(n => n[0]).join('').toUpperCase() || "DL";
+  };
+
   const ScheduleDialog = () => (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
@@ -334,7 +339,7 @@ export default function Consultations() {
                       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                         <div className="flex items-center gap-4 flex-1">
                           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-lg font-bold text-primary-foreground shadow-lg shadow-primary/20">
-                            {getInitials(consultation.professionalName)}
+                            DL
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -388,7 +393,7 @@ export default function Consultations() {
                       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                         <div className="flex items-center gap-4 flex-1">
                           <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
-                            {getInitials(consultation.professionalName)}
+                            DL
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
