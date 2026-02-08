@@ -191,7 +191,7 @@ export class MemStorage implements IStorage {
       name: "Aluno Teste",
       phone: "11988887777",
       address: "Rua Teste, 123",
-      password: "aluno123",
+      password: "aluna123",
       createdAt: new Date().toISOString(),
     };
     this.users.set(testUser.id, testUser);
