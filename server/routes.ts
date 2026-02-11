@@ -1,12 +1,13 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import session from "express-session";
+import { getIronSession } from "iron-session";
+import { sessionOptions } from "./session";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
-import { 
-  leadSchema, 
-  signupSchema, 
+import {
+  leadSchema,
+  signupSchema,
   loginSchema,
   adminLoginSchema,
   insertPathologySchema,
@@ -18,12 +19,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
-declare module "express-session" {
-  interface SessionData {
-    userId?: number;
-    adminId?: number;
-  }
-}
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configuração de Segurança com Helmet
@@ -51,20 +47,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/admin/login", authLimiter);
 
   // Configuração de sessão segura
-  app.use(
-    session({
-      name: "__host_dl_session", // Nome customizado para ocultar tecnologia
-      secret: "doce-leveza-secret-key-super-secure-2026", // Idealmente viria de env
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true, // Impede acesso via JavaScript (Mitiga XSS)
-        secure: process.env.NODE_ENV === "production", // Apenas via HTTPS em produção
-        sameSite: "strict", // Previne CSRF
-        maxAge: 24 * 60 * 60 * 1000,
-      },
-    })
-  );
+  // Configuração de sessão segura (Iron Session)
+  app.use(async (req, res, next) => {
+    const session = await getIronSession(req, res, sessionOptions);
+    // @ts-ignore - Augment request with session
+    req.session = session;
+    next();
+  });
 
   // Middlewares de Proteção
   const requireUser = (req: Request, res: Response, next: NextFunction) => {
@@ -92,7 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ ...adminWithoutPassword, role: admin.role || "admin" });
       }
     }
-    
+
     if (!req.session.userId) return res.status(401).json(null);
     const user = await storage.getUserById(req.session.userId);
     if (!user) return res.status(401).json(null);
@@ -108,10 +97,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(adminWithoutPassword);
   });
 
-  app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy(() => {
-      res.json({ success: true });
-    });
+  app.post("/api/auth/logout", async (req, res) => {
+    req.session.destroy();
+    await req.session.save();
+    res.json({ success: true });
   });
 
   // Admin - Settings management
@@ -193,7 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/signup", async (req, res) => {
     try {
       const validatedData = signupSchema.parse(req.body);
-      
+
       // Check if user already exists
       const existingUser = await storage.getUserByPhone(validatedData.phone);
       if (existingUser) {
@@ -204,10 +193,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.createUser(validatedData);
-      
+
       // Don't send password back
       const { password, ...userWithoutPassword } = user;
-      
+
       res.status(201).json({ success: true, data: userWithoutPassword });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -229,7 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { identifier, password } = req.body;
-      
+
       if (!identifier || !password) {
         return res.status(400).json({ success: false, error: "Credenciais incompletas" });
       }
@@ -243,11 +232,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           req.session.adminId = admin.id;
           // Garantir que a sessão de usuário comum não interfira
           req.session.userId = undefined;
-          
+          await req.session.save();
+
           const { password: _, ...adminWithoutPassword } = admin;
           return res.json({ success: true, data: { ...adminWithoutPassword, role: admin.role || "admin" } });
         }
-        
+
         // Se não for admin, talvez seja um lead/usuário? 
         // No esquema atual apenas AdminUser tem email.
         return res.status(401).json({
@@ -258,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Tratar como telefone
         user = await storage.getUserByPhone(identifier);
       }
-      
+
       if (!user || user.password !== password) {
         return res.status(401).json({
           success: false,
@@ -268,10 +258,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Iniciar sessão
       req.session.userId = user.id;
+      await req.session.save();
 
       // Don't send password back
       const { password: _, ...userWithoutPassword } = user;
-      
+
       // Adicionar role de usuário padrão para o frontend
       res.json({ success: true, data: { ...userWithoutPassword, role: "user" } });
     } catch (error) {
@@ -417,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = adminLoginSchema.parse(req.body);
       const admin = await storage.getAdminByEmail(validatedData.email);
-      
+
       if (!admin || admin.password !== validatedData.password) {
         return res.status(401).json({
           success: false,
@@ -427,6 +418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Iniciar sessão admin
       req.session.adminId = admin.id;
+      await req.session.save();
 
       const { password, ...adminWithoutPassword } = admin;
       res.json({ success: true, data: adminWithoutPassword });
@@ -784,7 +776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin - Leads management
   app.delete("/api/admin/leads/:id", async (req, res) => {
     try {
-      const success = await storage.deleteLead(req.params.id);
+      const success = await storage.deleteLead(parseInt(req.params.id));
       if (!success) {
         return res.status(404).json({ error: "Lead not found" });
       }

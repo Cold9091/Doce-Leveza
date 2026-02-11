@@ -21,7 +21,7 @@ interface DashboardHeaderProps {
   onCourseButtonClick?: () => void;
 }
 
-export function DashboardHeader({ 
+export function DashboardHeader({
   userName = "Aluno",
   showCourseButton = false,
   courseButtonText = "Ver Aula",
@@ -56,7 +56,7 @@ export function DashboardHeader({
     <header className="flex items-center justify-between gap-4 border-b p-4 bg-background">
       <div className="flex items-center gap-4 flex-1">
         <SidebarTrigger data-testid="button-sidebar-toggle" className="text-muted-foreground hover:text-foreground" />
-        
+
         <div className="flex items-center gap-2">
           <span className="text-lg font-semibold text-foreground" data-testid="text-greeting">
             Olá, {userName}
@@ -66,7 +66,7 @@ export function DashboardHeader({
 
       <div className="flex items-center gap-2">
         {showCourseButton && (
-          <Button 
+          <Button
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 hidden sm:flex"
             onClick={onCourseButtonClick}
             data-testid="button-course"
@@ -77,9 +77,9 @@ export function DashboardHeader({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              size="icon" 
-              variant="ghost" 
+            <Button
+              size="icon"
+              variant="ghost"
               className="relative text-muted-foreground hover:text-foreground"
               data-testid="button-notifications"
             >
@@ -101,8 +101,8 @@ export function DashboardHeader({
             <div className="max-h-[400px] overflow-y-auto">
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
-                  <DropdownMenuItem 
-                    key={notification.id} 
+                  <DropdownMenuItem
+                    key={notification.id}
                     className={`flex flex-col items-start gap-1 p-4 cursor-default focus:bg-accent ${!notification.read ? 'bg-primary/5' : ''}`}
                     onClick={(e) => {
                       if (!notification.read) {
@@ -119,7 +119,7 @@ export function DashboardHeader({
                       {notification.message}
                     </p>
                     <span className="text-[10px] text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ptBR })}
+                      {notification.createdAt ? formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ptBR }) : "Há pouco tempo"}
                     </span>
                   </DropdownMenuItem>
                 ))
@@ -136,8 +136,8 @@ export function DashboardHeader({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="relative h-10 w-10 rounded-full p-0"
               data-testid="button-avatar"
             >

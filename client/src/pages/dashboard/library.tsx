@@ -53,14 +53,13 @@ export default function Library() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         {ebooks?.map((ebook) => {
-          const hasAccess = hasAccessToEbook(ebook.pathologyId);
+          const hasAccess = hasAccessToEbook(ebook.pathologyId ?? undefined);
 
           return (
             <Card
               key={ebook.id}
-              className={`overflow-hidden transition-all ${
-                hasAccess ? "hover-elevate active-elevate-2" : "opacity-75 grayscale-[0.5]"
-              }`}
+              className={`overflow-hidden transition-all ${hasAccess ? "hover-elevate active-elevate-2" : "opacity-75 grayscale-[0.5]"
+                }`}
               data-testid={`card-ebook-${ebook.id}`}
             >
               <div className="relative aspect-[3/4] bg-muted">
@@ -100,8 +99,8 @@ export default function Library() {
                     </Badge>
                   ))}
                 </div>
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   variant={hasAccess ? "default" : "outline"}
                   data-testid={`button-read-ebook-${ebook.id}`}
                   onClick={() => {

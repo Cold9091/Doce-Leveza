@@ -1,25 +1,156 @@
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const leads = sqliteTable("leads", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  createdAt: text("created_at").default(new Date().toISOString()),
+});
+
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  phone: text("phone").notNull(),
+  address: text("address").notNull(),
+  password: text("password").notNull(),
+  createdAt: text("created_at").default(new Date().toISOString()),
+});
+
+export const admins = sqliteTable("admins", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  role: text("role").default("admin"),
+  createdAt: text("created_at").default(new Date().toISOString()),
+});
+
+export const pathologies = sqliteTable("pathologies", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  imageUrl: text("image_url"),
+  price: integer("price").default(0),
+});
+
+export const videos = sqliteTable("videos", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  pathologyId: integer("pathology_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  duration: text("duration").notNull(),
+  thumbnailUrl: text("thumbnail_url").notNull(),
+  videoUrl: text("video_url").notNull(),
+  resources: text("resources"), // JSON string
+  viewCount: integer("view_count").default(0),
+});
+
+export const ebooks = sqliteTable("ebooks", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  pathologyId: integer("pathology_id"),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  coverUrl: text("cover_url").notNull(),
+  downloadUrl: text("download_url").notNull(),
+  tags: text("tags").notNull(), // JSON string
+  pages: integer("pages").notNull(),
+});
+
+export const consultations = sqliteTable("consultations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  datetime: text("datetime").notNull(),
+  status: text("status").notNull(), // "agendada", "concluida", "cancelada"
+  notes: text("notes").notNull(),
+});
+
+export const subscriptions = sqliteTable("subscriptions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  plan: text("plan").notNull(), // "mensal", "anual"
+  status: text("status").notNull(), // "ativa", "cancelada", "expirada"
+  startDate: text("start_date").notNull(),
+  renewalDate: text("renewal_date").notNull(),
+  paymentMethod: text("payment_method").notNull(),
+  proofUrl: text("proof_url"),
+});
+
+export const userAccess = sqliteTable("user_access", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  pathologyId: integer("pathology_id").notNull(),
+  startDate: text("start_date").notNull(),
+  expiryDate: text("expiry_date").notNull(),
+  status: text("status").notNull(),
+});
+
+export const notifications = sqliteTable("notifications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(),
+  read: integer("read").default(0), // 0 = false, 1 = true
+  createdAt: text("created_at").default(new Date().toISOString()),
+});
+
+export const adminNotifications = sqliteTable("admin_notifications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(),
+  relatedId: integer("related_id"),
+  read: integer("read").default(0),
+  createdAt: text("created_at").default(new Date().toISOString()),
+});
+
+export const systemSettings = sqliteTable("system_settings", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  siteName: text("site_name").default("Doce Leveza"),
+  supportEmail: text("support_email").default("suporte@doceleveza.com"),
+  supportPhone: text("support_phone").default("(11) 99999-9999"),
+  maintenanceMode: integer("maintenance_mode").default(0),
+  enableSignup: integer("enable_signup").default(1),
+  apiBaseUrl: text("api_base_url"),
+  googleAnalyticsId: text("google_analytics_id"),
+  facebookPixelId: text("facebook_pixel_id"),
+  smtpHost: text("smtp_host"),
+  smtpPort: integer("smtp_port"),
+  smtpUser: text("smtp_user"),
+  smtpPass: text("smtp_pass"),
+});
+
+// Schemas for Zod (Application Level Validation)
+
 // Lead capture schema for CTA buttons
-export const leadSchema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+export const leadSchema = createInsertSchema(leads).pick({
+  name: true,
+  email: true,
+  phone: true,
+}).extend({
   email: z.string().email("Email inválido"),
-  phone: z.string().optional(),
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
 });
 
-export type Lead = z.infer<typeof leadSchema>;
-
-// User schema for authentication
-export const userSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  phone: z.string(),
-  address: z.string(),
-  password: z.string(),
-  createdAt: z.string(),
+export const videoSchema = createInsertSchema(videos).extend({
+  resources: z.array(z.string()).optional(),
 });
 
-export const signupSchema = z.object({
+export const ebookSchema = createInsertSchema(ebooks).extend({
+  tags: z.array(z.string()),
+});
+
+export const signupSchema = createInsertSchema(users).pick({
+  name: true,
+  phone: true,
+  address: true,
+  password: true,
+}).extend({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
   phone: z.string().min(9, "Telefone é obrigatório"),
   address: z.string().min(5, "Endereço é obrigatório"),
@@ -31,142 +162,66 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Senha é obrigatória"),
 });
 
-export type User = z.infer<typeof userSchema>;
-export type SignupData = z.infer<typeof signupSchema>;
-export type LoginData = z.infer<typeof loginSchema>;
-
-// Pathology schema
-export const pathologySchema = z.object({
-  id: z.number(),
-  slug: z.string(),
-  title: z.string(),
-  description: z.string(),
-  icon: z.string(),
-  imageUrl: z.string().optional(),
-  price: z.number().default(0), // Preço individual do programa
-});
-
-export const insertPathologySchema = pathologySchema.omit({ id: true });
-export type Pathology = z.infer<typeof pathologySchema>;
-export type InsertPathology = z.infer<typeof insertPathologySchema>;
-
-// Video schema
-export const videoSchema = z.object({
-  id: z.number(),
-  pathologyId: z.number(),
-  title: z.string(),
-  description: z.string(),
-  duration: z.string(),
-  thumbnailUrl: z.string(),
-  videoUrl: z.string(),
-  resources: z.array(z.string()).optional(),
-  viewCount: z.number().optional(),
-});
-
-export const insertVideoSchema = videoSchema.omit({ id: true });
-export type Video = z.infer<typeof videoSchema>;
-export type InsertVideo = z.infer<typeof insertVideoSchema>;
-
-// Ebook schema
-export const ebookSchema = z.object({
-  id: z.number(),
-  pathologyId: z.number().optional(), // Conecta ebook a uma patologia/programa
-  title: z.string(),
-  description: z.string(),
-  coverUrl: z.string(),
-  downloadUrl: z.string(),
-  tags: z.array(z.string()),
-  pages: z.number(),
-});
-
-export const insertEbookSchema = ebookSchema.omit({ id: true });
-export type Ebook = z.infer<typeof ebookSchema>;
-export type InsertEbook = z.infer<typeof insertEbookSchema>;
-
-// Consultation schema
-export const consultationSchema = z.object({
-  id: z.number(),
-  userId: z.number(),
-  datetime: z.string(),
-  status: z.enum(["agendada", "concluida", "cancelada"]),
-  notes: z.string().min(5, "A descrição (motivo) da consulta é obrigatória"),
-});
-
-export const insertConsultationSchema = consultationSchema.omit({ id: true });
-export type Consultation = z.infer<typeof consultationSchema>;
-export type InsertConsultation = z.infer<typeof insertConsultationSchema>;
-
-// Subscription schema
-export const subscriptionSchema = z.object({
-  id: z.number(),
-  userId: z.number(),
-  plan: z.enum(["mensal", "anual"]),
-  status: z.enum(["ativa", "cancelada", "expirada"]),
-  startDate: z.string(),
-  renewalDate: z.string(),
-  paymentMethod: z.string(),
-  proofUrl: z.string().optional(),
-});
-
-export const insertSubscriptionSchema = subscriptionSchema.omit({ id: true });
-export type Subscription = z.infer<typeof subscriptionSchema>;
-export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
-
-// Admin user schema
-export const adminUserSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  email: z.string().email(),
-  password: z.string(),
-  role: z.enum(["admin", "super_admin"]),
-  createdAt: z.string(),
-});
-
 export const adminLoginSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "Senha é obrigatória"),
 });
 
-export type AdminUser = z.infer<typeof adminUserSchema>;
-export type AdminLoginData = z.infer<typeof adminLoginSchema>;
+// Export types
+export type Lead = typeof leads.$inferSelect;
+export type InsertLead = typeof leads.$inferInsert;
 
-// User Access to Pathologies/Programs
-export const userAccessSchema = z.object({
-  id: z.number(),
-  userId: z.number(),
-  pathologyId: z.number(),
-  startDate: z.string(),
-  expiryDate: z.string(),
-  status: z.enum(["activo", "expirado", "removido", "pendente", "inativo"]),
-});
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+export type SignupData = z.infer<typeof signupSchema>;
 
-export const insertUserAccessSchema = userAccessSchema.omit({ id: true });
-export type UserAccess = z.infer<typeof userAccessSchema>;
-export type InsertUserAccess = z.infer<typeof insertUserAccessSchema>;
+export type AdminUser = typeof admins.$inferSelect;
+export type InsertAdminUser = typeof admins.$inferInsert;
 
-// System Settings schema
-export const systemSettingsSchema = z.object({
-  id: z.number(),
-  siteName: z.string().default("Doce Leveza"),
-  supportEmail: z.string().email().default("suporte@doceleveza.com"),
-  supportPhone: z.string().default("(11) 99999-9999"),
-  maintenanceMode: z.boolean().default(false),
-  enableSignup: z.boolean().default(true),
-  // Advanced Settings
-  apiBaseUrl: z.string().url().optional(),
-  googleAnalyticsId: z.string().optional(),
-  facebookPixelId: z.string().optional(),
-  smtpHost: z.string().optional(),
-  smtpPort: z.number().optional(),
-  smtpUser: z.string().optional(),
-  smtpPass: z.string().optional(),
-});
+export type Pathology = typeof pathologies.$inferSelect;
+export type InsertPathology = typeof pathologies.$inferInsert;
 
-export const insertSystemSettingsSchema = systemSettingsSchema.omit({ id: true });
-export type SystemSettings = z.infer<typeof systemSettingsSchema>;
-export type InsertSystemSettings = z.infer<typeof insertSystemSettingsSchema>;
+export type Video = Omit<typeof videos.$inferSelect, "resources"> & { resources?: string[] };
+export type InsertVideo = Omit<typeof videos.$inferInsert, "resources"> & { resources?: string[] };
 
-// Statistics schema for admin dashboard
+export type Ebook = Omit<typeof ebooks.$inferSelect, "tags"> & { tags: string[] };
+export type InsertEbook = Omit<typeof ebooks.$inferInsert, "tags"> & { tags: string[] };
+
+export type Consultation = typeof consultations.$inferSelect;
+export type InsertConsultation = typeof consultations.$inferInsert;
+export const insertConsultationSchema = createInsertSchema(consultations).omit({ id: true });
+export const consultationSchema = createInsertSchema(consultations);
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({ id: true });
+export const subscriptionSchema = createInsertSchema(subscriptions);
+
+
+export type UserAccess = typeof userAccess.$inferSelect;
+export type InsertUserAccess = typeof userAccess.$inferInsert;
+export const insertUserAccessSchema = createInsertSchema(userAccess).omit({ id: true });
+export const userAccessSchema = createInsertSchema(userAccess);
+
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true });
+export const notificationSchema = createInsertSchema(notifications);
+
+
+export type AdminNotification = typeof adminNotifications.$inferSelect;
+export type InsertAdminNotification = typeof adminNotifications.$inferInsert;
+export const insertAdminNotificationSchema = createInsertSchema(adminNotifications).omit({ id: true });
+export const adminNotificationSchema = createInsertSchema(adminNotifications);
+
+
+export type SystemSettings = typeof systemSettings.$inferSelect;
+export type InsertSystemSettings = typeof systemSettings.$inferInsert;
+export const insertSystemSettingsSchema = createInsertSchema(systemSettings).omit({ id: true });
+export const systemSettingsSchema = createInsertSchema(systemSettings);
+
+
 export const statisticsSchema = z.object({
   totalUsers: z.number(),
   activeSubscriptions: z.number(),
@@ -177,35 +232,19 @@ export const statisticsSchema = z.object({
   recentUsers: z.number(),
   revenue: z.number().optional(),
 });
-
 export type Statistics = z.infer<typeof statisticsSchema>;
 
-// Notification schema
-export const notificationSchema = z.object({
-  id: z.number(),
-  userId: z.number(),
-  title: z.string(),
-  message: z.string(),
-  type: z.enum(["consultation", "content", "system", "payment"]),
-  read: z.boolean().default(false),
-  createdAt: z.string(),
+// Additional Schema Exports for frontend compatibility
+export const insertPathologySchema = createInsertSchema(pathologies).omit({ id: true });
+export const pathologySchema = createInsertSchema(pathologies);
+
+export const insertVideoSchema = createInsertSchema(videos).omit({ id: true }).extend({
+  resources: z.array(z.string()).optional(),
 });
-
-export const insertNotificationSchema = notificationSchema.omit({ id: true });
-export type Notification = z.infer<typeof notificationSchema>;
-export type InsertNotification = z.infer<typeof insertNotificationSchema>;
-
-// Admin Notification schema
-export const adminNotificationSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  message: z.string(),
-  type: z.enum(["payment", "renewal", "system"]),
-  relatedId: z.number().optional(), // ID da assinatura ou acesso relacionado
-  read: z.boolean().default(false),
-  createdAt: z.string(),
+export const insertEbookSchema = createInsertSchema(ebooks).omit({ id: true }).extend({
+  tags: z.array(z.string()),
 });
+export const userSchema = createInsertSchema(users);
+export const adminUserSchema = createInsertSchema(admins);
 
-export const insertAdminNotificationSchema = adminNotificationSchema.omit({ id: true });
-export type AdminNotification = z.infer<typeof adminNotificationSchema>;
-export type InsertAdminNotification = z.infer<typeof insertAdminNotificationSchema>;
+

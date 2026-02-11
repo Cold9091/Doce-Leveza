@@ -231,12 +231,13 @@ export default function AdminPathologies() {
                     <FormItem>
                       <FormLabel>Preço (AOA)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field} 
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                          placeholder="Ex: 85000" 
-                          data-testid="input-pathology-price" 
+                        <Input
+                          type="number"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                          placeholder="Ex: 85000"
+                          data-testid="input-pathology-price"
                         />
                       </FormControl>
                       <FormMessage />

@@ -233,9 +233,8 @@ export default function AdminSubscriptions() {
                   {adminNotifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`flex flex-col gap-1 border-b p-4 text-sm transition-colors hover:bg-muted/50 cursor-pointer ${
-                        !notification.read ? "bg-primary/5" : ""
-                      }`}
+                      className={`flex flex-col gap-1 border-b p-4 text-sm transition-colors hover:bg-muted/50 cursor-pointer ${!notification.read ? "bg-primary/5" : ""
+                        }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
                       <div className="flex items-center justify-between gap-2">
@@ -248,7 +247,7 @@ export default function AdminSubscriptions() {
                         {notification.message}
                       </p>
                       <span className="text-[10px] text-muted-foreground/60 mt-1">
-                        {format(new Date(notification.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                        {notification.createdAt ? format(new Date(notification.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR }) : "N/A"}
                       </span>
                     </div>
                   ))}
@@ -368,8 +367,8 @@ export default function AdminSubscriptions() {
                     <p className="text-muted-foreground font-medium">
                       Nenhum aluno encontrado para "{searchQuery}"
                     </p>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="mt-2 text-primary hover:bg-primary/10"
                       onClick={() => setSearchQuery("")}
                     >
@@ -409,14 +408,14 @@ export default function AdminSubscriptions() {
           <Tabs defaultValue="overview" className="w-full">
             <div className="px-6 border-b">
               <TabsList className="w-full justify-start h-12 bg-transparent p-0 gap-6">
-                <TabsTrigger 
-                  value="overview" 
+                <TabsTrigger
+                  value="overview"
                   className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 text-sm font-semibold"
                 >
                   Visão Geral
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="proof" 
+                <TabsTrigger
+                  value="proof"
                   className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 text-sm font-semibold flex gap-2"
                 >
                   <FileText className="h-4 w-4" />
@@ -429,8 +428,8 @@ export default function AdminSubscriptions() {
               {selectedSubscriptionUser && (
                 <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
                   <div className="grid grid-cols-2 gap-4">
-                    <div 
-                      className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group" 
+                    <div
+                      className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group"
                       onClick={() => selectedUserSubscription && setEditingSubscription(selectedUserSubscription)}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -445,8 +444,8 @@ export default function AdminSubscriptions() {
                       </div>
                     </div>
 
-                    <div 
-                      className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group" 
+                    <div
+                      className="bg-card border p-4 rounded-xl cursor-pointer hover:bg-accent/50 transition-all hover-elevate active-elevate-2 group"
                       onClick={() => selectedUserSubscription && setEditingRenewal(selectedUserSubscription)}
                     >
                       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 flex items-center justify-between">
@@ -480,12 +479,12 @@ export default function AdminSubscriptions() {
                         {pathologies?.length || 0} Total
                       </Badge>
                     </div>
-                    
+
                     <div className="grid gap-2">
                       {pathologies?.map((pathology) => {
                         const access = userAccess?.find(a => a.pathologyId === pathology.id);
                         const status = access?.status || "inativo";
-                        
+
                         const statusConfig: Record<string, { label: string, variant: "default" | "secondary" | "outline" | "destructive" }> = {
                           activo: { label: "Pago", variant: "default" },
                           pendente: { label: "Pendente", variant: "secondary" },
@@ -496,8 +495,8 @@ export default function AdminSubscriptions() {
                         const config = statusConfig[status] || statusConfig.inativo;
 
                         return (
-                          <div 
-                            key={pathology.id} 
+                          <div
+                            key={pathology.id}
                             className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-muted/30 cursor-pointer hover:bg-accent/40 transition-all hover-elevate group"
                             onClick={() => setEditingAccess({ id: access?.id, pathologyId: pathology.id, status })}
                           >
@@ -536,13 +535,13 @@ export default function AdminSubscriptions() {
                   <ImageIcon className="h-3.5 w-3.5" />
                   Comprovante de Pagamento
                 </h4>
-                
+
                 {selectedUserSubscription?.proofUrl ? (
                   <div className="space-y-4">
                     <div className="border-2 border-dashed rounded-xl overflow-hidden bg-muted/20 aspect-[4/3] flex items-center justify-center relative group">
-                      <img 
-                        src={selectedUserSubscription.proofUrl} 
-                        alt="Comprovante de Pagamento" 
+                      <img
+                        src={selectedUserSubscription.proofUrl}
+                        alt="Comprovante de Pagamento"
                         className="max-w-full max-h-full object-contain"
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -656,9 +655,9 @@ export default function AdminSubscriptions() {
                   if (editingRenewal) {
                     const newRenewalDate = new Date();
                     newRenewalDate.setDate(newRenewalDate.getDate() + opt.days);
-                    updateSubscriptionMutation.mutate({ 
-                      id: editingRenewal.id, 
-                      renewalDate: newRenewalDate.toISOString() 
+                    updateSubscriptionMutation.mutate({
+                      id: editingRenewal.id,
+                      renewalDate: newRenewalDate.toISOString()
                     } as any);
                   }
                 }}

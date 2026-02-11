@@ -89,7 +89,7 @@ export default function AdminConsultations() {
                               {users?.find((u) => u.id === consultation.userId)?.name || `Usuário #${consultation.userId}`}
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                              {consultation.professionalName} - {consultation.professionalSpecialty}
+                              Status: {consultation.status}
                             </p>
                           </div>
                         </div>

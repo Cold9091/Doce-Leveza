@@ -110,9 +110,9 @@ export default function AdminUsers() {
           ) : filteredUsers && filteredUsers.length > 0 ? (
             <div className="space-y-3">
               {filteredUsers.map((user) => (
-                <Card 
-                  key={user.id} 
-                  data-testid={`card-user-${user.id}`} 
+                <Card
+                  key={user.id}
+                  data-testid={`card-user-${user.id}`}
                   className="hover-elevate cursor-pointer"
                   onClick={() => setSelectedUser(user)}
                 >
@@ -228,7 +228,7 @@ export default function AdminUsers() {
                   <div className="text-right">
                     <p className="text-xs text-muted-foreground">Cadastrado em</p>
                     <p className="text-sm font-medium">
-                      {format(new Date(selectedUser.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      {selectedUser.createdAt ? format(new Date(selectedUser.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "N/A"}
                     </p>
                   </div>
                 </div>

@@ -6,12 +6,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import type { Pathology, Video } from "@shared/schema";
-import { 
+import {
   ArrowLeft,
   ArrowRight,
-  Play, 
-  Clock, 
-  FileText, 
+  Play,
+  Clock,
+  FileText,
   Eye,
   Pause,
   SkipBack,
@@ -53,7 +53,7 @@ let ytApiPromise: Promise<void> | null = null;
 
 function loadYouTubeApi(): Promise<void> {
   if (ytApiPromise) return ytApiPromise;
-  
+
   if (window.YT && window.YT.Player) {
     return Promise.resolve();
   }
@@ -85,18 +85,18 @@ function loadYouTubeApi(): Promise<void> {
 
 function getYouTubeVideoId(url: string): string | null {
   if (!url) return null;
-  
+
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
   ];
-  
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) {
       return match[1];
     }
   }
-  
+
   return null;
 }
 
@@ -134,12 +134,12 @@ export default function PathologyDetail() {
   const [pdfLoading, setPdfLoading] = useState<boolean>(true);
   const [pdfReaderOpen, setPdfReaderOpen] = useState(false);
   const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
-  
+
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const [, params] = useRoute("/dashboard/programas/:slug");
   const slug = params?.slug;
 
@@ -171,15 +171,15 @@ export default function PathologyDetail() {
     return userSubscriptions?.pathologyIds?.includes(pathologyId);
   };
 
-  const filteredEbooks = ebooks?.filter(e => isUnlocked(e.pathologyId));
+  const filteredEbooks = ebooks?.filter(e => isUnlocked(e.pathologyId ?? undefined));
 
   const currentVideo = pathologyVideos?.[currentVideoIndex];
   const videoId = currentVideo ? getYouTubeVideoId(currentVideo.videoUrl) : null;
-  
+
   // NOTE: If useContentProtection is missing or errors out, ensure it's not the cause of early returns.
   // Assuming it's correctly exported from "@/hooks/use-content-protection".
   try {
-    useContentProtection({ 
+    useContentProtection({
       enabled: showCourseView,
       showWarning: true,
       warningMessage: "Este vídeo é protegido por direitos autorais.",
@@ -209,7 +209,7 @@ export default function PathologyDetail() {
     if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
       const time = playerRef.current.getCurrentTime();
       setCurrentTime(time);
-      
+
       // Auto-switch to next video if near the end (15 seconds before)
       if (duration > 0 && duration - time <= 15) {
         if (pathologyVideos && currentVideoIndex < pathologyVideos.length - 1) {
@@ -240,7 +240,7 @@ export default function PathologyDetail() {
       if (playerRef.current) {
         try {
           playerRef.current.destroy();
-        } catch (e) {}
+        } catch (e) { }
         playerRef.current = null;
       }
       setPlayerReady(false);
@@ -259,7 +259,7 @@ export default function PathologyDetail() {
 
     const initPlayer = () => {
       if (cancelled) return;
-      
+
       const container = document.getElementById(containerId);
       if (!container) {
         setTimeout(initPlayer, 50);
@@ -269,7 +269,7 @@ export default function PathologyDetail() {
       if (playerRef.current) {
         try {
           playerRef.current.destroy();
-        } catch (e) {}
+        } catch (e) { }
         playerRef.current = null;
       }
 
@@ -300,7 +300,7 @@ export default function PathologyDetail() {
             onStateChange: (event: any) => {
               const playing = event.data === window.YT.PlayerState.PLAYING;
               setIsPlaying(playing);
-              
+
               if (playing && !hasCountedView && currentVideo) {
                 setHasCountedView(true);
                 incrementViewMutation.mutate(currentVideo.id);
@@ -341,7 +341,7 @@ export default function PathologyDetail() {
       } else {
         playerRef.current.playVideo();
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [playerReady, isPlaying]);
 
   const seekTo = useCallback((seconds: number) => {
@@ -349,7 +349,7 @@ export default function PathologyDetail() {
     try {
       playerRef.current.seekTo(seconds, true);
       setCurrentTime(seconds);
-    } catch (e) {}
+    } catch (e) { }
   }, [playerReady]);
 
   const skipBack = useCallback(() => {
@@ -368,7 +368,7 @@ export default function PathologyDetail() {
       try {
         playerRef.current.unMute();
         playerRef.current.setVolume(newVolume);
-      } catch (e) {}
+      } catch (e) { }
     }
   }, [playerReady]);
 
@@ -383,7 +383,7 @@ export default function PathologyDetail() {
         playerRef.current.mute();
         setIsMuted(true);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [playerReady, isMuted, volume]);
 
   const handleProgressChange = useCallback((value: number[]) => {
@@ -404,7 +404,7 @@ export default function PathologyDetail() {
     if (playerRef.current) {
       try {
         playerRef.current.destroy();
-      } catch (e) {}
+      } catch (e) { }
       playerRef.current = null;
     }
     setPlayerReady(false);
@@ -466,8 +466,9 @@ export default function PathologyDetail() {
       downloadUrl: pdf.url,
       coverUrl: "",
       tags: ["Material de Apoio"],
+      pathologyId: pathology?.id || null,
     };
-  }, []);
+  }, [pathology?.id]);
 
   if (!pathology) {
     return (
@@ -494,8 +495,8 @@ export default function PathologyDetail() {
           <ScrollArea className="flex-1">
             <div className="p-4">
               <div className="mb-3">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => setShowCourseView(false)}
                   className="text-muted-foreground"
@@ -506,7 +507,7 @@ export default function PathologyDetail() {
                 </Button>
               </div>
 
-              <div 
+              <div
                 ref={containerRef}
                 className="relative w-full bg-black rounded-2xl overflow-hidden protected-content shadow-lg"
                 style={{ aspectRatio: '16/9' }}
@@ -521,36 +522,35 @@ export default function PathologyDetail() {
                   <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse" />
                   {formatTime(currentTime)}
                 </Badge>
-                
+
                 {videoId ? (
                   <>
-                    <div 
+                    <div
                       id={`yt-player-inline-${currentVideo.id}`}
                       className="absolute inset-0 w-full h-full"
                     />
-                    
+
                     {/* Thumbnail overlay when paused or loading */}
                     {(!isPlaying || !playerReady) && currentVideo.thumbnailUrl && (
                       <div className="absolute inset-0 z-10">
-                        <img 
-                          src={currentVideo.thumbnailUrl} 
+                        <img
+                          src={currentVideo.thumbnailUrl}
                           alt={currentVideo.title}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-black/20" />
                       </div>
                     )}
-                    
+
                     <ProtectionOverlay userIdentifier="Usuário" showWatermark={true} />
-                    
+
                     <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-30" />
 
-                    <div 
-                      className={`absolute inset-0 z-40 transition-opacity duration-300 ${
-                        showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                      }`}
+                    <div
+                      className={`absolute inset-0 z-40 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                        }`}
                     >
-                      <div 
+                      <div
                         className="absolute inset-0 flex items-center justify-center cursor-pointer"
                         onClick={togglePlay}
                       >
@@ -565,7 +565,7 @@ export default function PathologyDetail() {
                             >
                               <SkipBack className="h-6 w-6" />
                             </Button>
-                            
+
                             <Button
                               size="icon"
                               className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
@@ -578,7 +578,7 @@ export default function PathologyDetail() {
                                 <Play className="h-8 w-8 text-white ml-1" />
                               )}
                             </Button>
-                            
+
                             <Button
                               size="icon"
                               variant="ghost"
@@ -602,7 +602,7 @@ export default function PathologyDetail() {
                             className="cursor-pointer"
                             data-testid="slider-progress"
                           />
-                          
+
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Button
@@ -618,7 +618,7 @@ export default function PathologyDetail() {
                                   <Play className="h-4 w-4" />
                                 )}
                               </Button>
-                              
+
                               <div className="flex items-center gap-2">
                                 <Button
                                   size="icon"
@@ -642,12 +642,12 @@ export default function PathologyDetail() {
                                   data-testid="slider-volume"
                                 />
                               </div>
-                              
+
                               <span className="text-white text-sm ml-2">
                                 {formatTime(currentTime)} / {formatTime(duration)}
                               </span>
                             </div>
-                            
+
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-xs text-white border-white/30 bg-black/30">
                                 <Shield className="mr-1 h-3 w-3" />
@@ -694,7 +694,7 @@ export default function PathologyDetail() {
                     </div>
                   </div>
                 </div>
-                
+
                 <Card>
                   <CardContent className="p-4">
                     <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -711,9 +711,9 @@ export default function PathologyDetail() {
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {currentVideo.resources.map((resource, idx) => (
-                        <Button 
-                          key={idx} 
-                          variant="outline" 
+                        <Button
+                          key={idx}
+                          variant="outline"
                           className="justify-start text-left h-auto py-3 px-4 hover:bg-primary/5 hover:border-primary/30"
                         >
                           <FileText className="mr-3 h-5 w-5 text-primary" />
@@ -754,7 +754,7 @@ export default function PathologyDetail() {
                 </Button>
               )}
             </div>
-            
+
             {rightPanelView === 'lessons' && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
@@ -762,8 +762,8 @@ export default function PathologyDetail() {
                   <span>{Math.round(((currentVideoIndex + 1) / (pathologyVideos?.length || 1)) * 100)}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-500" 
+                  <div
+                    className="h-full bg-primary transition-all duration-500"
                     style={{ width: `${((currentVideoIndex + 1) / (pathologyVideos?.length || 1)) * 100}%` }}
                   />
                 </div>
@@ -779,16 +779,14 @@ export default function PathologyDetail() {
                     <button
                       key={video.id}
                       onClick={() => handleVideoSelect(idx)}
-                      className={`w-full flex items-start gap-3 p-3 rounded-lg transition-all text-left group ${
-                        idx === currentVideoIndex 
-                          ? "bg-primary/10 border-primary/20" 
+                      className={`w-full flex items-start gap-3 p-3 rounded-lg transition-all text-left group ${idx === currentVideoIndex
+                          ? "bg-primary/10 border-primary/20"
                           : "hover:bg-background border-transparent"
-                      } border`}
+                        } border`}
                     >
                       <div className="relative flex-shrink-0 mt-0.5">
-                        <div className={`h-14 w-24 rounded-md bg-muted overflow-hidden border ${
-                          idx === currentVideoIndex ? "border-primary/30" : "border-border/50"
-                        }`}>
+                        <div className={`h-14 w-24 rounded-md bg-muted overflow-hidden border ${idx === currentVideoIndex ? "border-primary/30" : "border-border/50"
+                          }`}>
                           {video.thumbnailUrl ? (
                             <img src={video.thumbnailUrl} alt="" className="h-full w-full object-cover" />
                           ) : (
@@ -804,14 +802,12 @@ export default function PathologyDetail() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${
-                          idx === currentVideoIndex ? "text-primary" : "text-muted-foreground"
-                        }`}>
+                        <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${idx === currentVideoIndex ? "text-primary" : "text-muted-foreground"
+                          }`}>
                           Aula {idx + 1}
                         </p>
-                        <p className={`text-sm font-medium line-clamp-2 leading-snug ${
-                          idx === currentVideoIndex ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
-                        }`}>
+                        <p className={`text-sm font-medium line-clamp-2 leading-snug ${idx === currentVideoIndex ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                          }`}>
                           {video.title}
                         </p>
                         <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
@@ -882,8 +878,8 @@ export default function PathologyDetail() {
                         loading={<div className="p-8 text-center text-xs">Carregando PDF...</div>}
                         error={<div className="p-8 text-center text-xs text-destructive">Erro ao carregar PDF</div>}
                       >
-                        <Page 
-                          pageNumber={pdfPageNumber} 
+                        <Page
+                          pageNumber={pdfPageNumber}
                           scale={pdfScale}
                           renderAnnotationLayer={false}
                           renderTextLayer={false}
@@ -891,9 +887,9 @@ export default function PathologyDetail() {
                       </Document>
                     </div>
                   </div>
-                  
-                  <Button 
-                    className="w-full" 
+
+                  <Button
+                    className="w-full"
                     onClick={() => {
                       setSelectedEbook(convertPdfToEbook(selectedPdf!));
                       setPdfReaderOpen(true);
@@ -927,7 +923,7 @@ export default function PathologyDetail() {
         </Link>
         <div className="flex items-center gap-2">
           {pathologyVideos && pathologyVideos.length > 0 && (
-            <Button 
+            <Button
               className="w-full sm:w-auto shadow-lg shadow-primary/20"
               onClick={() => {
                 setCurrentVideoIndex(0);
@@ -972,7 +968,7 @@ export default function PathologyDetail() {
                 {pathologyVideos?.length || 0} aulas
               </Badge>
             </div>
-            
+
             <div className="grid grid-cols-1 gap-3">
               {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
@@ -980,7 +976,7 @@ export default function PathologyDetail() {
                 ))
               ) : pathologyVideos && pathologyVideos.length > 0 ? (
                 pathologyVideos.map((video, idx) => (
-                  <Card 
+                  <Card
                     key={video.id}
                     className="hover-elevate cursor-pointer group border-transparent hover:border-primary/20 transition-all overflow-hidden"
                     onClick={() => {
@@ -993,8 +989,8 @@ export default function PathologyDetail() {
                       <div className="flex items-center gap-4">
                         <div className="relative h-16 w-28 sm:h-20 sm:w-36 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
                           {video.thumbnailUrl ? (
-                            <img 
-                              src={video.thumbnailUrl} 
+                            <img
+                              src={video.thumbnailUrl}
                               alt={video.title}
                               className="h-full w-full object-cover transition-transform group-hover:scale-105"
                             />
@@ -1051,9 +1047,9 @@ export default function PathologyDetail() {
                 <div className="h-20 animate-pulse bg-muted rounded-lg" />
               ) : filteredEbooks && filteredEbooks.length > 0 ? (
                 filteredEbooks.map((ebook) => (
-                  <Button 
+                  <Button
                     key={ebook.id}
-                    variant="outline" 
+                    variant="outline"
                     className="w-full justify-start text-left h-auto py-3 px-4 hover:bg-primary/5 hover:border-primary/20 transition-all border-dashed"
                     onClick={() => handlePdfSelect(ebook)}
                   >

@@ -54,7 +54,7 @@ export default function AdminSettings() {
         data[key] = value;
       }
     });
-    
+
     // Manual check for switches as they don't appear in FormData if off
     if (!formData.has("maintenanceMode")) data.maintenanceMode = false;
     if (!formData.has("enableSignup")) data.enableSignup = false;
@@ -109,7 +109,7 @@ export default function AdminSettings() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="siteName">Nome do Site</Label>
-                    <Input id="siteName" name="siteName" defaultValue={settings?.siteName} data-testid="input-site-name" />
+                    <Input id="siteName" name="siteName" defaultValue={settings?.siteName ?? ""} data-testid="input-site-name" />
                   </div>
                 </CardContent>
               </Card>
@@ -125,11 +125,11 @@ export default function AdminSettings() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="supportEmail">E-mail de Suporte</Label>
-                    <Input id="supportEmail" name="supportEmail" type="email" defaultValue={settings?.supportEmail} data-testid="input-support-email" />
+                    <Input id="supportEmail" name="supportEmail" type="email" defaultValue={settings?.supportEmail ?? ""} data-testid="input-support-email" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="supportPhone">Telefone de Suporte</Label>
-                    <Input id="supportPhone" name="supportPhone" defaultValue={settings?.supportPhone} data-testid="input-support-phone" />
+                    <Input id="supportPhone" name="supportPhone" defaultValue={settings?.supportPhone ?? ""} data-testid="input-support-phone" />
                   </div>
                 </CardContent>
               </Card>
@@ -150,7 +150,7 @@ export default function AdminSettings() {
                         Bloqueia o acesso de usuários comuns ao site.
                       </p>
                     </div>
-                    <Switch id="maintenanceMode" name="maintenanceMode" defaultChecked={settings?.maintenanceMode} data-testid="switch-maintenance-mode" />
+                    <Switch id="maintenanceMode" name="maintenanceMode" defaultChecked={!!settings?.maintenanceMode} data-testid="switch-maintenance-mode" />
                   </div>
                   <div className="flex items-center justify-between space-x-2">
                     <div className="space-y-0.5">
@@ -159,7 +159,7 @@ export default function AdminSettings() {
                         Habilita ou desabilita o formulário de cadastro de novos alunos.
                       </p>
                     </div>
-                    <Switch id="enableSignup" name="enableSignup" defaultChecked={settings?.enableSignup} data-testid="switch-enable-signup" />
+                    <Switch id="enableSignup" name="enableSignup" defaultChecked={!!settings?.enableSignup} data-testid="switch-enable-signup" />
                   </div>
                 </CardContent>
               </Card>
@@ -179,15 +179,15 @@ export default function AdminSettings() {
                 <CardContent className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="googleAnalyticsId">Google Analytics ID</Label>
-                    <Input id="googleAnalyticsId" name="googleAnalyticsId" placeholder="UA-XXXXX-Y" defaultValue={settings?.googleAnalyticsId} data-testid="input-ga-id" />
+                    <Input id="googleAnalyticsId" name="googleAnalyticsId" placeholder="UA-XXXXX-Y" defaultValue={settings?.googleAnalyticsId ?? ""} data-testid="input-ga-id" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="facebookPixelId">Facebook Pixel ID</Label>
-                    <Input id="facebookPixelId" name="facebookPixelId" placeholder="123456789" defaultValue={settings?.facebookPixelId} data-testid="input-fb-pixel" />
+                    <Input id="facebookPixelId" name="facebookPixelId" placeholder="123456789" defaultValue={settings?.facebookPixelId ?? ""} data-testid="input-fb-pixel" />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="apiBaseUrl">API Base URL</Label>
-                    <Input id="apiBaseUrl" name="apiBaseUrl" type="url" placeholder="https://api.seusite.com" defaultValue={settings?.apiBaseUrl} data-testid="input-api-url" />
+                    <Input id="apiBaseUrl" name="apiBaseUrl" type="url" placeholder="https://api.seusite.com" defaultValue={settings?.apiBaseUrl ?? ""} data-testid="input-api-url" />
                   </div>
                 </CardContent>
               </Card>
@@ -203,19 +203,19 @@ export default function AdminSettings() {
                 <CardContent className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2 md:col-span-1">
                     <Label htmlFor="smtpHost">SMTP Host</Label>
-                    <Input id="smtpHost" name="smtpHost" placeholder="smtp.gmail.com" defaultValue={settings?.smtpHost} data-testid="input-smtp-host" />
+                    <Input id="smtpHost" name="smtpHost" placeholder="smtp.gmail.com" defaultValue={settings?.smtpHost ?? ""} data-testid="input-smtp-host" />
                   </div>
                   <div className="space-y-2 md:col-span-1">
                     <Label htmlFor="smtpPort">SMTP Port</Label>
-                    <Input id="smtpPort" name="smtpPort" type="number" placeholder="587" defaultValue={settings?.smtpPort} data-testid="input-smtp-port" />
+                    <Input id="smtpPort" name="smtpPort" type="number" placeholder="587" defaultValue={settings?.smtpPort ?? undefined} data-testid="input-smtp-port" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="smtpUser">SMTP Usuário</Label>
-                    <Input id="smtpUser" name="smtpUser" placeholder="contato@seusite.com" defaultValue={settings?.smtpUser} data-testid="input-smtp-user" />
+                    <Input id="smtpUser" name="smtpUser" placeholder="contato@seusite.com" defaultValue={settings?.smtpUser ?? ""} data-testid="input-smtp-user" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="smtpPass">SMTP Senha</Label>
-                    <Input id="smtpPass" name="smtpPass" type="password" placeholder="••••••••" defaultValue={settings?.smtpPass} data-testid="input-smtp-pass" />
+                    <Input id="smtpPass" name="smtpPass" type="password" placeholder="••••••••" defaultValue={settings?.smtpPass ?? ""} data-testid="input-smtp-pass" />
                   </div>
                 </CardContent>
               </Card>

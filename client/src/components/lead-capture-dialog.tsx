@@ -142,6 +142,7 @@ export function LeadCaptureDialog({
                           type="tel"
                           placeholder="(00) 00000-0000"
                           {...field}
+                          value={field.value ?? ""}
                           data-testid="input-phone"
                         />
                       </FormControl>

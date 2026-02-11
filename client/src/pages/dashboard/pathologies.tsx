@@ -67,7 +67,7 @@ export default function Pathologies() {
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent"></div>
-              
+
               {!hasAccess && (
                 <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md p-2 rounded-full border border-white/20">
                   <Lock className="h-4 w-4 text-white" />
@@ -84,13 +84,13 @@ export default function Pathologies() {
                 <Button
                   variant={hasAccess ? "outline" : "default"}
                   size="sm"
-                  className={`text-xs ${hasAccess 
-                    ? "text-white border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/40" 
+                  className={`text-xs ${hasAccess
+                    ? "text-white border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/40"
                     : "bg-primary text-primary-foreground font-bold"
-                  } self-start`}
+                    } self-start`}
                   data-testid={`button-pathology-${pathology.slug}`}
                 >
-                  {hasAccess ? "Acessar Programa" : `Comprar por ${pathology.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}`}
+                  {hasAccess ? "Acessar Programa" : `Comprar por ${(pathology.price || 0).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}`}
                 </Button>
               </div>
             </div>
@@ -107,7 +107,7 @@ export default function Pathologies() {
           }
 
           return (
-            <div key={pathology.id} onClick={() => alert(`Para acessar o ${pathology.title}, o valor é ${pathology.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}. Redirecionando para pagamento...`)}>
+            <div key={pathology.id} onClick={() => alert(`Para acessar o ${pathology.title}, o valor é ${(pathology.price || 0).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}. Redirecionando para pagamento...`)}>
               {cardContent}
             </div>
           );

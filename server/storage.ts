@@ -1,6 +1,8 @@
-import { 
-  type Lead, 
-  type User, 
+import {
+  type Lead,
+  type InsertLead,
+  type User,
+  type InsertUser,
   type SignupData,
   type Pathology,
   type InsertPathology,
@@ -14,22 +16,23 @@ import {
   type InsertConsultation,
   type InsertSubscription,
   type AdminUser,
-  type AdminLoginData,
   type Statistics,
   type SystemSettings,
-  type InsertSystemSettings,
   type AdminNotification,
   type InsertAdminNotification,
   type Notification,
-  type InsertNotification
+  type InsertNotification,
+  users, videos, ebooks, consultations, subscriptions, userAccess, leads, admins, notifications, adminNotifications, systemSettings,
+  pathologies
 } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Leads
-  createLead(lead: Lead): Promise<Lead & { id: string }>;
-  getLeads(): Promise<(Lead & { id: string })[]>;
-  deleteLead(id: string): Promise<boolean>;
+  createLead(lead: InsertLead): Promise<Lead>;
+  getLeads(): Promise<Lead[]>;
+  deleteLead(id: number): Promise<boolean>;
 
   // Users
   createUser(data: SignupData): Promise<User>;
@@ -103,412 +106,361 @@ export interface IStorage {
   updateSettings(data: Partial<SystemSettings>): Promise<SystemSettings>;
 }
 
-export class MemStorage implements IStorage {
-  private leads: Map<string, Lead & { id: string }>;
-  private users: Map<number, User>;
-  private pathologies: Map<number, Pathology>;
-  private videos: Map<number, Video>;
-  private ebooks: Map<number, Ebook>;
-  private consultations: Map<number, Consultation>;
-  private subscriptions: Map<number, Subscription>;
-  private userAccess: Map<number, UserAccess>;
-  private admins: Map<number, AdminUser>;
-  private notifications: Map<number, Notification>;
-  private adminNotifications: Map<number, AdminNotification>;
-  private settings: SystemSettings;
-
-  private userIdCounter: number;
-  private pathologyIdCounter: number;
-  private videoIdCounter: number;
-  private ebookIdCounter: number;
-  private consultationIdCounter: number;
-  private subscriptionIdCounter: number;
-  private userAccessIdCounter: number;
-  private notificationIdCounter: number;
-  private adminNotificationIdCounter: number;
-
-  constructor() {
-    this.leads = new Map();
-    this.users = new Map();
-    this.pathologies = new Map();
-    this.videos = new Map();
-    this.ebooks = new Map();
-    this.consultations = new Map();
-    this.subscriptions = new Map();
-    this.userAccess = new Map();
-    this.admins = new Map();
-    this.notifications = new Map();
-    this.adminNotifications = new Map();
-
-    this.userIdCounter = 1;
-    this.pathologyIdCounter = 1;
-    this.videoIdCounter = 1;
-    this.ebookIdCounter = 1;
-    this.consultationIdCounter = 1;
-    this.subscriptionIdCounter = 1;
-    this.userAccessIdCounter = 1;
-    this.notificationIdCounter = 1;
-    this.adminNotificationIdCounter = 1;
-
-    this.settings = {
-      id: 1,
-      siteName: "Doce Leveza",
-      supportEmail: "suporte@doceleveza.com",
-      supportPhone: "(11) 99999-9999",
-      maintenanceMode: false,
-      enableSignup: true,
-    };
-
-    this.seedAdmins();
-    this.seedTestUsers();
+export class DatabaseStorage implements IStorage {
+  // Leads
+  async createLead(lead: InsertLead): Promise<Lead> {
+    const [newLead] = await db.insert(leads).values(lead).returning();
+    return newLead;
   }
 
-  private seedAdmins() {
-    const admins: AdminUser[] = [
-      {
-        id: 1,
-        name: "Admin",
-        email: "admin@doceleveza.com",
-        password: "admin123",
-        role: "super_admin",
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        name: "Administrador Teste",
-        email: "teste_admin@doceleveza.com",
-        password: "senha_admin_teste",
-        role: "admin",
-        createdAt: new Date().toISOString(),
-      }
-    ];
-    admins.forEach(a => this.admins.set(a.id, a));
+  async getLeads(): Promise<Lead[]> {
+    return await db.select().from(leads);
   }
 
-  private seedTestUsers() {
-    const testUser: User = {
-      id: this.userIdCounter++,
-      name: "Aluno Teste",
-      phone: "11988887777",
-      address: "Rua Teste, 123",
-      password: "aluna123",
-      createdAt: new Date().toISOString(),
-    };
-    this.users.set(testUser.id, testUser);
+  async deleteLead(id: number): Promise<boolean> {
+    const [deleted] = await db.delete(leads).where(eq(leads.id, id)).returning();
+    return !!deleted;
   }
 
-  async getSettings(): Promise<SystemSettings> {
-    return this.settings;
-  }
-
-  async updateSettings(data: Partial<SystemSettings>): Promise<SystemSettings> {
-    this.settings = { ...this.settings, ...data };
-    return this.settings;
-  }
-
-  async createLead(lead: Lead): Promise<Lead & { id: string }> {
-    const id = randomUUID();
-    const leadWithId = { ...lead, id };
-    this.leads.set(id, leadWithId);
-    return leadWithId;
-  }
-
-  async getLeads(): Promise<(Lead & { id: string })[]> {
-    return Array.from(this.leads.values());
-  }
-
-  async deleteLead(id: string): Promise<boolean> {
-    return this.leads.delete(id);
-  }
-
+  // Users
   async createUser(data: SignupData): Promise<User> {
-    const id = this.userIdCounter++;
-    const user: User = {
-      id,
-      name: data.name,
-      phone: data.phone,
-      address: data.address,
-      password: data.password,
-      createdAt: new Date().toISOString(),
-    };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(data).returning();
     return user;
   }
 
   async getUserByPhone(phone: string): Promise<User | null> {
-    const users = Array.from(this.users.values());
-    return users.find(user => user.phone === phone) || null;
+    const [user] = await db.select().from(users).where(eq(users.phone, phone));
+    return user || null;
   }
 
   async getUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
+    return await db.select().from(users);
   }
 
   async getUserById(id: number): Promise<User | null> {
-    return this.users.get(id) || null;
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || null;
   }
 
   async updateUser(id: number, data: Partial<User>): Promise<User | null> {
-    const user = this.users.get(id);
-    if (!user) return null;
-    const updated = { ...user, ...data };
-    this.users.set(id, updated);
-    return updated;
+    const [user] = await db.update(users).set(data).where(eq(users.id, id)).returning();
+    return user || null;
   }
 
   async deleteUser(id: number): Promise<boolean> {
-    return this.users.delete(id);
+    const [deleted] = await db.delete(users).where(eq(users.id, id)).returning();
+    return !!deleted;
   }
 
+  // Pathologies
   async getPathologies(): Promise<Pathology[]> {
-    return Array.from(this.pathologies.values());
+    return await db.select().from(pathologies);
   }
 
   async getPathologyById(id: number): Promise<Pathology | null> {
-    return this.pathologies.get(id) || null;
+    const [pathology] = await db.select().from(pathologies).where(eq(pathologies.id, id));
+    return pathology || null;
   }
 
   async getPathologyBySlug(slug: string): Promise<Pathology | null> {
-    const pathologies = Array.from(this.pathologies.values());
-    return pathologies.find(p => p.slug === slug) || null;
+    const [pathology] = await db.select().from(pathologies).where(eq(pathologies.slug, slug));
+    return pathology || null;
   }
 
   async createPathology(data: InsertPathology): Promise<Pathology> {
-    const id = this.pathologyIdCounter++;
-    const pathology: Pathology = { id, ...data };
-    this.pathologies.set(id, pathology);
+    const [pathology] = await db.insert(pathologies).values(data).returning();
     return pathology;
   }
 
   async updatePathology(id: number, data: Partial<Pathology>): Promise<Pathology | null> {
-    const pathology = this.pathologies.get(id);
-    if (!pathology) return null;
-    const updated = { ...pathology, ...data };
-    this.pathologies.set(id, updated);
-    return updated;
+    const [pathology] = await db.update(pathologies).set(data).where(eq(pathologies.id, id)).returning();
+    return pathology || null;
   }
 
   async deletePathology(id: number): Promise<boolean> {
-    return this.pathologies.delete(id);
+    const [deleted] = await db.delete(pathologies).where(eq(pathologies.id, id)).returning();
+    return !!deleted;
   }
 
+  // Videos
   async getVideos(): Promise<Video[]> {
-    return Array.from(this.videos.values());
+    const result = await db.select().from(videos);
+    return result.map(v => ({
+      ...v,
+      resources: v.resources ? JSON.parse(v.resources) : undefined
+    }));
   }
 
   async getVideosByPathology(pathologyId: number): Promise<Video[]> {
-    const videos = Array.from(this.videos.values());
-    return videos.filter(v => v.pathologyId === pathologyId);
+    const result = await db.select().from(videos).where(eq(videos.pathologyId, pathologyId));
+    return result.map(v => ({
+      ...v,
+      resources: v.resources ? JSON.parse(v.resources) : undefined
+    }));
   }
 
   async getVideoById(id: number): Promise<Video | null> {
-    return this.videos.get(id) || null;
+    const [video] = await db.select().from(videos).where(eq(videos.id, id));
+    if (!video) return null;
+    return {
+      ...video,
+      resources: video.resources ? JSON.parse(video.resources) : undefined
+    };
   }
 
   async createVideo(data: InsertVideo): Promise<Video> {
-    const id = this.videoIdCounter++;
-    const video: Video = { id, ...data };
-    this.videos.set(id, video);
-    return video;
+    const { resources, ...videoData } = data;
+    const [video] = await db.insert(videos).values({
+      ...videoData,
+      resources: resources ? JSON.stringify(resources) : undefined
+    }).returning();
+    return {
+      ...video,
+      resources: video.resources ? JSON.parse(video.resources) : undefined
+    };
   }
 
   async updateVideo(id: number, data: Partial<Video>): Promise<Video | null> {
-    const video = this.videos.get(id);
+    const { resources, ...videoData } = data;
+    const [video] = await db.update(videos).set({
+      ...videoData,
+      resources: resources ? JSON.stringify(resources) : undefined
+    }).where(eq(videos.id, id)).returning();
+
     if (!video) return null;
-    const updated = { ...video, ...data };
-    this.videos.set(id, updated);
-    return updated;
+    return {
+      ...video,
+      resources: video.resources ? JSON.parse(video.resources) : undefined
+    };
   }
 
   async deleteVideo(id: number): Promise<boolean> {
-    return this.videos.delete(id);
+    const [deleted] = await db.delete(videos).where(eq(videos.id, id)).returning();
+    return !!deleted;
   }
 
+  // Ebooks
   async getEbooks(): Promise<Ebook[]> {
-    return Array.from(this.ebooks.values());
+    const result = await db.select().from(ebooks);
+    return result.map(e => ({
+      ...e,
+      tags: JSON.parse(e.tags)
+    }));
   }
 
   async getEbooksByPathology(pathologyId: number): Promise<Ebook[]> {
-    const ebooks = Array.from(this.ebooks.values());
-    return ebooks.filter(e => e.pathologyId === pathologyId);
+    const result = await db.select().from(ebooks).where(eq(ebooks.pathologyId, pathologyId));
+    return result.map(e => ({
+      ...e,
+      tags: JSON.parse(e.tags)
+    }));
   }
 
   async getEbookById(id: number): Promise<Ebook | null> {
-    return this.ebooks.get(id) || null;
+    const [ebook] = await db.select().from(ebooks).where(eq(ebooks.id, id));
+    if (!ebook) return null;
+    return {
+      ...ebook,
+      tags: JSON.parse(ebook.tags)
+    };
   }
 
   async createEbook(data: InsertEbook): Promise<Ebook> {
-    const id = this.ebookIdCounter++;
-    const ebook: Ebook = { id, ...data };
-    this.ebooks.set(id, ebook);
-    return ebook;
+    const { tags, ...ebookData } = data;
+    const [ebook] = await db.insert(ebooks).values({
+      ...ebookData,
+      tags: JSON.stringify(tags)
+    }).returning();
+    return {
+      ...ebook,
+      tags: JSON.parse(ebook.tags)
+    };
   }
 
   async updateEbook(id: number, data: Partial<Ebook>): Promise<Ebook | null> {
-    const ebook = this.ebooks.get(id);
+    const { tags, ...ebookData } = data;
+    const [ebook] = await db.update(ebooks).set({
+      ...ebookData,
+      tags: tags ? JSON.stringify(tags) : undefined
+    }).where(eq(ebooks.id, id)).returning();
+
     if (!ebook) return null;
-    const updated = { ...ebook, ...data };
-    this.ebooks.set(id, updated);
-    return updated;
+    return {
+      ...ebook,
+      tags: JSON.parse(ebook.tags)
+    };
   }
 
   async deleteEbook(id: number): Promise<boolean> {
-    return this.ebooks.delete(id);
+    const [deleted] = await db.delete(ebooks).where(eq(ebooks.id, id)).returning();
+    return !!deleted;
   }
 
+  // Consultations
   async getConsultations(): Promise<Consultation[]> {
-    return Array.from(this.consultations.values());
+    return await db.select().from(consultations);
   }
 
   async getConsultationsByUser(userId: number): Promise<Consultation[]> {
-    const consultations = Array.from(this.consultations.values());
-    return consultations.filter(c => c.userId === userId);
+    return await db.select().from(consultations).where(eq(consultations.userId, userId));
   }
 
   async getConsultationById(id: number): Promise<Consultation | null> {
-    return this.consultations.get(id) || null;
+    const [consultation] = await db.select().from(consultations).where(eq(consultations.id, id));
+    return consultation || null;
   }
 
   async createConsultation(data: InsertConsultation): Promise<Consultation> {
-    const id = this.consultationIdCounter++;
-    const consultation: Consultation = { 
-      id, 
+    const [consultation] = await db.insert(consultations).values({
       ...data,
       status: data.status || "agendada"
-    };
-    this.consultations.set(id, consultation);
+    }).returning();
     return consultation;
   }
 
   async updateConsultation(id: number, data: Partial<Consultation>): Promise<Consultation | null> {
-    const consultation = this.consultations.get(id);
-    if (!consultation) return null;
-    const updated = { ...consultation, ...data };
-    this.consultations.set(id, updated);
-    return updated;
+    const [consultation] = await db.update(consultations).set(data).where(eq(consultations.id, id)).returning();
+    return consultation || null;
   }
 
   async deleteConsultation(id: number): Promise<boolean> {
-    return this.consultations.delete(id);
+    const [deleted] = await db.delete(consultations).where(eq(consultations.id, id)).returning();
+    return !!deleted;
   }
 
+  // Subscriptions
   async getSubscriptions(): Promise<Subscription[]> {
-    return Array.from(this.subscriptions.values());
+    return await db.select().from(subscriptions);
   }
 
   async getSubscriptionByUser(userId: number): Promise<Subscription | null> {
-    const subscriptions = Array.from(this.subscriptions.values());
-    return subscriptions.find(s => s.userId === userId) || null;
+    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId));
+    return subscription || null;
   }
 
   async createSubscription(data: InsertSubscription): Promise<Subscription> {
-    const id = this.subscriptionIdCounter++;
-    const subscription: Subscription = { id, ...data };
-    this.subscriptions.set(id, subscription);
+    const [subscription] = await db.insert(subscriptions).values(data).returning();
     return subscription;
   }
 
   async updateSubscription(id: number, data: Partial<Subscription>): Promise<Subscription | null> {
-    const subscription = this.subscriptions.get(id);
-    if (!subscription) return null;
-    const updated = { ...subscription, ...data };
-    this.subscriptions.set(id, updated);
-    return updated;
+    const [subscription] = await db.update(subscriptions).set(data).where(eq(subscriptions.id, id)).returning();
+    return subscription || null;
   }
 
   async deleteSubscription(id: number): Promise<boolean> {
-    return this.subscriptions.delete(id);
+    const [deleted] = await db.delete(subscriptions).where(eq(subscriptions.id, id)).returning();
+    return !!deleted;
   }
 
+  // User Access
   async getUserAccess(userId: number): Promise<UserAccess[]> {
-    return Array.from(this.userAccess.values()).filter(a => a.userId === userId);
+    return await db.select().from(userAccess).where(eq(userAccess.userId, userId));
   }
 
   async createUserAccess(data: any): Promise<UserAccess> {
-    const id = this.userAccessIdCounter++;
-    const access: UserAccess = { id, ...data };
-    this.userAccess.set(id, access);
+    const [access] = await db.insert(userAccess).values(data).returning();
     return access;
   }
 
   async updateUserAccess(id: number, data: any): Promise<UserAccess | null> {
-    const access = this.userAccess.get(id);
-    if (!access) return null;
-    const updated = { ...access, ...data };
-    this.userAccess.set(id, updated);
-    return updated;
+    const [access] = await db.update(userAccess).set(data).where(eq(userAccess.id, id)).returning();
+    return access || null;
   }
 
+  // Notifications
   async getNotificationsByUser(userId: number): Promise<Notification[]> {
-    return Array.from(this.notifications.values())
-      .filter(n => n.userId === userId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return await db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
   }
 
   async createNotification(data: InsertNotification): Promise<Notification> {
-    const id = this.notificationIdCounter++;
-    const notification: Notification = { id, ...data };
-    this.notifications.set(id, notification);
+    const [notification] = await db.insert(notifications).values(data).returning();
     return notification;
   }
 
   async markNotificationRead(id: number): Promise<boolean> {
-    const notification = this.notifications.get(id);
-    if (!notification) return false;
-    notification.read = true;
-    return true;
+    const [notification] = await db.update(notifications).set({ read: 1 }).where(eq(notifications.id, id)).returning();
+    return !!notification;
   }
 
+  // Admin
   async getAdminById(id: number): Promise<AdminUser | null> {
-    return this.admins.get(id) || null;
+    const [admin] = await db.select().from(admins).where(eq(admins.id, id));
+    return admin || null;
   }
 
   async getAdminByEmail(email: string): Promise<AdminUser | null> {
-    const admins = Array.from(this.admins.values());
-    return admins.find(a => a.email === email) || null;
+    const [admin] = await db.select().from(admins).where(eq(admins.email, email));
+    return admin || null;
   }
 
   async getStatistics(): Promise<Statistics> {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const recentUsers = Array.from(this.users.values()).filter(
-      u => new Date(u.createdAt) >= thirtyDaysAgo
-    ).length;
+    const [userCount] = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const [videoCount] = await db.select({ count: sql<number>`count(*)` }).from(videos);
+    const [ebookCount] = await db.select({ count: sql<number>`count(*)` }).from(ebooks);
+    const [consultationCount] = await db.select({ count: sql<number>`count(*)` }).from(consultations);
+    const [leadCount] = await db.select({ count: sql<number>`count(*)` }).from(leads);
+    const [activeSubCount] = await db.select({ count: sql<number>`count(*)` }).from(subscriptions).where(eq(subscriptions.status, "ativa"));
 
-    const activeSubscriptions = Array.from(this.subscriptions.values()).filter(
-      s => s.status === "ativa"
-    ).length;
+    // Recent users (last 30 days) - SQLite specific date calculation
+    const [recentUserCount] = await db.select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(sql`created_at >= date('now', '-30 days')`);
 
     return {
-      totalUsers: this.users.size,
-      activeSubscriptions,
-      totalVideos: this.videos.size,
-      totalEbooks: this.ebooks.size,
-      totalConsultations: this.consultations.size,
-      totalLeads: this.leads.size,
-      recentUsers,
+      totalUsers: userCount?.count || 0,
+      activeSubscriptions: activeSubCount?.count || 0,
+      totalVideos: videoCount?.count || 0,
+      totalEbooks: ebookCount?.count || 0,
+      totalConsultations: consultationCount?.count || 0,
+      totalLeads: leadCount?.count || 0,
+      recentUsers: recentUserCount?.count || 0
     };
   }
 
   async getAdminNotifications(): Promise<AdminNotification[]> {
-    return Array.from(this.adminNotifications.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return await db.select().from(adminNotifications).orderBy(desc(adminNotifications.createdAt));
   }
 
   async createAdminNotification(data: InsertAdminNotification): Promise<AdminNotification> {
-    const id = this.adminNotificationIdCounter++;
-    const notification: AdminNotification = { id, ...data };
-    this.adminNotifications.set(id, notification);
+    const [notification] = await db.insert(adminNotifications).values(data).returning();
     return notification;
   }
 
   async markAdminNotificationRead(id: number): Promise<boolean> {
-    const notification = this.adminNotifications.get(id);
-    if (!notification) return false;
-    notification.read = true;
-    return true;
+    const [notification] = await db.update(adminNotifications).set({ read: 1 }).where(eq(adminNotifications.id, id)).returning();
+    return !!notification;
+  }
+
+  // Settings
+  async getSettings(): Promise<SystemSettings> {
+    // Try to get settings, if not exists, create one
+    let [settings] = await db.select().from(systemSettings).limit(1);
+
+    if (!settings) {
+      [settings] = await db.insert(systemSettings).values({
+        siteName: "Doce Leveza",
+        supportEmail: "suporte@doceleveza.com",
+        supportPhone: "(11) 99999-9999",
+        maintenanceMode: 0,
+        enableSignup: 1
+      }).returning();
+    }
+
+    return settings;
+  }
+
+  async updateSettings(data: Partial<SystemSettings>): Promise<SystemSettings> {
+    let [settings] = await db.select().from(systemSettings).limit(1);
+
+    if (!settings) {
+      // Should not happen if getSettings is called first, but just in case
+      return this.getSettings();
+    }
+
+    [settings] = await db.update(systemSettings).set(data).where(eq(systemSettings.id, settings.id)).returning();
+    return settings;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
