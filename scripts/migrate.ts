@@ -1,18 +1,18 @@
 import "dotenv/config";
-// import { migrate } from "drizzle-orm/libsql/migrator";
-// import { db, client } from "../server/db.js";
-
-// 🔄 PENDING: Migration script needs to be updated for Supabase/PostgreSQL
-// Previously used: drizzle-orm/libsql/migrator with LibSQL client
-// To be updated with: drizzle-orm/pg/migrator or drizzle-kit push
+import { migrate } from "drizzle-orm/pg/migrator";
+import { db } from "../server/db.js";
 
 async function runMigration() {
-    console.log("🔄 Database migration script pending configuration for Supabase...");
-    console.log("   Please complete the Supabase setup first.");
-    
-    // TODO: Implement PostgreSQL migration logic:
-    // await migrate(db, { migrationsFolder: "./migrations" });
-    // pool.end();
+    console.log("🚀 Starting database migration for Supabase PostgreSQL...");
+
+    try {
+        await migrate(db, { migrationsFolder: "./migrations" });
+        console.log("✅ Migration completed successfully!");
+        process.exit(0);
+    } catch (error) {
+        console.error("❌ Migration failed:", error);
+        process.exit(1);
+    }
 }
 
 runMigration();
