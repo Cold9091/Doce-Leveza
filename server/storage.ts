@@ -405,7 +405,7 @@ export class DatabaseStorage implements IStorage {
     // Recent users (last 30 days) - PostgreSQL
 const [recentUserCount] = await db.select({ count: sql<number>`count(*)` })
   .from(users)
-  .where(sql`created_at >= now() - interval '30 days'`);
+  .where(sql`created_at::timestamp >= now() - interval '30 days'`);
 
     return {
       totalUsers: userCount?.count || 0,
