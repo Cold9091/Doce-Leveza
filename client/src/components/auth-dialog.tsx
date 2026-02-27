@@ -96,9 +96,10 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (data: LoginData) => {
-      return await apiRequest("POST", "/api/auth/login", data);
-    },
+  mutationFn: async (data: LoginData) => {
+    const res = await apiRequest("POST", "/api/auth/login", data);
+    return await res.json();
+  },
     onSuccess: (response: any) => {
       toast({
         title: "Login realizado!",
