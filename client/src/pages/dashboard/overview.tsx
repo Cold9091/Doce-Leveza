@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Activity, BookOpen, Calendar, Video, ArrowRight, Sparkles, TrendingUp, Clock, User, Lock, CheckCircle2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import type { Pathology, Ebook, Consultation, Subscription, User as UserType } from "@shared/schema";
+import type { Pathology, Ebook, Consultation, Subscription, User as UserType, Video as VideoType } from "@shared/schema";
 
 export default function Overview() {
   const { data: user } = useQuery<UserType>({
@@ -18,6 +18,10 @@ export default function Overview() {
 
   const { data: ebooks } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks"],
+  });
+
+  const { data: videos } = useQuery<Video[]>({
+    queryKey: ["/api/videos"],
   });
 
   const userId = user?.id || 1;
@@ -48,9 +52,9 @@ export default function Overview() {
       testId: "stat-programs",
     },
     {
-      title: "Vídeos Assistidos",
-      value: 12,
-      subtitle: "de 24 totais",
+      title: "Vídeos Disponíveis",
+      value: videos?.length || 0,
+      subtitle: "para assistir",
       icon: Video,
       gradient: "from-emerald-500 to-emerald-600",
       bgGradient: "from-emerald-500/10 to-emerald-600/5",
@@ -185,15 +189,6 @@ export default function Overview() {
         ))}
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">Seu Progresso</span>
-          <span className="text-sm text-muted-foreground">50% completo</span>
-        </div>
-        <Progress value={50} className="h-2" />
-        <p className="text-xs text-muted-foreground">12 de 24 vídeos assistidos</p>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="hover-elevate transition-all">
           <CardHeader className="flex flex-row items-center justify-between gap-2 pb-3">
@@ -211,36 +206,34 @@ export default function Overview() {
             </Link>
           </CardHeader>
           <CardContent className="space-y-3">
-            {[
-              { title: "Introdução à Nutrição Funcional", progress: 75, duration: "15:00" },
-              { title: "Alimentação e Metabolismo", progress: 30, duration: "22:30" },
-            ].map((video, idx) => (
-              <div 
-                key={idx} 
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-              >
-                <div className="relative h-12 w-20 rounded-md bg-muted flex items-center justify-center overflow-hidden">
-                  <Video className="h-5 w-5 text-muted-foreground" />
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted-foreground/20">
-                    <div 
-                      className="h-full bg-emerald-500" 
-                      style={{ width: `${video.progress}%` }}
+            {videos && videos.length > 0 ? (
+              videos.slice(0, 2).map((video) => (
+                <div 
+                  key={video.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                >
+                  <div className="relative h-12 w-20 rounded-md bg-muted flex items-center justify-center overflow-hidden">
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      className="w-full h-full object-cover"
                     />
                   </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{video.title}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span>{video.duration}</span>
-                    <span className="text-emerald-600 dark:text-emerald-400">
-                      {video.progress}% concluído
-                    </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{video.title}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span>{video.duration}</span>
+                      {video.viewCount > 0 && (
+                        <span className="text-emerald-600 dark:text-emerald-400">
+                          {video.viewCount} {video.viewCount === 1 ? "visualização" : "visualizações"}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {pathologies?.length === 0 && (
+              ))
+            ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
                 Seus vídeos recentes aparecerão aqui
               </p>
