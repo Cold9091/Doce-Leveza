@@ -1,124 +1,124 @@
-CREATE TABLE `admin_notifications` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`title` text NOT NULL,
-	`message` text NOT NULL,
-	`type` text NOT NULL,
-	`related_id` integer,
-	`read` integer DEFAULT 0,
-	`created_at` text DEFAULT '2026-02-11T15:02:09.274Z'
+CREATE TABLE admin_notifications (
+	id SERIAL PRIMARY KEY,
+	title TEXT NOT NULL,
+	message TEXT NOT NULL,
+	type TEXT NOT NULL,
+	related_id INTEGER,
+	read INTEGER DEFAULT 0,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE `admins` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`name` text NOT NULL,
-	`email` text NOT NULL,
-	`password` text NOT NULL,
-	`role` text DEFAULT 'admin',
-	`created_at` text DEFAULT '2026-02-11T15:02:09.272Z'
+CREATE TABLE admins (
+	id SERIAL PRIMARY KEY,
+	name TEXT NOT NULL,
+	email TEXT NOT NULL,
+	password TEXT NOT NULL,
+	role TEXT DEFAULT 'admin',
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `admins_email_unique` ON `admins` (`email`);--> statement-breakpoint
-CREATE TABLE `consultations` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`user_id` integer NOT NULL,
-	`datetime` text NOT NULL,
-	`status` text NOT NULL,
-	`notes` text NOT NULL
+CREATE UNIQUE INDEX admins_email_unique ON admins (email);--> statement-breakpoint
+CREATE TABLE consultations (
+	id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL,
+	datetime TIMESTAMP WITH TIME ZONE NOT NULL,
+	status TEXT NOT NULL,
+	notes TEXT NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `ebooks` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`pathology_id` integer,
-	`title` text NOT NULL,
-	`description` text NOT NULL,
-	`cover_url` text NOT NULL,
-	`download_url` text NOT NULL,
-	`tags` text NOT NULL,
-	`pages` integer NOT NULL
+CREATE TABLE ebooks (
+	id SERIAL PRIMARY KEY,
+	pathology_id INTEGER,
+	title TEXT NOT NULL,
+	description TEXT NOT NULL,
+	cover_url TEXT NOT NULL,
+	download_url TEXT NOT NULL,
+	tags TEXT NOT NULL,
+	pages INTEGER NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `leads` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`name` text NOT NULL,
-	`email` text NOT NULL,
-	`phone` text,
-	`created_at` text DEFAULT '2026-02-11T15:02:09.267Z'
+CREATE TABLE leads (
+	id SERIAL PRIMARY KEY,
+	name TEXT NOT NULL,
+	email TEXT NOT NULL,
+	phone TEXT,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE `notifications` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`user_id` integer NOT NULL,
-	`title` text NOT NULL,
-	`message` text NOT NULL,
-	`type` text NOT NULL,
-	`read` integer DEFAULT 0,
-	`created_at` text DEFAULT '2026-02-11T15:02:09.274Z'
+CREATE TABLE notifications (
+	id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL,
+	title TEXT NOT NULL,
+	message TEXT NOT NULL,
+	type TEXT NOT NULL,
+	read INTEGER DEFAULT 0,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE `pathologies` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`slug` text NOT NULL,
-	`title` text NOT NULL,
-	`description` text NOT NULL,
-	`icon` text NOT NULL,
-	`image_url` text,
-	`price` integer DEFAULT 0
+CREATE TABLE pathologies (
+	id SERIAL PRIMARY KEY,
+	slug TEXT NOT NULL,
+	title TEXT NOT NULL,
+	description TEXT NOT NULL,
+	icon TEXT NOT NULL,
+	image_url TEXT,
+	price INTEGER DEFAULT 0
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `pathologies_slug_unique` ON `pathologies` (`slug`);--> statement-breakpoint
-CREATE TABLE `subscriptions` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`user_id` integer NOT NULL,
-	`plan` text NOT NULL,
-	`status` text NOT NULL,
-	`start_date` text NOT NULL,
-	`renewal_date` text NOT NULL,
-	`payment_method` text NOT NULL,
-	`proof_url` text
+CREATE UNIQUE INDEX pathologies_slug_unique ON pathologies (slug);--> statement-breakpoint
+CREATE TABLE subscriptions (
+	id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL,
+	plan TEXT NOT NULL,
+	status TEXT NOT NULL,
+	start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+	renewal_date TIMESTAMP WITH TIME ZONE NOT NULL,
+	payment_method TEXT NOT NULL,
+	proof_url TEXT
 );
 --> statement-breakpoint
-CREATE TABLE `system_settings` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`site_name` text DEFAULT 'Doce Leveza',
-	`support_email` text DEFAULT 'suporte@doceleveza.com',
-	`support_phone` text DEFAULT '(11) 99999-9999',
-	`maintenance_mode` integer DEFAULT 0,
-	`enable_signup` integer DEFAULT 1,
-	`api_base_url` text,
-	`google_analytics_id` text,
-	`facebook_pixel_id` text,
-	`smtp_host` text,
-	`smtp_port` integer,
-	`smtp_user` text,
-	`smtp_pass` text
+CREATE TABLE system_settings (
+	id SERIAL PRIMARY KEY,
+	site_name TEXT DEFAULT 'Doce Leveza',
+	support_email TEXT DEFAULT 'suporte@doceleveza.com',
+	support_phone TEXT DEFAULT '(11) 99999-9999',
+	maintenance_mode INTEGER DEFAULT 0,
+	enable_signup INTEGER DEFAULT 1,
+	api_base_url TEXT,
+	google_analytics_id TEXT,
+	facebook_pixel_id TEXT,
+	smtp_host TEXT,
+	smtp_port INTEGER,
+	smtp_user TEXT,
+	smtp_pass TEXT
 );
 --> statement-breakpoint
-CREATE TABLE `user_access` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`user_id` integer NOT NULL,
-	`pathology_id` integer NOT NULL,
-	`start_date` text NOT NULL,
-	`expiry_date` text NOT NULL,
-	`status` text NOT NULL
+CREATE TABLE user_access (
+	id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL,
+	pathology_id INTEGER NOT NULL,
+	start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+	expiry_date TIMESTAMP WITH TIME ZONE NOT NULL,
+	status TEXT NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`name` text NOT NULL,
-	`phone` text NOT NULL,
-	`address` text NOT NULL,
-	`password` text NOT NULL,
-	`created_at` text DEFAULT '2026-02-11T15:02:09.271Z'
+CREATE TABLE users (
+	id SERIAL PRIMARY KEY,
+	name TEXT NOT NULL,
+	phone TEXT NOT NULL,
+	address TEXT NOT NULL,
+	password TEXT NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE `videos` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`pathology_id` integer NOT NULL,
-	`title` text NOT NULL,
-	`description` text NOT NULL,
-	`duration` text NOT NULL,
-	`thumbnail_url` text NOT NULL,
-	`video_url` text NOT NULL,
-	`resources` text,
-	`view_count` integer DEFAULT 0
+CREATE TABLE videos (
+	id SERIAL PRIMARY KEY,
+	pathology_id INTEGER NOT NULL,
+	title TEXT NOT NULL,
+	description TEXT NOT NULL,
+	duration TEXT NOT NULL,
+	thumbnail_url TEXT NOT NULL,
+	video_url TEXT NOT NULL,
+	resources TEXT,
+	view_count INTEGER DEFAULT 0
 );
