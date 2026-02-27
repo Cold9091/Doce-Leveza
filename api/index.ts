@@ -2,7 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "../server/routes.js";
 
 const app = express();
-
+app.set('trust proxy', 1); // necessário para o Vercel/proxies
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
