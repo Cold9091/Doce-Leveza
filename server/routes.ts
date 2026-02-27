@@ -1,8 +1,8 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { getIronSession } from "iron-session";
-import { sessionOptions } from "./session";
+import { sessionOptions } from "./session.js";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import {
