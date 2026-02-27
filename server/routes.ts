@@ -437,13 +437,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin statistics
   app.get("/api/admin/statistics", requireAdmin, async (_req, res) => {
-    try {
-      const stats = await storage.getStatistics();
-      res.json(stats);
-    } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
+  try {
+    const stats = await storage.getStatistics();
+    res.json(stats);
+  } catch (error) {
+    console.error("Statistics error:", error); // já deve existir
+    res.status(500).json({ error: String(error) }); // temporário para ver o erro
+  }
+});
 
   // Admin - Users management
   app.get("/api/admin/users", requireAdmin, async (_req, res) => {
