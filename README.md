@@ -17,7 +17,7 @@ A full-stack web application built with React, Express, and TypeScript.
 ### Backend
 - Node.js with Express
 - TypeScript
-- Drizzle ORM with PostgreSQL (Neon)
+- Drizzle ORM with PostgreSQL (Supabase)
 - Passport.js for authentication
 - Express sessions
 - Rate limiting
@@ -34,7 +34,7 @@ A full-stack web application built with React, Express, and TypeScript.
 ### Prerequisites
 - Node.js (v18 or higher)
 - npm or yarn
-- PostgreSQL database (Neon recommended)
+- PostgreSQL database (Supabase recommended)
 
 ### Installation
 
@@ -52,7 +52,7 @@ npm install
 3. Set up environment variables
 Create a `.env` file in the root directory with:
 ```
-DATABASE_URL=your_postgresql_connection_string
+DATABASE_URL=postgresql://user:password@host.supabase.co:5432/postgres
 SESSION_SECRET=your_session_secret
 ```
 
