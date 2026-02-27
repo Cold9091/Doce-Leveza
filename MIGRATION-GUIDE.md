@@ -30,6 +30,9 @@ O projeto foi migrado com sucesso de **Turso/LibSQL para Supabase PostgreSQL**.
 npm install
 ```
 
+### 1.1 Forçar IPv4 ou usar pooler URL
+Se o seu ambiente rejeitar conexões IPv6, use o endpoint pooler IPv4 fornecido pelo Supabase (como no `.env` acima) ou acrescente `?hostaddr=<IPv4>` ao `DATABASE_URL`.
+
 ### 2. Executar Migrações (Escolher uma opção)
 
 **Opção A: Usando drizzle-kit (RECOMENDADO)**

@@ -1,5 +1,6 @@
-import { drizzle } from 'drizzle-orm/pg';
-import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pkg from 'pg';
+const { Pool } = pkg;
 import * as schema from "@shared/schema";
 
 if (!process.env.DATABASE_URL) {
@@ -9,7 +10,7 @@ if (!process.env.DATABASE_URL) {
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false, // Required for Supabase
+        rejectUnauthorized: false,
     },
 });
 
