@@ -16,7 +16,7 @@ import {
   insertConsultationSchema,
   insertSubscriptionSchema,
   systemSettingsSchema
-} from "@shared/schema.js";
+} from "../shared/schema.js";
 import { z } from "zod";
 
 
