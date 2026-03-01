@@ -8,32 +8,59 @@ import { Link } from "wouter";
 import type { Pathology, Ebook, Consultation, Subscription, User as UserType, Video as VideoType } from "@shared/schema";
 
 export default function Overview() {
-  const { data: user } = useQuery<UserType>({
+  const { data: user, isLoading: userLoading } = useQuery<UserType>({
     queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60, // 60 segundos de cache
   });
 
-  const { data: pathologies } = useQuery<Pathology[]>({
+  const { data: pathologies, isLoading: pathologiesLoading } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
-  const { data: ebooks } = useQuery<Ebook[]>({
+  const { data: ebooks, isLoading: ebooksLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks"],
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
-  const { data: videos } = useQuery<Video[]>({
+  const { data: videos, isLoading: videosLoading } = useQuery<Video[]>({
     queryKey: ["/api/videos"],
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
   const userId = user?.id || 1;
-  const { data: consultations } = useQuery<Consultation[]>({
+  const { data: consultations, isLoading: consultationsLoading } = useQuery<Consultation[]>({
     queryKey: ["/api/consultations/user", userId],
     enabled: !!user?.id,
+    staleTime: 1000 * 60, // 60 segundos de cache
   });
 
-  const { data: subscription } = useQuery<Subscription>({
+  const { data: subscription, isLoading: subscriptionLoading } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
     enabled: !!user?.id,
+    staleTime: 1000 * 60, // 60 segundos de cache
   });
+
+  // Verificar se está carregando dados críticos
+  const isLoading = userLoading || (pathologiesLoading && !pathologies) || (subscriptionLoading && !subscription);
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-6 sm:space-y-8">
+        <div className="h-48 sm:h-64 bg-gradient-to-br from-muted to-muted/50 rounded-2xl animate-pulse" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 bg-muted rounded-lg animate-pulse" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-64 bg-muted rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const upcomingConsultations = consultations?.filter(c => c.status === "agendada") || [];
 

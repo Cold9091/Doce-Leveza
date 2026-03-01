@@ -20,10 +20,12 @@ import { Link } from "wouter";
 export default function Profile() {
   const { data: pathologies } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user/1"], // Hardcoded for demo
+    staleTime: 1000 * 60, // 60 segundos de cache
   });
 
   const user = {

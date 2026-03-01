@@ -40,6 +40,7 @@ export default function Consultations() {
 
   const { data: consultations = [], isLoading } = useQuery<Consultation[]>({
     queryKey: ["/api/consultations/user", userId],
+    staleTime: 1000 * 60, // 60 segundos de cache
   });
 
   const form = useForm<ScheduleFormData>({

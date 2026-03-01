@@ -13,11 +13,13 @@ export default function Library() {
 
   const { data: ebooks, isLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks"],
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
   const userId = 1; // In a real app, this would come from auth context
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
+    staleTime: 1000 * 60, // 60 segundos de cache
   });
 
   // Access control logic similar to pathologies.tsx

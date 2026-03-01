@@ -35,8 +35,8 @@ function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode
   const { data: user, isLoading } = useQuery({
     queryKey: [endpoint],
     retry: false,
-    staleTime: 1000 * 30, // 30 segundos de cache para segurança/performance
-    gcTime: 1000 * 60,
+    staleTime: 1000 * 60, // 60 segundos de cache
+    gcTime: 1000 * 60 * 5, // 5 minutos de garbage collection
   });
 
   if (isLoading) {
@@ -110,7 +110,7 @@ function Router() {
           const { data: user, isLoading } = useQuery<{ role?: string }>({
             queryKey: ["/api/auth/me"],
             retry: false,
-            staleTime: 0,
+            staleTime: 1000 * 60, // 60 segundos de cache
           });
 
           if (isLoading) return (

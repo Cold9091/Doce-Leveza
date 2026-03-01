@@ -145,11 +145,13 @@ export default function PathologyDetail() {
 
   const { data: pathologies } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
   const { data: videos, isLoading } = useQuery<Video[]>({
     queryKey: ["/api/videos"],
     enabled: !!pathologies,
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
   const pathology = pathologies?.find((p) => p.slug === slug);
@@ -159,10 +161,12 @@ export default function PathologyDetail() {
   const { data: ebooks, isLoading: ebooksLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks", { pathologyId: pathology?.id }],
     enabled: !!pathology,
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
   const { data: userSubscriptions } = useQuery<any>({
     queryKey: ["/api/subscriptions/user/1"], // Hardcoded user ID for demo
+    staleTime: 1000 * 60, // 60 segundos de cache
   });
 
   const isUnlocked = (pathologyId?: number) => {
