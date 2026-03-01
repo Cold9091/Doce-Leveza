@@ -22,7 +22,9 @@ import {
   type InsertAdminNotification,
   type Notification,
   type InsertNotification,
-  users, videos, ebooks, consultations, subscriptions, userAccess, leads, admins, notifications, adminNotifications, systemSettings,
+  type PaymentProof,
+  type InsertPaymentProof,
+  users, videos, ebooks, consultations, subscriptions, userAccess, leads, admins, notifications, adminNotifications, systemSettings, paymentProofs,
   pathologies
 } from "../shared/schema.js";
 import { db } from "./db.js";
@@ -104,6 +106,13 @@ export interface IStorage {
   // Settings
   getSettings(): Promise<SystemSettings>;
   updateSettings(data: Partial<SystemSettings>): Promise<SystemSettings>;
+
+  // Payment Proofs
+  createPaymentProof(data: InsertPaymentProof): Promise<PaymentProof>;
+  getPaymentProofs(status?: string): Promise<PaymentProof[]>;
+  getPaymentProofsByUser(userId: number): Promise<PaymentProof[]>;
+  approvePaymentProof(id: number, adminId: number): Promise<PaymentProof>;
+  rejectPaymentProof(id: number, adminNotes: string): Promise<PaymentProof>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -461,6 +470,48 @@ export class DatabaseStorage implements IStorage {
 
     [settings] = await db.update(systemSettings).set(data).where(eq(systemSettings.id, settings.id)).returning();
     return settings;
+  }
+
+  // Payment Proofs
+  async createPaymentProof(data: InsertPaymentProof): Promise<PaymentProof> {
+    const [proof] = await db.insert(paymentProofs).values(data).returning();
+    return proof;
+  }
+
+  async getPaymentProofs(status?: string): Promise<PaymentProof[]> {
+    if (status) {
+      return await db.select().from(paymentProofs).where(eq(paymentProofs.status, status));
+    }
+    return await db.select().from(paymentProofs).orderBy(desc(paymentProofs.createdAt));
+  }
+
+  async getPaymentProofsByUser(userId: number): Promise<PaymentProof[]> {
+    return await db.select().from(paymentProofs).where(eq(paymentProofs.userId, userId));
+  }
+
+  async approvePaymentProof(id: number, adminId: number): Promise<PaymentProof> {
+    const [proof] = await db
+      .update(paymentProofs)
+      .set({
+        status: "aprovado",
+        approvedBy: adminId,
+        approvedAt: new Date().toISOString(),
+      })
+      .where(eq(paymentProofs.id, id))
+      .returning();
+    return proof;
+  }
+
+  async rejectPaymentProof(id: number, adminNotes: string): Promise<PaymentProof> {
+    const [proof] = await db
+      .update(paymentProofs)
+      .set({
+        status: "rejeitado",
+        adminNotes,
+      })
+      .where(eq(paymentProofs.id, id))
+      .returning();
+    return proof;
   }
 }
 

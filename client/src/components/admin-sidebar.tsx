@@ -72,6 +72,12 @@ const secondaryMenuItems = [
     testId: "nav-admin-subscriptions",
   },
   {
+    title: "Pagamentos",
+    url: "/admin/pagamentos",
+    icon: CreditCard,
+    testId: "nav-admin-payments",
+  },
+  {
     title: "Configurações",
     url: "/admin/configuracoes",
     icon: Settings,

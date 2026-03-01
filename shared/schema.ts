@@ -109,6 +109,19 @@ export const adminNotifications = pgTable("admin_notifications", {
   createdAt: text("created_at").default(new Date().toISOString()),
 });
 
+export const paymentProofs = pgTable("payment_proofs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  pathologyId: integer("pathology_id").notNull(),
+  amount: integer("amount").notNull(),
+  proofUrl: text("proof_url").notNull(),
+  status: text("status").default("pendente"), // pendente, aprovado, rejeitado
+  adminNotes: text("admin_notes"),
+  approvedBy: integer("approved_by"),
+  createdAt: text("created_at").default(new Date().toISOString()),
+  approvedAt: text("approved_at"),
+});
+
 export const systemSettings = pgTable("system_settings", {
   id: serial("id").primaryKey(),
   siteName: text("site_name").default("Doce Leveza"),
@@ -199,6 +212,10 @@ export type AdminNotification = typeof adminNotifications.$inferSelect;
 export type InsertAdminNotification = typeof adminNotifications.$inferInsert;
 export const insertAdminNotificationSchema = createInsertSchema(adminNotifications).omit({ id: true });
 export const adminNotificationSchema = createInsertSchema(adminNotifications);
+export type PaymentProof = typeof paymentProofs.$inferSelect;
+export type InsertPaymentProof = typeof paymentProofs.$inferInsert;
+export const insertPaymentProofSchema = createInsertSchema(paymentProofs).omit({ id: true });
+export const paymentProofSchema = createInsertSchema(paymentProofs);
 export type SystemSettings = typeof systemSettings.$inferSelect;
 export type InsertSystemSettings = typeof systemSettings.$inferInsert;
 export const insertSystemSettingsSchema = createInsertSchema(systemSettings).omit({ id: true });

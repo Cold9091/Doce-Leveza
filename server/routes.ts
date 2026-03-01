@@ -827,6 +827,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment Proofs - Submit payment proof (user uploads PDF)
+  app.post("/api/payments/submit", requireUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const { programId, amount } = req.body;
+
+      if (!programId || !amount) {
+        return res.status(400).json({ error: "Program ID and amount are required" });
+      }
+
+      // In a real app, you would handle file upload here (to cloud storage like S3)
+      // For now, we'll create a payment proof record with placeholder proof URL
+      const proofUrl = `/proofs/payment-${userId}-${programId}-${Date.now()}.pdf`;
+
+      const paymentProof = await storage.createPaymentProof({
+        userId,
+        pathologyId: programId,
+        amount,
+        proofUrl,
+        status: "pendente",
+      });
+
+      res.json(paymentProof);
+    } catch (error) {
+      console.error("Payment submission error:", error);
+      res.status(500).json({ error: "Failed to submit payment proof" });
+    }
+  });
+
+  // Get payment proofs by user
+  app.get("/api/payments/user/:userId", requireUser, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const currentUserId = req.session.userId;
+
+      // Users can only see their own payment proofs
+      if (userId !== currentUserId) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+
+      const proofs = await storage.getPaymentProofsByUser(userId);
+      res.json(proofs);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Get all payment proofs
+  app.get("/api/admin/payments", requireAdmin, async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const proofs = await storage.getPaymentProofs(status);
+      res.json(proofs);
+    } catch (error) {
+      console.error("Get payments error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Approve payment proof
+  app.put("/api/admin/payments/:id/approve", requireAdmin, async (req, res) => {
+    try {
+      const paymentId = parseInt(req.params.id);
+      const adminId = req.session.adminId;
+
+      if (isNaN(paymentId)) {
+        return res.status(400).json({ error: "Invalid payment ID" });
+      }
+
+      const proof = await storage.approvePaymentProof(paymentId, adminId || 1);
+
+      // Create or update subscription for the user
+      if (proof) {
+        const existingSub = await storage.getSubscriptionByUser(proof.userId);
+        if (existingSub) {
+          await storage.updateSubscription(existingSub.id, {
+            status: "ativa",
+            renewalDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          });
+        } else {
+          await storage.createSubscription({
+            userId: proof.userId,
+            plan: "programa",
+            status: "ativa",
+            startDate: new Date().toISOString(),
+            renewalDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            paymentMethod: "transferencia-bancaria",
+          });
+        }
+      }
+
+      res.json(proof);
+    } catch (error) {
+      console.error("Approve payment error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Reject payment proof
+  app.put("/api/admin/payments/:id/reject", requireAdmin, async (req, res) => {
+    try {
+      const paymentId = parseInt(req.params.id);
+      const { adminNotes } = req.body;
+
+      if (isNaN(paymentId)) {
+        return res.status(400).json({ error: "Invalid payment ID" });
+      }
+
+      const proof = await storage.rejectPaymentProof(paymentId, adminNotes || "");
+      res.json(proof);
+    } catch (error) {
+      console.error("Reject payment error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -21,6 +21,7 @@ import Consultations from "@/pages/dashboard/consultations";
 import Settings from "@/pages/dashboard/settings";
 import Profile from "@/pages/dashboard/profile";
 import Subscription from "@/pages/dashboard/subscription";
+import Assinaturas from "@/pages/dashboard/assinaturas";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminUsers from "@/pages/admin/users";
 import AdminPathologies from "@/pages/admin/pathologies";
@@ -28,6 +29,7 @@ import AdminVideos from "@/pages/admin/videos";
 import AdminEbooks from "@/pages/admin/ebooks";
 import AdminConsultations from "@/pages/admin/consultations";
 import AdminSubscriptions from "@/pages/admin/subscriptions";
+import AdminPayments from "@/pages/admin/payments";
 import AdminSettings from "@/pages/admin/settings";
 
 function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode, type?: "user" | "admin" }) {
@@ -184,6 +186,15 @@ function Router() {
           </ProtectedRoute>
         )}
       </Route>
+      <Route path="/dashboard/assinaturas">
+        {() => (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Assinaturas />
+            </DashboardLayout>
+          </ProtectedRoute>
+        )}
+      </Route>
       <Route path="/admin">
         {() => (
           <ProtectedRoute type="admin">
@@ -243,6 +254,15 @@ function Router() {
           <ProtectedRoute type="admin">
             <AdminLayout>
               <AdminSubscriptions />
+            </AdminLayout>
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/admin/pagamentos">
+        {() => (
+          <ProtectedRoute type="admin">
+            <AdminLayout>
+              <AdminPayments />
             </AdminLayout>
           </ProtectedRoute>
         )}

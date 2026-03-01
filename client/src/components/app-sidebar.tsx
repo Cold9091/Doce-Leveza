@@ -16,6 +16,7 @@ import {
   BookOpen,
   Settings,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -51,6 +52,15 @@ const mainMenuItems = [
     url: "/dashboard/biblioteca",
     icon: BookOpen,
     testId: "nav-library",
+  },
+];
+
+const billingMenuItems = [
+  {
+    title: "Assinaturas",
+    url: "/dashboard/assinaturas",
+    icon: CreditCard,
+    testId: "nav-subscriptions",
   },
 ];
 
@@ -93,6 +103,38 @@ export function AppSidebar() {
           {mainMenuItems.map((item) => {
             const isActive = location === item.url || 
               (item.url !== "/dashboard" && location.startsWith(item.url));
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  className={`
+                    h-11 px-4 rounded-lg transition-all duration-200
+                    ${isActive 
+                      ? "bg-primary text-primary-foreground font-medium" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }
+                  `}
+                >
+                  <Link href={item.url}>
+                    <span 
+                      className="flex items-center gap-3 w-full cursor-pointer"
+                      data-testid={item.testId}
+                    >
+                      <item.icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
+                      <span className="text-sm">{item.title}</span>
+                    </span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+
+        <SidebarSeparator className="my-4" />
+
+        <SidebarMenu className="space-y-1">
+          {billingMenuItems.map((item) => {
+            const isActive = location === item.url;
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
