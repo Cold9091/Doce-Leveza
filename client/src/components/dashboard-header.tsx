@@ -149,9 +149,9 @@ export function DashboardHeader({
               data-testid="button-avatar"
             >
               <Avatar className="h-10 w-10 border-2 border-primary/20">
-                <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" alt={userName} />
+                <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" alt={user?.name || "Usuário"} />
                 <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  {userName.charAt(0).toUpperCase()}
+                  {(user?.name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </Button>
