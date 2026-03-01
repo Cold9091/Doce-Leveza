@@ -49,7 +49,10 @@ export default function AdminPathologies() {
       await apiRequest("POST", "/api/admin/pathologies", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/pathologies"],
+        refetchType: "all",
+      });
       toast({
         title: "Sucesso",
         description: "Programa criado com sucesso",
@@ -71,7 +74,10 @@ export default function AdminPathologies() {
       await apiRequest("PUT", `/api/admin/pathologies/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/pathologies"],
+        refetchType: "all",
+      });
       toast({
         title: "Sucesso",
         description: "Programa atualizado com sucesso",
@@ -94,7 +100,10 @@ export default function AdminPathologies() {
       await apiRequest("DELETE", `/api/admin/pathologies/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pathologies"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/pathologies"],
+        refetchType: "all",
+      });
       toast({
         title: "Sucesso",
         description: "Programa removido com sucesso",

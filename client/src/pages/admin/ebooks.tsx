@@ -42,6 +42,10 @@ export default function AdminEbooks() {
 
   const { data: pathologies } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
+    staleTime: 1000 * 60 * 3, // 3 minutos de cache
+    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+    staleTime: 1000 * 60 * 3, // 3 minutos de cache
+    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
 
   const form = useForm<InsertEbook>({
