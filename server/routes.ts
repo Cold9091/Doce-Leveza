@@ -195,12 +195,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.createUser(validatedData);
 
       // Create free subscription for new user
-      await storage.createSubscription({
+      const subscription = await storage.createSubscription({
         userId: user.id,
         plan: "gratuito",
         status: "ativa",
         startDate: new Date().toISOString(),
-        renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+        renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         paymentMethod: "gratuito",
       });
 
@@ -287,19 +287,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Pathologies routes
-  app.get("/api/pathologies", requireUser, async (req, res) => {
+  // Pathologies routes - PUBLIC (list only, no auth needed)
+  // Access control happens at subscription/content level, not at program listing
+  app.get("/api/pathologies", async (req, res) => {
     try {
       const pathologies = await storage.getPathologies();
       console.log(`GET /api/pathologies -> returned ${pathologies.length} items`);
       res.json(pathologies);
     } catch (error) {
       console.error("/api/pathologies error", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Internal server error", details: String(error) });
     }
   });
 
-  app.get("/api/pathologies/:slug", requireUser, async (req, res) => {
+  app.get("/api/pathologies/:slug", async (req, res) => {
     try {
       const pathology = await storage.getPathologyBySlug(req.params.slug);
       if (!pathology) {

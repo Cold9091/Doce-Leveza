@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2 } from "lucide-react";
 
@@ -105,6 +105,10 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
         title: "Login realizado!",
         description: "Bem-vindo de volta ao DOCE LEVEZA.",
       });
+      
+      // Invalidar cache do usuário para garantir dados frescos
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
       
       // Redirecionar imediatamente baseado no papel do usuário
       const userData = response.data;
