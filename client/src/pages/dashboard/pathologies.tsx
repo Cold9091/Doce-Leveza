@@ -24,6 +24,9 @@ export default function Pathologies() {
     queryKey: ["/api/pathologies"],
     staleTime: 1000 * 60 * 3, // 3 minutos de cache
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+    onSuccess(data) {
+      console.log("dashboard: fetched pathologies", data);
+    },
   });
 
   const userId = user?.id || 1;
@@ -34,11 +37,27 @@ export default function Pathologies() {
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
 
-  // Simulando controle de acesso por programa individual
+  // user-specific access entries, fetched via user endpoint
+  const { data: userAccess } = useQuery<any[]>({
+    queryKey: ["/api/user/access"],
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+    onSuccess(data) {
+      console.log("dashboard: user access records", data);
+    },
+  });
+
+  // controle de acesso por programa
   const hasAccessToProgram = (programId: number) => {
+    // assinantes ativos recebem tudo
     if (subscription?.status === "ativa") return true;
-    // Simulação: Apenas o primeiro programa está liberado para demonstração
-    return programId === 1;
+    // caso tenhamos regras de acesso individual, verificar
+    if (userAccess && userAccess.some(a => a.pathologyId === programId)) {
+      return true;
+    }
+    // não há permissão, mas continuamos a exibir o programa (apenas travado)
+    return false;
   };
 
   if (isLoading) {

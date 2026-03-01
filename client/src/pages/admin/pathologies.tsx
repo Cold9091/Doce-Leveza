@@ -30,6 +30,9 @@ export default function AdminPathologies() {
 
   const { data: pathologies, isLoading } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
+    onSuccess(data) {
+      console.log("admin: loaded pathologies", data);
+    },
   });
 
   const form = useForm<InsertPathology>({
@@ -49,10 +52,13 @@ export default function AdminPathologies() {
       await apiRequest("POST", "/api/admin/pathologies", data);
     },
     onSuccess: () => {
+      // make sure any cached list is refetched immediately
       queryClient.invalidateQueries({ 
         queryKey: ["/api/pathologies"],
         refetchType: "all",
       });
+      queryClient.refetchQueries({ queryKey: ["/api/pathologies"] });
+      console.log("admin: pathology created, invalidated cache");
       toast({
         title: "Sucesso",
         description: "Programa criado com sucesso",
@@ -60,10 +66,11 @@ export default function AdminPathologies() {
       setIsDialogOpen(false);
       form.reset();
     },
-    onError: () => {
+    onError: (err: any) => {
+      console.error("create pathology failed", err);
       toast({
         title: "Erro",
-        description: "Erro ao criar programa",
+        description: err?.message || "Erro ao criar programa",
         variant: "destructive",
       });
     },
@@ -78,6 +85,8 @@ export default function AdminPathologies() {
         queryKey: ["/api/pathologies"],
         refetchType: "all",
       });
+      queryClient.refetchQueries({ queryKey: ["/api/pathologies"] });
+      console.log("admin: pathology updated, cache invalidated");
       toast({
         title: "Sucesso",
         description: "Programa atualizado com sucesso",
@@ -86,10 +95,11 @@ export default function AdminPathologies() {
       setEditingPathology(null);
       form.reset();
     },
-    onError: () => {
+    onError: (err: any) => {
+      console.error("update pathology failed", err);
       toast({
         title: "Erro",
-        description: "Erro ao atualizar programa",
+        description: err?.message || "Erro ao atualizar programa",
         variant: "destructive",
       });
     },
@@ -104,15 +114,18 @@ export default function AdminPathologies() {
         queryKey: ["/api/pathologies"],
         refetchType: "all",
       });
+      queryClient.refetchQueries({ queryKey: ["/api/pathologies"] });
+      console.log("admin: pathology deleted, cache invalidated");
       toast({
         title: "Sucesso",
         description: "Programa removido com sucesso",
       });
     },
-    onError: () => {
+    onError: (err: any) => {
+      console.error("delete pathology failed", err);
       toast({
         title: "Erro",
-        description: "Erro ao remover programa",
+        description: err?.message || "Erro ao remover programa",
         variant: "destructive",
       });
     },
@@ -163,6 +176,9 @@ export default function AdminPathologies() {
           </h1>
           <p className="text-muted-foreground mt-2">
             Adicione e gerencie os programas do sistema
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {pathologies ? `${pathologies.length} registro(s) encontrado(s)` : "carregando..."}
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>

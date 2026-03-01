@@ -275,11 +275,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Pathologies routes
-  app.get("/api/pathologies", requireUser, async (_req, res) => {
+  app.get("/api/pathologies", requireUser, async (req, res) => {
     try {
       const pathologies = await storage.getPathologies();
+      console.log(`GET /api/pathologies -> returned ${pathologies.length} items`);
       res.json(pathologies);
     } catch (error) {
+      console.error("/api/pathologies error", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -793,6 +795,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(userId)) {
         return res.status(400).json({ error: "Invalid user ID" });
       }
+      const access = await storage.getUserAccess(userId);
+      res.json(access);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // exposed endpoint for current user to fetch own access records
+  app.get("/api/user/access", requireUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
       const access = await storage.getUserAccess(userId);
       res.json(access);
     } catch (error) {
