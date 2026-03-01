@@ -402,10 +402,11 @@ export class DatabaseStorage implements IStorage {
     const [leadCount] = await db.select({ count: sql<number>`count(*)` }).from(leads);
     const [activeSubCount] = await db.select({ count: sql<number>`count(*)` }).from(subscriptions).where(eq(subscriptions.status, "ativa"));
 
-    // Recent users (last 30 days) - PostgreSQL
-const [recentUserCount] = await db.select({ count: sql<number>`count(*)` })
-  .from(users)
-  .where(sql`created_at::timestamp >= now() - interval '30 days'`);
+    // Recent users (last 30 days)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const [recentUserCount] = await db.select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(sql`${users.createdAt} >= ${thirtyDaysAgo}`);
 
     return {
       totalUsers: userCount?.count || 0,
