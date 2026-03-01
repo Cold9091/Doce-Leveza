@@ -10,27 +10,32 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Notification } from "@shared/schema";
+import type { Notification, User as UserType } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface DashboardHeaderProps {
-  userName?: string;
   showCourseButton?: boolean;
   courseButtonText?: string;
   onCourseButtonClick?: () => void;
 }
 
 export function DashboardHeader({
-  userName = "Aluno",
   showCourseButton = false,
   courseButtonText = "Ver Aula",
   onCourseButtonClick
 }: DashboardHeaderProps) {
-  const userId = 1;
+  const { data: user } = useQuery<UserType>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 2, // 2 minutos de cache
+    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+  });
+
+  const userId = user?.id || 1;
 
   const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ["/api/notifications/user", userId],
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 2, // 2 minutos de cache
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
@@ -61,7 +66,7 @@ export function DashboardHeader({
 
         <div className="flex items-center gap-2">
           <span className="text-lg font-semibold text-foreground" data-testid="text-greeting">
-            Olá, {userName}
+            Olá, {user?.name || "Usuário"}
           </span>
         </div>
       </div>

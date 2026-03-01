@@ -14,29 +14,53 @@ import {
   Calendar
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import type { Pathology, Subscription } from "@shared/schema";
+import type { Pathology, Subscription, User as UserType } from "@shared/schema";
 import { Link } from "wouter";
 
 export default function Profile() {
+  const { data: userInfo, isLoading: userLoading } = useQuery<UserType>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 2, // 2 minutos de cache
+    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+  });
+
   const { data: pathologies } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
     staleTime: 1000 * 60 * 5, // 5 minutos de cache
   });
 
   const { data: subscription } = useQuery<Subscription>({
-    queryKey: ["/api/subscriptions/user/1"], // Hardcoded for demo
+    queryKey: ["/api/subscriptions/user", userInfo?.id || 1],
+    enabled: !!userInfo?.id,
     staleTime: 1000 * 60, // 60 segundos de cache
   });
 
-  const user = {
-    name: "Maria Silva",
-    email: "maria.silva@email.com",
-    phone: "+244 912 345 678",
-    address: "Rua das Flores, 123, Luanda",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9ce29b2933?w=400",
+  // Fallback para dados mockados se não houver dados reais
+  const user = userInfo || {
+    name: "Usuário",
+    email: "-",
+    phone: "-",
+    address: "-",
+    avatar: "",
   };
 
   const otherPrograms = pathologies?.filter(p => p.id !== 1) || [];
+
+  if (userLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-10 w-48 bg-muted animate-pulse rounded" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="h-96 bg-muted animate-pulse rounded-lg" />
+          <div className="lg:col-span-2 space-y-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

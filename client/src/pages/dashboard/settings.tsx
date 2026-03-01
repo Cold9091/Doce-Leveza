@@ -4,8 +4,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { User, Lock, Bell } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { User as UserType } from "@shared/schema";
 
 export default function Settings() {
+  const { data: user, isLoading } = useQuery<UserType>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <div className="h-10 w-48 bg-muted animate-pulse rounded" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-56 bg-muted animate-pulse rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
@@ -36,7 +57,7 @@ export default function Settings() {
               <Input
                 id="name"
                 placeholder="Seu nome"
-                defaultValue="Usuário Teste"
+                defaultValue={user?.name || ""}
                 data-testid="input-name"
               />
             </div>
@@ -46,7 +67,7 @@ export default function Settings() {
                 id="phone"
                 type="tel"
                 placeholder="+244 9XX XXX XXX"
-                defaultValue="+244 923456789"
+                defaultValue={user?.phone || ""}
                 data-testid="input-phone"
               />
             </div>
@@ -56,7 +77,7 @@ export default function Settings() {
             <Input
               id="address"
               placeholder="Seu endereço"
-              defaultValue="Luanda, Angola"
+              defaultValue={user?.address || ""}
               data-testid="input-address"
             />
           </div>

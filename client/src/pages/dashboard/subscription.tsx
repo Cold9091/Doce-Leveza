@@ -3,14 +3,29 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, CreditCard, Calendar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useQuery } from "@tanstack/react-query";
+import type { Subscription as SubscriptionType, User as UserType } from "@shared/schema";
 
 export default function Subscription() {
-  const currentPlan = {
-    name: "Anual",
-    status: "ativa",
-    startDate: "20 Nov 2024",
-    renewalDate: "20 Nov 2025",
-    paymentMethod: "Cartão de Crédito •••• 4242",
+  const { data: user } = useQuery<UserType>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  const { data: subscription, isLoading } = useQuery<SubscriptionType>({
+    queryKey: ["/api/subscriptions/user", user?.id || 1],
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  const currentPlan = subscription || {
+    name: "Sem Plano",
+    status: "inativa",
+    startDate: "-",
+    renewalDate: "-",
+    paymentMethod: "-",
   };
 
   const benefits = [
@@ -22,7 +37,17 @@ export default function Subscription() {
     "Atualizações semanais de conteúdo",
   ];
 
-  return (
+  if (isLoading) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <div className="h-10 w-48 bg-muted animate-pulse rounded" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+          <div className="lg:col-span-2 h-64 bg-muted animate-pulse rounded-lg" />
+          <div className="h-64 bg-muted animate-pulse rounded-lg" />
+        </div>
+      </div>
+    );
+  }
     <div className="space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground" data-testid="heading-subscription">

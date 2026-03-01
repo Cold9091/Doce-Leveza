@@ -14,7 +14,7 @@ import { z } from "zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Consultation } from "@shared/schema";
+import type { Consultation, User as UserType } from "@shared/schema";
 
 const scheduleFormSchema = z.object({
   date: z.string().min(1, "Selecione uma data"),
@@ -36,10 +36,17 @@ export default function Consultations() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const userId = 1;
+  const { data: user } = useQuery<UserType>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  const userId = user?.id || 1;
 
   const { data: consultations = [], isLoading } = useQuery<Consultation[]>({
     queryKey: ["/api/consultations/user", userId],
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 2, // 2 minutos de cache
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });

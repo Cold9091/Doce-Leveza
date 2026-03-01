@@ -73,7 +73,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen w-full bg-muted/30">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <DashboardHeader userName="Maria" />
+          <DashboardHeader />
           <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
             {children}
           </main>

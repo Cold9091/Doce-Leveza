@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import type { Ebook, Subscription } from "@shared/schema";
+import type { Ebook, Subscription, User as UserType } from "@shared/schema";
 import { BookOpen, FileText, Lock } from "lucide-react";
 import { PdfReader } from "@/components/pdf-reader";
 
@@ -11,15 +11,22 @@ export default function Library() {
   const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
   const [readerOpen, setReaderOpen] = useState(false);
 
+  const { data: user } = useQuery<UserType>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
   const { data: ebooks, isLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks"],
     staleTime: 1000 * 60 * 10, // 10 minutos de cache
     gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
   });
 
-  const userId = 1; // In a real app, this would come from auth context
+  const userId = user?.id || 1;
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 2, // 2 minutos de cache
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });

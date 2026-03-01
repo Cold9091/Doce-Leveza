@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import type { Pathology, Subscription } from "@shared/schema";
+import type { Pathology, Subscription, User as UserType } from "@shared/schema";
 import { Lock } from "lucide-react";
 
 const pathologyImageMap: Record<string, string> = {
@@ -14,15 +14,22 @@ const pathologyImageMap: Record<string, string> = {
 };
 
 export default function Pathologies() {
+  const { data: user } = useQuery<UserType>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
   const { data: pathologies, isLoading } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
     staleTime: 1000 * 60 * 10, // 10 minutos de cache
     gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
   });
 
-  const userId = 1;
+  const userId = user?.id || 1;
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 2, // 2 minutos de cache
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
