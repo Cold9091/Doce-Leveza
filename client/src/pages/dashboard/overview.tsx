@@ -10,35 +10,41 @@ import type { Pathology, Ebook, Consultation, Subscription, User as UserType, Vi
 export default function Overview() {
   const { data: user, isLoading: userLoading } = useQuery<UserType>({
     queryKey: ["/api/auth/me"],
-    staleTime: 1000 * 60, // 60 segundos de cache
+    staleTime: 1000 * 60 * 2, // 2 minutos de cache
+    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
 
   const { data: pathologies, isLoading: pathologiesLoading } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
-    staleTime: 1000 * 60 * 5, // 5 minutos de cache
+    staleTime: 1000 * 60 * 10, // 10 minutos de cache
+    gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
   });
 
   const { data: ebooks, isLoading: ebooksLoading } = useQuery<Ebook[]>({
     queryKey: ["/api/ebooks"],
-    staleTime: 1000 * 60 * 5, // 5 minutos de cache
+    staleTime: 1000 * 60 * 10, // 10 minutos de cache
+    gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
   });
 
   const { data: videos, isLoading: videosLoading } = useQuery<Video[]>({
     queryKey: ["/api/videos"],
-    staleTime: 1000 * 60 * 5, // 5 minutos de cache
+    staleTime: 1000 * 60 * 10, // 10 minutos de cache
+    gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
   });
 
   const userId = user?.id || 1;
   const { data: consultations, isLoading: consultationsLoading } = useQuery<Consultation[]>({
     queryKey: ["/api/consultations/user", userId],
     enabled: !!user?.id,
-    staleTime: 1000 * 60, // 60 segundos de cache
+    staleTime: 1000 * 60 * 2, // 2 minutos de cache
+    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
 
   const { data: subscription, isLoading: subscriptionLoading } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
     enabled: !!user?.id,
-    staleTime: 1000 * 60, // 60 segundos de cache
+    staleTime: 1000 * 60 * 2, // 2 minutos de cache
+    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
 
   // Verificar se está carregando dados críticos

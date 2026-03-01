@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { Loader2 } from "lucide-react";
 
 import Home from "@/pages/home";
@@ -32,7 +33,7 @@ import AdminSettings from "@/pages/admin/settings";
 function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode, type?: "user" | "admin" }) {
   const endpoint = type === "admin" ? "/api/admin/me" : "/api/auth/me";
   
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading } = useQuery<any>({
     queryKey: [endpoint],
     retry: false,
     staleTime: 1000 * 60, // 60 segundos de cache
@@ -49,6 +50,12 @@ function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode
 
   if (!user) {
     window.location.href = "/"; // Forçar redirecionamento total para limpar estado
+    return null;
+  }
+
+  // Se é usuario e está acessando rota de user, verificar se é admin
+  if (type === "user" && (user?.role === "admin" || user?.role === "super_admin")) {
+    window.location.replace("/admin");
     return null;
   }
 
@@ -106,32 +113,13 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard">
-        {() => {
-          const { data: user, isLoading } = useQuery<{ role?: string }>({
-            queryKey: ["/api/auth/me"],
-            retry: false,
-            staleTime: 1000 * 60, // 60 segundos de cache
-          });
-
-          if (isLoading) return (
-            <div className="flex items-center justify-center min-h-screen">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          );
-
-          if (user?.role === "admin" || user?.role === "super_admin") {
-            window.location.replace("/admin");
-            return null;
-          }
-
-          return (
-            <ProtectedRoute>
-              <DashboardLayout>
-                <Overview />
-              </DashboardLayout>
-            </ProtectedRoute>
-          );
-        }}
+        {() => (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Overview />
+            </DashboardLayout>
+          </ProtectedRoute>
+        )}
       </Route>
       <Route path="/dashboard/programas">
         {() => (
@@ -276,10 +264,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ErrorBoundary>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 }

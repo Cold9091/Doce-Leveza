@@ -16,13 +16,15 @@ const pathologyImageMap: Record<string, string> = {
 export default function Pathologies() {
   const { data: pathologies, isLoading } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
-    staleTime: 1000 * 60 * 5, // 5 minutos de cache
+    staleTime: 1000 * 60 * 10, // 10 minutos de cache
+    gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
   });
 
   const userId = 1;
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
-    staleTime: 1000 * 60, // 60 segundos de cache
+    staleTime: 1000 * 60 * 2, // 2 minutos de cache
+    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
 
   // Simulando controle de acesso por programa individual
