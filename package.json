@@ -10,7 +10,8 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:migrate-sql": "tsx scripts/migrate-sql.ts"
+    "db:migrate-sql": "tsx scripts/migrate-sql.ts",
+    "db:seed": "tsx server/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

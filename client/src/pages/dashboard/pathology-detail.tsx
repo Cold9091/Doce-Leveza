@@ -143,6 +143,12 @@ export default function PathologyDetail() {
   const [, params] = useRoute("/dashboard/programas/:slug");
   const slug = params?.slug;
 
+  const { data: user } = useQuery<any>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
   const { data: pathologies } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
     staleTime: 1000 * 60 * 3, // 3 minutos de cache
@@ -166,13 +172,14 @@ export default function PathologyDetail() {
   });
 
   const { data: userSubscriptions } = useQuery<any>({
-    queryKey: ["/api/subscriptions/user/1"], // Hardcoded user ID for demo
+    queryKey: ["/api/subscriptions/user", user?.id || 1],
+    enabled: !!user?.id,
     staleTime: 1000 * 60, // 60 segundos de cache
   });
 
   const isUnlocked = (pathologyId?: number) => {
     if (!pathologyId) return true;
-    if (pathologyId === 1) return true; // Demo unlock
+    if (userSubscriptions?.status === "ativa") return true;
     return userSubscriptions?.pathologyIds?.includes(pathologyId);
   };
 
