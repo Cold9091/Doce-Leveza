@@ -5,6 +5,8 @@ import { getIronSession } from "iron-session";
 import { sessionOptions } from "./session.js";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
+import multer from "multer";
+import { uploadImageToCloudinary } from "./cloudinary.js";
 import {
   leadSchema,
   signupSchema,
@@ -18,6 +20,8 @@ import {
   systemSettingsSchema
 } from "../shared/schema.js";
 import { z } from "zod";
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 
 
@@ -558,6 +562,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Upload cover image to Cloudinary
+  app.post("/api/admin/upload/image", requireAdmin, upload.single("image"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "Nenhum ficheiro enviado" });
+      }
+      const folder = (req.body.folder as string) || "doce-leveza";
+      const publicId = req.body.publicId as string | undefined;
+      const url = await uploadImageToCloudinary(req.file.buffer, folder, publicId);
+      res.json({ url });
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      res.status(500).json({ error: "Falha ao fazer upload da imagem" });
     }
   });
 
