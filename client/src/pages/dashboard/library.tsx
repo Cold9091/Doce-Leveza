@@ -3,13 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import type { Ebook, Subscription, User as UserType } from "@shared/schema";
+import type { Ebook, Pathology, Subscription, User as UserType } from "@shared/schema";
 import { BookOpen, FileText, Lock } from "lucide-react";
 import { PdfReader } from "@/components/pdf-reader";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Library() {
   const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
   const [readerOpen, setReaderOpen] = useState(false);
+  const { toast } = useToast();
 
   const { data: user } = useQuery<UserType>({
     queryKey: ["/api/auth/me"],
@@ -35,6 +37,11 @@ export default function Library() {
     queryKey: ["/api/user/access"],
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: pathologies } = useQuery<Pathology[]>({
+    queryKey: ["/api/pathologies"],
+    staleTime: 1000 * 60 * 5,
   });
 
   const hasAccessToEbook = (pathologyId?: number) => {
@@ -119,6 +126,11 @@ export default function Library() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex flex-wrap gap-2">
+                  {ebook.pathologyId && pathologies?.find(p => p.id === ebook.pathologyId) && (
+                    <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                      {pathologies.find(p => p.id === ebook.pathologyId)?.title}
+                    </Badge>
+                  )}
                   {ebook.tags.map((tag, idx) => (
                     <Badge key={idx} variant="secondary" className="text-xs">
                       {tag}
@@ -134,7 +146,11 @@ export default function Library() {
                       setSelectedEbook(ebook);
                       setReaderOpen(true);
                     } else {
-                      alert("Este ebook faz parte de um programa que você ainda não adquiriu.");
+                      toast({
+                        title: "Acesso bloqueado",
+                        description: "Este ebook faz parte de um programa que ainda não adquiriu.",
+                        variant: "destructive",
+                      });
                     }
                   }}
                 >
