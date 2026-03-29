@@ -33,7 +33,7 @@ export default function Assinaturas() {
     gcTime: 1000 * 60 * 10,
   });
 
-  const hasActiveSubscription = subscription?.status === "ativa";
+  const hasActiveSubscription = subscription?.status === "ativa" || subscription?.status === "por_programa";
 
   const handlePaymentClick = (program: Pathology) => {
     setSelectedProgram(program);

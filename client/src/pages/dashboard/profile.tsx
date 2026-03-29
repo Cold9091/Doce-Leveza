@@ -1,51 +1,98 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  CreditCard, 
-  Package, 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Phone,
+  MapPin,
+  CreditCard,
+  Package,
   ChevronRight,
   ShieldCheck,
-  Calendar
+  Calendar,
+  Pencil,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import type { Pathology, Subscription, User as UserType } from "@shared/schema";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import type { Pathology, Subscription, User as UserType, UserAccess } from "@shared/schema";
 import { Link } from "wouter";
 
 export default function Profile() {
+  const { toast } = useToast();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editAddress, setEditAddress] = useState("");
+
   const { data: userInfo, isLoading: userLoading } = useQuery<UserType>({
     queryKey: ["/api/auth/me"],
-    staleTime: 1000 * 60 * 2, // 2 minutos de cache
-    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
   });
 
   const { data: pathologies } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
-    staleTime: 1000 * 60 * 3, // 3 minutos de cache
-    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+    staleTime: 1000 * 60 * 3,
+    gcTime: 1000 * 60 * 10,
   });
 
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userInfo?.id || 1],
     enabled: !!userInfo?.id,
-    staleTime: 1000 * 60, // 60 segundos de cache
+    staleTime: 1000 * 60,
   });
 
-  // Fallback para dados mockados se não houver dados reais
-  const user = userInfo || {
-    name: "Usuário",
-    email: "-",
-    phone: "-",
-    address: "-",
-    avatar: "",
+  const { data: userAccessList = [] } = useQuery<UserAccess[]>({
+    queryKey: ["/api/user/access"],
+    enabled: !!userInfo?.id,
+    staleTime: 1000 * 60,
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: { name: string; address: string }) =>
+      apiRequest("PATCH", "/api/auth/profile", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setEditOpen(false);
+      toast({ title: "Perfil atualizado com sucesso!" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao atualizar perfil", variant: "destructive" });
+    },
+  });
+
+  const openEdit = () => {
+    setEditName(userInfo?.name || "");
+    setEditAddress(userInfo?.address || "");
+    setEditOpen(true);
   };
 
-  const otherPrograms = pathologies?.filter(p => p.id !== 1) || [];
+  const handleSave = () => {
+    if (!editName.trim()) {
+      toast({ title: "O nome não pode estar vazio", variant: "destructive" });
+      return;
+    }
+    updateProfileMutation.mutate({ name: editName.trim(), address: editAddress.trim() });
+  };
+
+  const user = userInfo || { name: "Usuário", phone: "-", address: "-", avatar: "" };
+
+  // IDs dos programas já com acesso ativo e não expirado
+  const unlockedPathologyIds = new Set(
+    userAccessList
+      .filter(a => a.status === "ativo" && new Date(a.expiryDate) > new Date())
+      .map(a => a.pathologyId)
+  );
+
+  const hasFullAccess = subscription?.status === "ativa";
+
+  const lockedPrograms = hasFullAccess
+    ? []
+    : (pathologies || []).filter(p => !unlockedPathologyIds.has(p.id));
 
   if (userLoading) {
     return (
@@ -96,20 +143,26 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>{user.email}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{user.phone}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>{user.address}</span>
-              </div>
+              {user.phone && user.phone !== "-" && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span>{user.phone}</span>
+                </div>
+              )}
+              {user.address && user.address !== "-" && (
+                <div className="flex items-center gap-3 text-sm">
+                  <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span>{user.address}</span>
+                </div>
+              )}
             </div>
-            <Button variant="outline" className="w-full mt-4" data-testid="button-edit-profile">
+            <Button
+              variant="outline"
+              className="w-full mt-4"
+              data-testid="button-edit-profile"
+              onClick={openEdit}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
               Editar Perfil
             </Button>
           </CardContent>
@@ -125,28 +178,34 @@ export default function Profile() {
                   <ShieldCheck className="h-5 w-5 text-primary" />
                   <CardTitle className="text-lg">Assinatura</CardTitle>
                 </div>
-                {subscription?.status === "ativa" && (
-                  <Badge variant="default" className="bg-green-500 hover:bg-green-600">Ativa</Badge>
+                {(subscription?.status === "ativa" || subscription?.status === "por_programa") && (
+                  <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                    {subscription.status === "por_programa" ? "Por Programa" : "Ativa"}
+                  </Badge>
                 )}
               </div>
             </CardHeader>
             <CardContent>
-              {subscription?.status === "ativa" ? (
+              {(subscription?.status === "ativa" || subscription?.status === "por_programa") ? (
                 <div className="flex flex-col sm:flex-row justify-between gap-4 p-4 rounded-lg bg-muted/50 border">
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Plano Atual</p>
-                    <p className="text-lg font-bold capitalize">{subscription.plan}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>
-                        Próxima renovação:{" "}
-                        {new Date(subscription.renewalDate).toLocaleDateString("pt-BR", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </div>
+                    <p className="text-lg font-bold capitalize">
+                      {subscription.status === "por_programa" ? "Acesso por Programa" : subscription.plan}
+                    </p>
+                    {subscription.status === "ativa" && subscription.renewalDate && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>
+                          Próxima renovação:{" "}
+                          {new Date(subscription.renewalDate).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Link href="/dashboard/assinatura">
@@ -173,40 +232,105 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* Other Programs to Unlock */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Desbloquear Outros Programas</CardTitle>
-              </div>
-              <CardDescription>Expanda seu conhecimento com outros programas especializados</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {otherPrograms.map((program) => (
-                <div 
-                  key={program.id}
-                  className="group relative p-4 rounded-xl border bg-card hover:bg-accent/5 transition-colors duration-200"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-sm leading-tight pr-8">{program.title}</h3>
-                    <Badge variant="outline" className="text-primary border-primary/20">
-                      {program.price?.toLocaleString()} AOA
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-4">
-                    {program.description}
-                  </p>
-                  <Button variant="outline" size="sm" className="w-full text-xs font-medium group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200">
-                    Desbloquear Agora
-                    <ChevronRight className="ml-1 h-3 w-3" />
-                  </Button>
+          {/* Locked Programs */}
+          {lockedPrograms.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Package className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Desbloquear Outros Programas</CardTitle>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+                <CardDescription>Expanda seu conhecimento com outros programas especializados</CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {lockedPrograms.map((program) => (
+                  <div
+                    key={program.id}
+                    className="group relative p-4 rounded-xl border bg-card hover:bg-accent/5 transition-colors duration-200"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-sm leading-tight pr-8">{program.title}</h3>
+                      <Badge variant="outline" className="text-primary border-primary/20">
+                        {program.price?.toLocaleString()} AOA
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-4">
+                      {program.description}
+                    </p>
+                    <Link href="/dashboard/assinaturas">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs font-medium group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200"
+                        data-testid={`button-unlock-program-${program.id}`}
+                      >
+                        Desbloquear Agora
+                        <ChevronRight className="ml-1 h-3 w-3" />
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* All programs unlocked */}
+          {lockedPrograms.length === 0 && (subscription?.status === "ativa" || subscription?.status === "por_programa") && (
+            <Card>
+              <CardContent className="flex flex-col items-center gap-3 py-8 text-center">
+                <ShieldCheck className="h-10 w-10 text-green-500" />
+                <p className="font-semibold text-foreground">Todos os programas desbloqueados!</p>
+                <p className="text-sm text-muted-foreground">
+                  Você tem acesso a todos os programas disponíveis.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Perfil</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Nome completo</Label>
+              <Input
+                id="edit-name"
+                data-testid="input-edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Seu nome completo"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-address">Localização / Endereço</Label>
+              <Input
+                id="edit-address"
+                data-testid="input-edit-address"
+                value={editAddress}
+                onChange={(e) => setEditAddress(e.target.value)}
+                placeholder="Ex: Luanda, Angola"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditOpen(false)} data-testid="button-cancel-edit">
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={updateProfileMutation.isPending}
+              data-testid="button-save-profile"
+            >
+              {updateProfileMutation.isPending ? "A guardar..." : "Guardar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

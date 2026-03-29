@@ -99,6 +99,9 @@ export default function Subscription() {
                 {currentPlan.status === "ativa" && (
                   <Badge className="bg-green-100 text-green-800">Ativa</Badge>
                 )}
+                {currentPlan.status === "por_programa" && (
+                  <Badge className="bg-blue-100 text-blue-800">Por Programa</Badge>
+                )}
                 {currentPlan.status === "inativa" && (
                   <Badge variant="secondary">Inativa</Badge>
                 )}

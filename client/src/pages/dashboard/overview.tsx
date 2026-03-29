@@ -71,7 +71,7 @@ export default function Overview() {
   const upcomingConsultations = consultations?.filter(c => c.status === "agendada") || [];
 
   // Logic for active program info
-  const activeSubscription = subscription?.status === "ativa";
+  const activeSubscription = subscription?.status === "ativa" || subscription?.status === "por_programa";
   const firstPathology = pathologies?.[0];
 
   const stats = [
