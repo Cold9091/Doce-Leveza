@@ -6,7 +6,7 @@ import { sessionOptions } from "./session.js";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import multer from "multer";
-import { uploadImageToCloudinary } from "./cloudinary.js";
+import { uploadImageToCloudinary, uploadRawToCloudinary } from "./cloudinary.js";
 import {
   leadSchema,
   signupSchema,
@@ -907,19 +907,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payment Proofs - Submit payment proof (user uploads PDF)
+  // Payment Proofs - Upload proof PDF to Cloudinary (user)
+  app.post("/api/payments/upload-proof", requireUser, upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "Nenhum ficheiro enviado" });
+      }
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ error: "Formato inválido. Use PDF, JPG ou PNG." });
+      }
+      const userId = req.session.userId;
+      const isImage = req.file.mimetype.startsWith("image/");
+      const folder = "doce-leveza/proofs";
+      const publicId = `proof-${userId}-${Date.now()}`;
+      let url: string;
+      if (isImage) {
+        url = await uploadImageToCloudinary(req.file.buffer, folder, publicId);
+      } else {
+        url = await uploadRawToCloudinary(req.file.buffer, folder, publicId);
+      }
+      res.json({ url });
+    } catch (error) {
+      console.error("Proof upload error:", error);
+      res.status(500).json({ error: "Falha ao fazer upload do comprovativo" });
+    }
+  });
+
+  // Payment Proofs - Submit payment proof record
   app.post("/api/payments/submit", requireUser, async (req, res) => {
     try {
       const userId = req.session.userId;
-      const { programId, amount } = req.body;
+      const { programId, amount, proofUrl } = req.body;
 
-      if (!programId || !amount) {
-        return res.status(400).json({ error: "Program ID and amount are required" });
+      if (!programId) {
+        return res.status(400).json({ error: "ID do programa é obrigatório" });
       }
-
-      // In a real app, you would handle file upload here (to cloud storage like S3)
-      // For now, we'll create a payment proof record with placeholder proof URL
-      const proofUrl = `/proofs/payment-${userId}-${programId}-${Date.now()}.pdf`;
+      if (amount === undefined || amount === null) {
+        return res.status(400).json({ error: "Valor do pagamento é obrigatório" });
+      }
+      if (!proofUrl) {
+        return res.status(400).json({ error: "URL do comprovativo é obrigatória" });
+      }
 
       const paymentProof = await storage.createPaymentProof({
         userId,
@@ -929,7 +958,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pendente",
       });
 
-      // Notify admins of new payment proof
       storage.createAdminNotification({
         title: "Novo comprovante de pagamento",
         message: `Utilizador #${userId} enviou comprovante para o programa #${programId} (${amount} Kz). Aguarda verificação.`,
@@ -940,7 +968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(paymentProof);
     } catch (error) {
       console.error("Payment submission error:", error);
-      res.status(500).json({ error: "Failed to submit payment proof" });
+      res.status(500).json({ error: "Falha ao registar pagamento" });
     }
   });
 
