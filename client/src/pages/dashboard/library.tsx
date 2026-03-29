@@ -27,15 +27,30 @@ export default function Library() {
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 2, // 2 minutos de cache
-    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
   });
 
-  // Access control logic similar to pathologies.tsx
+  const { data: userAccess } = useQuery<any[]>({
+    queryKey: ["/api/user/access"],
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 2,
+  });
+
   const hasAccessToEbook = (pathologyId?: number) => {
+    if (!pathologyId) return false;
+    // Assinatura anual/total concede acesso a tudo
     if (subscription?.status === "ativa") return true;
-    // Demonstration: Only first program (ID 1) is unlocked by default
-    return pathologyId === 1;
+    // Verificar acesso individual por programa com status "ativo" e não expirado
+    if (userAccess) {
+      return userAccess.some(a => {
+        if (a.pathologyId !== pathologyId) return false;
+        if (a.status !== "ativo") return false;
+        if (a.expiryDate && new Date(a.expiryDate) < new Date()) return false;
+        return true;
+      });
+    }
+    return false;
   };
 
   if (isLoading) {

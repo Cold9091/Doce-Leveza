@@ -50,13 +50,17 @@ export default function Pathologies() {
 
   // controle de acesso por programa
   const hasAccessToProgram = (programId: number) => {
-    // assinantes ativos recebem tudo
+    // Assinatura anual/total: status "ativa" dá acesso a todos os programas
     if (subscription?.status === "ativa") return true;
-    // caso tenhamos regras de acesso individual, verificar
-    if (userAccess && userAccess.some(a => a.pathologyId === programId)) {
-      return true;
+    // Acesso individual por programa: verifica o registo com status "ativo" e não expirado
+    if (userAccess) {
+      return userAccess.some(a => {
+        if (a.pathologyId !== programId) return false;
+        if (a.status !== "ativo") return false;
+        if (a.expiryDate && new Date(a.expiryDate) < new Date()) return false;
+        return true;
+      });
     }
-    // não há permissão, mas continuamos a exibir o programa (apenas travado)
     return false;
   };
 

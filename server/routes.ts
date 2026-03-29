@@ -1006,13 +1006,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const proof = await storage.approvePaymentProof(paymentId, adminId || 1);
 
-      // Create or update subscription for the user
       if (proof) {
         const renewalDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+        const startDate = new Date().toISOString();
+
+        // Create/update a user_access record for the specific program paid
+        const existingAccess = await storage.getUserAccess(proof.userId);
+        const accessForPathology = existingAccess.find(a => a.pathologyId === proof.pathologyId);
+        if (accessForPathology) {
+          await storage.updateUserAccess(accessForPathology.id, {
+            status: "ativo",
+            startDate,
+            expiryDate: renewalDate,
+          });
+        } else {
+          await storage.createUserAccess({
+            userId: proof.userId,
+            pathologyId: proof.pathologyId,
+            status: "ativo",
+            startDate,
+            expiryDate: renewalDate,
+          });
+        }
+
+        // Track subscription for admin visibility (status "por_programa" ≠ "ativa",
+        // so it does NOT grant blanket access to all programs on the frontend)
         const existingSub = await storage.getSubscriptionByUser(proof.userId);
         if (existingSub) {
           await storage.updateSubscription(existingSub.id, {
-            status: "ativa",
+            status: "por_programa",
             renewalDate,
             proofUrl: proof.proofUrl,
           });
@@ -1020,8 +1042,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.createSubscription({
             userId: proof.userId,
             plan: "programa",
-            status: "ativa",
-            startDate: new Date().toISOString(),
+            status: "por_programa",
+            startDate,
             renewalDate,
             paymentMethod: "transferencia-bancaria",
             proofUrl: proof.proofUrl,
@@ -1032,7 +1054,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.createNotification({
           userId: proof.userId,
           title: "Pagamento aprovado!",
-          message: "O seu comprovante foi verificado e a sua assinatura está agora ativa. Bom estudo!",
+          message: "O seu comprovante foi verificado e já tens acesso ao programa. Bom estudo!",
           type: "content",
         }).catch(() => {});
       }
@@ -1069,6 +1091,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(proof);
     } catch (error) {
       console.error("Reject payment error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Migrate existing "ativa" subscriptions to per-program access
+  // Finds approved payment proofs, creates user_access records, updates subscription status
+  app.post("/api/admin/migrate-access", requireAdmin, async (req, res) => {
+    try {
+      const approvedProofs = await storage.getPaymentProofs("aprovado");
+      const fixed: number[] = [];
+
+      for (const proof of approvedProofs) {
+        // Ensure a user_access record exists for this pathology
+        const existingAccess = await storage.getUserAccess(proof.userId);
+        const accessForPathology = existingAccess.find(a => a.pathologyId === proof.pathologyId);
+        const renewalDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+
+        if (accessForPathology) {
+          if (accessForPathology.status !== "ativo") {
+            await storage.updateUserAccess(accessForPathology.id, { status: "ativo", expiryDate: renewalDate });
+            fixed.push(proof.userId);
+          }
+        } else {
+          await storage.createUserAccess({
+            userId: proof.userId,
+            pathologyId: proof.pathologyId,
+            status: "ativo",
+            startDate: new Date().toISOString(),
+            expiryDate: renewalDate,
+          });
+          fixed.push(proof.userId);
+        }
+
+        // Fix subscription status if it's "ativa" (blanket access) → should be "por_programa"
+        const sub = await storage.getSubscriptionByUser(proof.userId);
+        if (sub && sub.status === "ativa") {
+          await storage.updateSubscription(sub.id, { status: "por_programa" });
+        }
+      }
+
+      res.json({ success: true, fixedUsers: [...new Set(fixed)], totalProofs: approvedProofs.length });
+    } catch (error) {
+      console.error("Migrate access error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

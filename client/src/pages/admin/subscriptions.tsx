@@ -189,6 +189,24 @@ export default function AdminSubscriptions() {
     },
   });
 
+  const migrateAccessMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/migrate-access", {});
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      invalidateSubscriptions();
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/payments"] });
+      toast({
+        title: "Migração concluída",
+        description: `${data.fixedUsers?.length || 0} utilizador(es) corrigido(s) de ${data.totalProofs || 0} pagamentos aprovados`,
+      });
+    },
+    onError: (err: any) => {
+      toast({ title: "Erro", description: err?.message || "Erro na migração", variant: "destructive" });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest("DELETE", `/api/admin/subscriptions/${id}`, undefined);
@@ -206,16 +224,18 @@ export default function AdminSubscriptions() {
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
       ativa: "default",
+      por_programa: "secondary",
       cancelada: "destructive",
       expirada: "secondary",
     };
     const labels: Record<string, string> = {
-      ativa: "Ativa",
+      ativa: "Ativa Total",
+      por_programa: "Por Programa",
       cancelada: "Cancelada",
       expirada: "Expirada",
     };
     return (
-      <Badge variant={variants[status] || "default"} className="font-medium">
+      <Badge variant={variants[status] || "secondary"} className="font-medium">
         {labels[status] || status}
       </Badge>
     );
@@ -245,10 +265,24 @@ export default function AdminSubscriptions() {
           </p>
         </div>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="icon" className="relative h-10 w-10">
-              <Bell className="h-5 w-5" />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-10 gap-1.5 text-xs font-semibold"
+            onClick={() => migrateAccessMutation.mutate()}
+            disabled={migrateAccessMutation.isPending}
+            title="Corrige acessos por programa de pagamentos já aprovados"
+            data-testid="button-migrate-access"
+          >
+            {migrateAccessMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Settings className="h-3.5 w-3.5" />}
+            Corrigir Acessos
+          </Button>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon" className="relative h-10 w-10">
+                <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
                   {unreadCount}
@@ -298,7 +332,8 @@ export default function AdminSubscriptions() {
               )}
             </ScrollArea>
           </PopoverContent>
-        </Popover>
+          </Popover>
+        </div>
       </div>
 
       <div className="grid gap-6">
@@ -688,7 +723,8 @@ export default function AdminSubscriptions() {
           </div>
           <div className="p-3 grid grid-cols-1 gap-2">
             {[
-              { val: "ativa", label: "Ativa", variant: "default" },
+              { val: "ativa", label: "Ativa (Acesso Total)", variant: "default" },
+              { val: "por_programa", label: "Por Programa", variant: "secondary" },
               { val: "cancelada", label: "Cancelada", variant: "destructive" },
               { val: "expirada", label: "Expirada", variant: "secondary" }
             ].map((s) => (

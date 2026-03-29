@@ -174,13 +174,29 @@ export default function PathologyDetail() {
   const { data: userSubscriptions } = useQuery<any>({
     queryKey: ["/api/subscriptions/user", user?.id || 1],
     enabled: !!user?.id,
-    staleTime: 1000 * 60, // 60 segundos de cache
+    staleTime: 1000 * 60,
+  });
+
+  const { data: userAccess } = useQuery<any[]>({
+    queryKey: ["/api/user/access"],
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 2,
   });
 
   const isUnlocked = (pathologyId?: number) => {
     if (!pathologyId) return true;
+    // Assinatura anual/total concede acesso a tudo
     if (userSubscriptions?.status === "ativa") return true;
-    return userSubscriptions?.pathologyIds?.includes(pathologyId);
+    // Verificar acesso individual com status "ativo" e não expirado
+    if (userAccess) {
+      return userAccess.some(a => {
+        if (a.pathologyId !== pathologyId) return false;
+        if (a.status !== "ativo") return false;
+        if (a.expiryDate && new Date(a.expiryDate) < new Date()) return false;
+        return true;
+      });
+    }
+    return false;
   };
 
   const filteredEbooks = ebooks?.filter(e => isUnlocked(e.pathologyId ?? undefined));
