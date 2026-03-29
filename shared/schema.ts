@@ -235,6 +235,10 @@ export const insertPathologySchema = createInsertSchema(pathologies).omit({ id: 
 export const pathologySchema = createInsertSchema(pathologies);
 export const insertVideoSchema = createInsertSchema(videos).omit({ id: true }).extend({
   resources: z.array(z.string()).optional(),
+  pathologyId: z.number().int().min(1, "Selecione um programa válido"),
+  videoUrl: z.string().min(1, "URL do vídeo é obrigatória").url("URL do vídeo inválida"),
+  thumbnailUrl: z.string().min(1, "URL da thumbnail é obrigatória").url("URL da thumbnail inválida"),
+  duration: z.string().min(1, "Duração é obrigatória"),
 });
 export const insertEbookSchema = createInsertSchema(ebooks).omit({ id: true }).extend({
   tags: z.array(z.string()),

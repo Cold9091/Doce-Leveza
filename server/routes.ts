@@ -637,25 +637,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/videos/:id", requireAdmin, async (req, res) => {
     try {
-      const video = await storage.updateVideo(parseInt(req.params.id), req.body);
+      const validatedData = insertVideoSchema.parse(req.body);
+      const video = await storage.updateVideo(parseInt(req.params.id), validatedData);
       if (!video) {
         return res.status(404).json({ error: "Video not found" });
       }
       res.json(video);
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation error", details: error.errors });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
   });
 
   app.patch("/api/admin/videos/:id", requireAdmin, async (req, res) => {
     try {
-      const video = await storage.updateVideo(parseInt(req.params.id), req.body);
+      const validatedData = insertVideoSchema.parse(req.body);
+      const video = await storage.updateVideo(parseInt(req.params.id), validatedData);
       if (!video) {
         return res.status(404).json({ error: "Video not found" });
       }
       res.json(video);
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Validation error", details: error.errors });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
   });
 
