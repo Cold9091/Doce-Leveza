@@ -103,6 +103,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  // Change own password
+  app.patch("/api/auth/password", requireUser, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: "Senha atual e nova senha são obrigatórias" });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user) return res.status(404).json({ error: "Utilizador não encontrado" });
+
+      if (user.password !== currentPassword) {
+        return res.status(401).json({ error: "Senha atual incorreta" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: "A nova senha deve ter pelo menos 6 caracteres" });
+      }
+
+      await storage.updateUser(userId, { password: newPassword });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Update own profile (name, address)
+  app.patch("/api/auth/profile", requireUser, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { name, address } = req.body;
+
+      const allowed: Record<string, string> = {};
+      if (name && typeof name === "string") allowed.name = name.trim();
+      if (address && typeof address === "string") allowed.address = address.trim();
+
+      if (Object.keys(allowed).length === 0) {
+        return res.status(400).json({ error: "Nenhum campo válido para atualizar" });
+      }
+
+      const updated = await storage.updateUser(userId, allowed);
+      if (!updated) return res.status(404).json({ error: "Utilizador não encontrado" });
+
+      const { password, ...userWithoutPassword } = updated;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Admin - Settings management
   app.get("/api/admin/settings", requireAdmin, async (_req, res) => {
     try {
@@ -195,6 +247,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.createUser(validatedData);
 
       console.log(`✅ User ${user.id} created`);
+
+      // Notify admins of new registration
+      storage.createAdminNotification({
+        title: "Novo utilizador registado",
+        message: `${user.name} (${user.phone}) criou uma conta.`,
+        type: "info",
+        relatedId: user.id,
+      }).catch(() => {});
 
       // Don't send password back
       const { password, ...userWithoutPassword } = user;
@@ -839,6 +899,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pendente",
       });
 
+      // Notify admins of new payment proof
+      storage.createAdminNotification({
+        title: "Novo comprovante de pagamento",
+        message: `Utilizador #${userId} enviou comprovante para o programa #${programId} (${amount} Kz). Aguarda verificação.`,
+        type: "payment",
+        relatedId: paymentProof.id,
+      }).catch(() => {});
+
       res.json(paymentProof);
     } catch (error) {
       console.error("Payment submission error:", error);
@@ -906,6 +974,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentMethod: "transferencia-bancaria",
           });
         }
+
+        // Notify the user their payment was approved
+        storage.createNotification({
+          userId: proof.userId,
+          title: "Pagamento aprovado!",
+          message: "O seu comprovante foi verificado e a sua assinatura está agora ativa. Bom estudo!",
+          type: "content",
+        }).catch(() => {});
       }
 
       res.json(proof);
@@ -926,6 +1002,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const proof = await storage.rejectPaymentProof(paymentId, adminNotes || "");
+
+      // Notify the user their payment was rejected
+      if (proof) {
+        storage.createNotification({
+          userId: proof.userId,
+          title: "Comprovante rejeitado",
+          message: `O seu comprovante de pagamento foi rejeitado. ${adminNotes ? "Motivo: " + adminNotes : "Contacte o suporte para mais informações."}`,
+          type: "info",
+        }).catch(() => {});
+      }
+
       res.json(proof);
     } catch (error) {
       console.error("Reject payment error:", error);
