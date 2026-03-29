@@ -5,6 +5,9 @@ import path from "path";
 
 const app = express();
 
+// Trust Replit's reverse proxy so express-rate-limit can identify users correctly
+app.set('trust proxy', 1);
+
 app.use('/assets', express.static(path.join(process.cwd(), 'attached_assets')));
 
 declare module 'http' {

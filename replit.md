@@ -97,17 +97,21 @@ O banco de dados foi migrado de PostgreSQL para **Turso** (SQLite distribuído).
 - `npm run start` — Servidor de produção
 - Deployment: Autoscale no Replit
 
-## Admin Padrão (após seed)
+## Admin Padrão
 
-- **Email**: `admin@doceleveza.com`
-- **Senha**: `admin123`
+- **Email**: `doceleveza@admin.ao`
+- **Senha**: `doceleveza909192`
 - **Role**: `super_admin`
 
-## Problemas Conhecidos (a corrigir)
+## Problemas Resolvidos
 
-1. Detalhe do programa importa PDF estático que pode não existir
-2. Fluxo de pagamento (upload de comprovante) está quebrado
-3. Admin Payments — URL de API errada no queryKey
-4. Configurações admin sem autenticação no GET/PATCH
-5. Senhas armazenadas em texto puro (sem hash)
-6. SESSION_PASSWORD usa valor padrão — deve ser env var
+1. ✅ PDF estático existe em `attached_assets/` — sem problema
+2. ✅ Fluxo de pagamento corrigido — `PaymentDialog` agora envia JSON em vez de `FormData`
+3. ✅ Admin Payments — `queryKey` e `queryFn` corrigidos para usar query param `?status=`
+4. ✅ Configurações admin — `requireAdmin` adicionado aos endpoints GET/PATCH
+5. ✅ Express `trust proxy` configurado para o proxy do Replit (elimina aviso do rate-limit)
+
+## Problemas Conhecidos (ainda a corrigir)
+
+1. Senhas armazenadas em texto puro (sem hash) — risco de segurança em produção
+2. SESSION_PASSWORD usa valor padrão — configurar como secret no Replit

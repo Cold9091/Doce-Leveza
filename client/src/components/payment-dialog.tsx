@@ -35,14 +35,15 @@ export function PaymentDialog({ program, isOpen, onOpenChange }: PaymentDialogPr
   const [fileError, setFileError] = useState<string>("");
 
   const submitPaymentMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      return await apiRequest("POST", "/api/payments/submit", formData);
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/payments/submit", {
+        programId: program.id,
+        amount: program.price || 0,
+      });
     },
     onSuccess: () => {
-      // Reset form
       setFile(null);
       onOpenChange(false);
-      // Show success message
       alert("Pagamento enviado com sucesso. Um administrador irá verificar seu comprovante.");
     },
     onError: (error: unknown) => {
@@ -77,12 +78,7 @@ export function PaymentDialog({ program, isOpen, onOpenChange }: PaymentDialogPr
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("programId", String(program.id));
-    formData.append("amount", String(program.price || 0));
-
-    submitPaymentMutation.mutate(formData);
+    submitPaymentMutation.mutate();
   };
 
   return (

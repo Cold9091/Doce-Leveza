@@ -104,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Settings management
-  app.get("/api/admin/settings", async (_req, res) => {
+  app.get("/api/admin/settings", requireAdmin, async (_req, res) => {
     try {
       const settings = await storage.getSettings();
       res.json(settings);
@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/settings", async (req, res) => {
+  app.patch("/api/admin/settings", requireAdmin, async (req, res) => {
     try {
       const settings = await storage.updateSettings(req.body);
       res.json(settings);

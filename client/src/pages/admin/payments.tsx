@@ -25,7 +25,15 @@ export default function AdminPayments() {
 
   // Fetch payment proofs
   const { data: proofs = [], isLoading, refetch } = useQuery<PaymentProof[]>({
-    queryKey: ["/api/admin/payments", selectedStatus],
+    queryKey: ["/api/admin/payments", { status: selectedStatus }],
+    queryFn: async () => {
+      const url = selectedStatus
+        ? `/api/admin/payments?status=${selectedStatus}`
+        : "/api/admin/payments";
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
+      return res.json();
+    },
     staleTime: 1000 * 60,
     gcTime: 1000 * 60 * 5,
   });
@@ -44,7 +52,7 @@ export default function AdminPayments() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/payments"] });
-      refetch();
+      setTimeout(() => refetch(), 300);
     },
     onError: (error) => {
       alert(`Erro ao aprovar: ${error}`);
@@ -60,7 +68,7 @@ export default function AdminPayments() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/payments"] });
-      refetch();
+      setTimeout(() => refetch(), 300);
     },
     onError: (error) => {
       alert(`Erro ao rejeitar: ${error}`);
