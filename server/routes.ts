@@ -6,6 +6,7 @@ import { sessionOptions } from "./session.js";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import multer from "multer";
+import bcrypt from "bcryptjs";
 import { uploadImageToCloudinary, uploadRawToCloudinary } from "./cloudinary.js";
 import {
   leadSchema,
@@ -120,7 +121,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUserById(userId);
       if (!user) return res.status(404).json({ error: "Utilizador não encontrado" });
 
-      if (user.password !== currentPassword) {
+      const currentMatch = user.password.startsWith("$2")
+        ? await bcrypt.compare(currentPassword, user.password)
+        : user.password === currentPassword;
+      if (!currentMatch) {
         return res.status(401).json({ error: "Senha atual incorreta" });
       }
 
@@ -128,7 +132,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "A nova senha deve ter pelo menos 6 caracteres" });
       }
 
-      await storage.updateUser(userId, { password: newPassword });
+      const hashedNew = await bcrypt.hash(newPassword, 12);
+      await storage.updateUser(userId, { password: hashedNew });
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
@@ -248,7 +253,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const user = await storage.createUser(validatedData);
+      const hashedPassword = await bcrypt.hash(validatedData.password, 12);
+      const user = await storage.createUser({ ...validatedData, password: hashedPassword });
 
       console.log(`✅ User ${user.id} created`);
 
@@ -295,8 +301,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (identifier.includes("@")) {
         // Tentar encontrar admin pelo email primeiro
         const admin = await storage.getAdminByEmail(identifier);
-        if (admin && admin.password === password) {
-          req.session.adminId = admin.id;
+        const adminPasswordMatch = admin && (
+          admin.password.startsWith("$2") ? await bcrypt.compare(password, admin.password) : admin.password === password
+        );
+        if (adminPasswordMatch) {
+          req.session.adminId = admin!.id;
           // Garantir que a sessão de usuário comum não interfira
           req.session.userId = undefined;
           await req.session.save();
@@ -316,7 +325,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user = await storage.getUserByPhone(identifier);
       }
 
-      if (!user || user.password !== password) {
+      const userPasswordMatch = user && (
+        user.password.startsWith("$2") ? await bcrypt.compare(password, user.password) : user.password === password
+      );
+      if (!user || !userPasswordMatch) {
         return res.status(401).json({
           success: false,
           error: "Telefone ou senha incorretos",
@@ -493,7 +505,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = adminLoginSchema.parse(req.body);
       const admin = await storage.getAdminByEmail(validatedData.email);
 
-      if (!admin || admin.password !== validatedData.password) {
+      const adminMatch = admin && (
+        admin.password.startsWith("$2") ? await bcrypt.compare(validatedData.password, admin.password) : admin.password === validatedData.password
+      );
+      if (!adminMatch) {
         return res.status(401).json({
           success: false,
           error: "Email ou senha incorretos",
@@ -501,10 +516,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Iniciar sessão admin
-      req.session.adminId = admin.id;
+      req.session.adminId = admin!.id;
       await req.session.save();
 
-      const { password, ...adminWithoutPassword } = admin;
+      const { password, ...adminWithoutPassword } = admin!;
       res.json({ success: true, data: adminWithoutPassword });
     } catch (error) {
       if (error instanceof z.ZodError) {
