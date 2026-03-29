@@ -20,19 +20,19 @@ async function seed() {
     }
 
     // Seed Admin
-    const adminEmail = "admin@doceleveza.com";
+    const adminEmail = "doceleveza@admin.ao";
     const existingAdmin = await db.select().from(admins).where(eq(admins.email, adminEmail));
 
     if (existingAdmin.length === 0) {
         console.log("Creating default admin user...");
         await db.insert(admins).values({
-            name: "Admin",
+            name: "Administrador",
             email: adminEmail,
-            password: "admin123", // In production, this should be hashed!
+            password: "doceleveza909192",
             role: "super_admin",
             createdAt: new Date().toISOString(),
         });
-        console.log("Admin created: admin@doceleveza.com / admin123");
+        console.log("Admin created: doceleveza@admin.ao / doceleveza909192");
     } else {
         console.log("Admin already exists.");
     }
