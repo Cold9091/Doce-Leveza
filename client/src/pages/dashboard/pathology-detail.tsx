@@ -38,9 +38,7 @@ import { PdfReader } from "@/components/pdf-reader";
 import type { Ebook } from "@shared/schema";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import pdfTestFile from "@assets/A-ARTE-DA-GUERRA_1765386889371.pdf";
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 declare global {
   interface Window {
@@ -106,11 +104,7 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-const mockPdfs = [
-  { id: 1, title: "A Arte da Guerra - Sun Tzu", pages: 68, url: pdfTestFile },
-  { id: 2, title: "Protocolo de Exercícios", pages: 28, url: pdfTestFile },
-  { id: 3, title: "Material de Apoio - Anatomia", pages: 62, url: pdfTestFile },
-];
+type SelectedPdf = { id: number; title: string; pages: number; url: string | null };
 
 export default function PathologyDetail() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
@@ -126,7 +120,7 @@ export default function PathologyDetail() {
   const [apiReady, setApiReady] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
   const [hasCountedView, setHasCountedView] = useState(false);
-  const [selectedPdf, setSelectedPdf] = useState<typeof mockPdfs[0] | null>(null);
+  const [selectedPdf, setSelectedPdf] = useState<SelectedPdf | null>(null);
   const [rightPanelView, setRightPanelView] = useState<'lessons' | 'pdf'>('lessons');
   const [pdfNumPages, setPdfNumPages] = useState<number>(0);
   const [pdfPageNumber, setPdfPageNumber] = useState<number>(1);
@@ -485,7 +479,7 @@ export default function PathologyDetail() {
     setPdfScale((prev) => Math.max(0.3, prev - 0.1));
   }, []);
 
-  const convertPdfToEbook = useCallback((pdf: typeof mockPdfs[0]): Ebook => {
+  const convertPdfToEbook = useCallback((pdf: SelectedPdf): Ebook => {
     return {
       id: pdf.id,
       title: pdf.title,
