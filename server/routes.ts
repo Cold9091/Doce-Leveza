@@ -226,8 +226,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all leads (for future admin panel)
-  app.get("/api/leads", async (_req, res) => {
+  // Get all leads (admin only)
+  app.get("/api/leads", requireAdmin, async (_req, res) => {
     try {
       const leads = await storage.getLeads();
       res.json({ success: true, data: leads });
