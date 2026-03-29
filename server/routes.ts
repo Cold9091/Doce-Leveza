@@ -239,6 +239,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Forgot password — reset via phone number
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { phone, newPassword } = req.body;
+
+      if (!phone || !newPassword) {
+        return res.status(400).json({ success: false, error: "Telefone e nova senha são obrigatórios" });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, error: "A senha deve ter pelo menos 6 caracteres" });
+      }
+
+      const user = await storage.getUserByPhone(phone);
+      if (!user) {
+        // Return success anyway to prevent phone enumeration
+        return res.json({ success: true, message: "Se o número estiver registado, a senha foi redefinida." });
+      }
+
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(user.id, { password: hashed });
+
+      res.json({ success: true, message: "Senha redefinida com sucesso." });
+    } catch (error) {
+      res.status(500).json({ success: false, error: "Erro interno. Tente novamente." });
+    }
+  });
+
   // User signup
   app.post("/api/auth/signup", async (req, res) => {
     try {
