@@ -2,8 +2,18 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Plus, Sparkles, Video, Phone } from "lucide-react";
+import { Calendar, Clock, Plus, Sparkles, Video, Phone, AlertTriangle, RotateCcw } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,7 +32,13 @@ const scheduleFormSchema = z.object({
   notes: z.string().min(5, "A descrição (motivo) da consulta é obrigatória"),
 });
 
+const rescheduleFormSchema = z.object({
+  date: z.string().min(1, "Selecione uma data"),
+  time: z.string().min(1, "Selecione um horário"),
+});
+
 type ScheduleFormData = z.infer<typeof scheduleFormSchema>;
+type RescheduleFormData = z.infer<typeof rescheduleFormSchema>;
 
 const professionals = [
   { name: "Dr. Doce Leveza", specialty: "Equipe de Saúde", avatar: "DL" },
@@ -34,6 +50,8 @@ const availableTimes = [
 
 export default function Consultations() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [cancelId, setCancelId] = useState<number | null>(null);
+  const [rescheduleConsultation, setRescheduleConsultation] = useState<Consultation | null>(null);
   const { toast } = useToast();
 
   const { data: user } = useQuery<UserType>({
@@ -47,224 +65,99 @@ export default function Consultations() {
   const { data: consultations = [], isLoading } = useQuery<Consultation[]>({
     queryKey: ["/api/consultations/user", userId],
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 2, // 2 minutos de cache
-    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
   });
 
   const form = useForm<ScheduleFormData>({
     resolver: zodResolver(scheduleFormSchema),
-    defaultValues: {
-      date: "",
-      time: "",
-      notes: "",
-    },
+    defaultValues: { date: "", time: "", notes: "" },
   });
+
+  const rescheduleForm = useForm<RescheduleFormData>({
+    resolver: zodResolver(rescheduleFormSchema),
+    defaultValues: { date: "", time: "" },
+  });
+
+  const today = new Date().toISOString().split('T')[0];
 
   const scheduleMutation = useMutation({
     mutationFn: async (data: ScheduleFormData) => {
       const datetime = `${data.date}T${data.time}:00`;
-      const response = await apiRequest("POST", "/api/consultations", {
-        userId,
-        datetime,
-        status: "agendada",
-        notes: data.notes,
-      });
-      return response;
+      return apiRequest("POST", "/api/consultations", { userId, datetime, status: "agendada", notes: data.notes });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/consultations/user", userId] });
-      toast({
-        title: "Consulta Agendada",
-        description: "Sua consulta foi agendada com sucesso!",
-      });
+      toast({ title: "Consulta Agendada", description: "Sua consulta foi agendada com sucesso!" });
       setDialogOpen(false);
       form.reset();
     },
     onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível agendar a consulta. Tente novamente.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro", description: "Não foi possível agendar a consulta. Tente novamente.", variant: "destructive" });
     },
   });
 
-  const onSubmit = (data: ScheduleFormData) => {
-    scheduleMutation.mutate(data);
-  };
+  const cancelMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest("PATCH", `/api/consultations/${id}`, { status: "cancelada" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/consultations/user", userId] });
+      toast({ title: "Consulta Cancelada", description: "A sua consulta foi cancelada." });
+      setCancelId(null);
+    },
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível cancelar a consulta.", variant: "destructive" });
+    },
+  });
 
-  const handleProfessionalChange = (name: string) => {
-    // This is no longer needed as we use static defaults
-  };
+  const rescheduleMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: RescheduleFormData }) => {
+      const datetime = `${data.date}T${data.time}:00`;
+      return apiRequest("PATCH", `/api/consultations/${id}`, { datetime, status: "agendada" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/consultations/user", userId] });
+      toast({ title: "Consulta Reagendada", description: "A sua consulta foi reagendada com sucesso!" });
+      setRescheduleConsultation(null);
+      rescheduleForm.reset();
+    },
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível reagendar a consulta.", variant: "destructive" });
+    },
+  });
 
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: "default" | "secondary" | "destructive"; label: string; className: string }> = {
-      agendada: { 
-        variant: "default", 
-        label: "Agendada",
-        className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-      },
-      concluida: { 
-        variant: "secondary", 
-        label: "Concluída",
-        className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
-      },
-      cancelada: { 
-        variant: "destructive", 
-        label: "Cancelada",
-        className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
-      },
+    const config: Record<string, { label: string; className: string }> = {
+      agendada: { label: "Agendada", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+      concluida: { label: "Concluída", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
+      cancelada: { label: "Cancelada", className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" },
     };
-    const statusConfig = config[status] || config.agendada;
-    return (
-      <Badge variant="outline" className={statusConfig.className}>
-        {statusConfig.label}
-      </Badge>
-    );
+    const c = config[status] || config.agendada;
+    return <Badge variant="outline" className={c.className}>{c.label}</Badge>;
   };
 
-  const formatDate = (datetime: string) => {
-    const date = new Date(datetime);
-    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-  };
+  const formatDate = (datetime: string) =>
+    new Date(datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-  const formatTime = (datetime: string) => {
-    const date = new Date(datetime);
-    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const today = new Date().toISOString().split('T')[0];
+  const formatTime = (datetime: string) =>
+    new Date(datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
   const upcomingConsultations = consultations.filter(c => c.status === "agendada");
   const pastConsultations = consultations.filter(c => c.status !== "agendada");
 
-  const ScheduleDialog = () => (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full sm:w-auto shadow-lg shadow-primary/20" data-testid="button-schedule-consultation">
-          <Plus className="mr-2 h-4 w-4" />
-          Agendar Consulta
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Calendar className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <DialogTitle>Agendar Nova Consulta</DialogTitle>
-              <DialogDescription>
-                Escolha um profissional e horário disponível
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="date" 
-                        min={today}
-                        {...field} 
-                        data-testid="input-date"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Horário</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="select-time">
-                          <SelectValue placeholder="Horário" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {availableTimes.map((time) => (
-                          <SelectItem key={time} value={time} data-testid={`option-time-${time}`}>
-                            {time}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição / Motivo da Consulta</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descreva detalhadamente o motivo da sua consulta. Esta informação é essencial para o agendamento."
-                      className="min-h-[120px] resize-none"
-                      {...field}
-                      data-testid="input-notes"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end gap-3 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setDialogOpen(false)}
-                data-testid="button-cancel-schedule"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={scheduleMutation.isPending}
-                className="shadow-lg shadow-primary/20"
-                data-testid="button-confirm-schedule"
-              >
-                {scheduleMutation.isPending ? "Agendando..." : "Confirmar Agendamento"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
-
   return (
     <div className="space-y-6">
+      {/* Header banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/90 via-orange-500 to-orange-600/90 p-6 sm:p-8 text-white">
         <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,transparent,black)]" />
         <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-        
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="h-5 w-5" />
-              <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                Consultas Online
-              </Badge>
+              <Badge variant="secondary" className="bg-white/20 text-white border-white/30">Consultas Online</Badge>
             </div>
             <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-2" data-testid="heading-consultations">
               Minhas Consultas
@@ -273,10 +166,82 @@ export default function Consultations() {
               Agende consultas com nossos especialistas e acompanhe sua jornada de saúde
             </p>
           </div>
-          <ScheduleDialog />
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto bg-white text-orange-600 hover:bg-white/90 shadow-lg" data-testid="button-schedule-consultation">
+                <Plus className="mr-2 h-4 w-4" />
+                Agendar Consulta
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <DialogTitle>Agendar Nova Consulta</DialogTitle>
+                    <DialogDescription>Escolha um profissional e horário disponível</DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit((d) => scheduleMutation.mutate(d))} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="date" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Data</FormLabel>
+                        <FormControl>
+                          <Input type="date" min={today} {...field} data-testid="input-date" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="time" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Horário</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-time"><SelectValue placeholder="Horário" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {availableTimes.map((t) => (
+                              <SelectItem key={t} value={t} data-testid={`option-time-${t}`}>{t}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                  <FormField control={form.control} name="notes" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição / Motivo da Consulta</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Descreva detalhadamente o motivo da sua consulta."
+                          className="min-h-[120px] resize-none"
+                          {...field}
+                          data-testid="input-notes"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} data-testid="button-cancel-schedule">Cancelar</Button>
+                    <Button type="submit" disabled={scheduleMutation.isPending} data-testid="button-confirm-schedule">
+                      {scheduleMutation.isPending ? "Agendando..." : "Confirmar Agendamento"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="hover-elevate">
           <CardContent className="p-4 flex items-center gap-4">
@@ -313,6 +278,7 @@ export default function Consultations() {
         </Card>
       </div>
 
+      {/* Consultation list */}
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -362,10 +328,26 @@ export default function Consultations() {
                         </p>
                       )}
                       <div className="flex gap-3 mt-4">
-                        <Button variant="outline" size="sm" data-testid={`button-reschedule-${consultation.id}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            rescheduleForm.reset({ date: "", time: "" });
+                            setRescheduleConsultation(consultation);
+                          }}
+                          data-testid={`button-reschedule-${consultation.id}`}
+                        >
+                          <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
                           Reagendar
                         </Button>
-                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" data-testid={`button-cancel-${consultation.id}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
+                          onClick={() => setCancelId(consultation.id)}
+                          data-testid={`button-cancel-${consultation.id}`}
+                        >
+                          <AlertTriangle className="mr-1.5 h-3.5 w-3.5" />
                           Cancelar
                         </Button>
                       </div>
@@ -388,9 +370,7 @@ export default function Consultations() {
                     <CardContent className="p-5">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                         <div className="flex items-center gap-4 flex-1">
-                          <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
-                            DL
-                          </div>
+                          <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">DL</div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
                               <CardTitle className="text-base">Consulta de Saúde</CardTitle>
@@ -399,9 +379,7 @@ export default function Consultations() {
                             <CardDescription className="text-sm">Atendimento Equipe Doce Leveza</CardDescription>
                           </div>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(consultation.datetime)}
-                        </div>
+                        <div className="text-sm text-muted-foreground">{formatDate(consultation.datetime)}</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -423,6 +401,86 @@ export default function Consultations() {
           </CardContent>
         </Card>
       )}
+
+      {/* Cancel confirmation dialog */}
+      <AlertDialog open={cancelId !== null} onOpenChange={(open) => !open && setCancelId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar Consulta</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem a certeza que deseja cancelar esta consulta? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Manter Consulta</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => cancelId !== null && cancelMutation.mutate(cancelId)}
+            >
+              {cancelMutation.isPending ? "Cancelando..." : "Sim, Cancelar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reschedule dialog */}
+      <Dialog open={rescheduleConsultation !== null} onOpenChange={(open) => !open && setRescheduleConsultation(null)}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <RotateCcw className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle>Reagendar Consulta</DialogTitle>
+                <DialogDescription>Escolha nova data e horário</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <Form {...rescheduleForm}>
+            <form
+              onSubmit={rescheduleForm.handleSubmit((d) =>
+                rescheduleConsultation && rescheduleMutation.mutate({ id: rescheduleConsultation.id, data: d })
+              )}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <FormField control={rescheduleForm.control} name="date" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nova Data</FormLabel>
+                    <FormControl>
+                      <Input type="date" min={today} {...field} data-testid="input-reschedule-date" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={rescheduleForm.control} name="time" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Novo Horário</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-reschedule-time"><SelectValue placeholder="Horário" /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableTimes.map((t) => (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <Button type="button" variant="outline" onClick={() => setRescheduleConsultation(null)}>Cancelar</Button>
+                <Button type="submit" disabled={rescheduleMutation.isPending}>
+                  {rescheduleMutation.isPending ? "Reagendando..." : "Confirmar Reagendamento"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
