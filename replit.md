@@ -1,93 +1,113 @@
-# DOCE LEVEZA Landing Page
+# Doce Leveza — Plataforma de Saúde e Bem-Estar
 
-## Overview
+## Visão Geral
 
-This is a landing page for "DOCE LEVEZA," a health and wellness program focused on weight loss and nutrition. The application is designed to capture leads through call-to-action buttons and showcase the program's features, benefits, and transformation results. The landing page follows a pixel-perfect design approach based on reference materials, featuring sections for hero content, target audience transformation photos, program pillars, course modules, and bonuses.
+Plataforma completa de saúde e nutrição chamada "Doce Leveza". Inclui landing page, área do usuário (dashboard) e painel administrativo. Permite cadastro de usuários, acesso a programas de saúde, vídeos, ebooks, consultas e gerenciamento de assinaturas.
 
-## User Preferences
+## Preferências do Usuário
 
-Preferred communication style: Simple, everyday language.
+- Linguagem de comunicação: Português (Brasil/Angola)
+- Estilo: simples e direto
 
-## System Architecture
+## Arquitetura do Sistema
 
-### Frontend Architecture
+### Frontend
 
-**Framework**: React 18 with TypeScript using Vite as the build tool and development server.
+- **Framework**: React 18 + TypeScript + Vite
+- **Roteamento**: Wouter (client-side routing)
+- **UI**: Shadcn UI (Radix UI primitives) + Tailwind CSS
+- **Estado**: TanStack React Query para dados do servidor
+- **Formulários**: React Hook Form + Zod
 
-**Routing**: The application uses Wouter for lightweight client-side routing, with a simple route structure (home page and 404 not-found page).
+### Backend
 
-**UI Component Library**: Shadcn UI components built on Radix UI primitives, providing accessible and customizable React components. The design system uses the "new-york" style variant with Tailwind CSS for styling.
+- **Servidor**: Express.js + TypeScript
+- **Autenticação**: iron-session (cookie-based, sessions seguras)
+- **ORM**: Drizzle ORM com dialect SQLite (Turso/LibSQL)
+- **Rate Limiting**: express-rate-limit
+- **Segurança**: helmet.js
 
-**State Management**: React Query (TanStack Query) handles server state management for API calls, with custom query client configuration that disables automatic refetching and sets infinite stale time.
+### Banco de Dados — TURSO (LibSQL/SQLite)
 
-**Form Handling**: React Hook Form with Zod schema validation for type-safe form management, particularly for the lead capture dialog.
+O banco de dados foi migrado de PostgreSQL para **Turso** (SQLite distribuído).
 
-**Design System**: 
-- Tailwind CSS with custom configuration extending the base theme
-- Custom CSS variables for theming (light mode defined)
-- Typography system using Montserrat (headings) and Open Sans (body text)
-- Consistent spacing system (4, 6, 8, 12, 16, 24 Tailwind units)
-- Component-specific design guidelines for hero section, audience section, pillars, modules, and bonus sections
+**Driver**: `@libsql/client`
+**ORM**: `drizzle-orm/libsql`
+**Dialect**: `turso` (SQLite)
 
-### Backend Architecture
+**Variáveis de ambiente necessárias:**
+- `TURSO_DATABASE_URL` — URL do banco (formato: `libsql://nome-db-org.turso.io`)
+- `TURSO_AUTH_TOKEN` — Token de autenticação Turso
+- `SESSION_PASSWORD` — Senha da sessão (mínimo 32 caracteres)
 
-**Server Framework**: Express.js running on Node.js with TypeScript.
+**Comandos de banco:**
+- `npm run db:push` — Aplica schema no banco Turso
+- `npm run db:seed` — Cria admin e dados padrão
+- `npm run db:migrate` — Roda migrations
 
-**API Design**: RESTful API endpoints:
-- `POST /api/leads` - Create new lead captures
-- `GET /api/leads` - Retrieve all leads (for future admin panel)
+### Tabelas do Banco
 
-**Data Storage**: In-memory storage implementation (`MemStorage` class) using JavaScript Map for temporary lead storage. The architecture is designed to be easily replaceable with a persistent database solution through the `IStorage` interface.
+| Tabela | Descrição |
+|--------|-----------|
+| `users` | Usuários (login por telefone) |
+| `admins` | Administradores (login por email) |
+| `pathologies` | Programas de saúde |
+| `videos` | Vídeos dos programas |
+| `ebooks` | Ebooks da biblioteca |
+| `consultations` | Consultas agendadas |
+| `subscriptions` | Assinaturas dos usuários |
+| `user_access` | Controle de acesso por programa |
+| `leads` | Leads capturados na landing page |
+| `payment_proofs` | Comprovantes de pagamento |
+| `notifications` | Notificações do usuário |
+| `admin_notifications` | Notificações do admin |
+| `system_settings` | Configurações globais do sistema |
 
-**Validation**: Zod schemas shared between client and server for consistent validation. Lead schema validates name (minimum 2 characters), email format, and optional phone number.
+### Rotas do Frontend
 
-**Development Setup**: Custom Vite middleware integration for hot module replacement during development. The server proxies Vite's dev server and handles SSR template rendering.
+**Públicas:**
+- `/` — Landing page
 
-### Build and Deployment
+**Dashboard do Usuário (requer login por telefone):**
+- `/dashboard` — Visão geral
+- `/dashboard/programas` — Lista de programas
+- `/dashboard/programas/:slug` — Detalhe do programa + vídeos
+- `/dashboard/biblioteca` — Biblioteca de ebooks
+- `/dashboard/perfil` — Perfil do usuário
+- `/dashboard/consultas` — Consultas agendadas
+- `/dashboard/configuracoes` — Configurações da conta
+- `/dashboard/assinatura` — Minha assinatura
+- `/dashboard/assinaturas` — Comprar/assinar programas
 
-**Build Process**: 
-- Client: Vite builds React application to `dist/public`
-- Server: esbuild bundles Express server to `dist/index.js` as ESM module
-- Separate build commands maintain clear separation between client and server builds
+**Painel Admin (requer login por email):**
+- `/admin` — Dashboard com estatísticas
+- `/admin/alunos` — Gerenciar usuários
+- `/admin/programas` — Gerenciar programas
+- `/admin/videos` — Gerenciar vídeos
+- `/admin/ebooks` — Gerenciar ebooks
+- `/admin/consultas` — Gerenciar consultas
+- `/admin/assinaturas` — Gerenciar assinaturas
+- `/admin/pagamentos` — Verificar comprovantes
+- `/admin/configuracoes` — Configurações do sistema
 
-**Scripts**:
-- `dev`: Development mode with tsx for TypeScript execution
-- `build`: Production build for both client and server
-- `start`: Production server execution
-- `db:push`: Drizzle Kit push for database migrations (prepared for future database integration)
+### Build e Deploy
 
-### External Dependencies
+- `npm run dev` — Desenvolvimento (porta 5000)
+- `npm run build` — Build de produção (Vite + esbuild)
+- `npm run start` — Servidor de produção
+- Deployment: Autoscale no Replit
 
-**Database (Configured but Not Active)**:
-- Drizzle ORM configured for PostgreSQL
-- Neon Database serverless driver included in dependencies
-- Database schema and migration setup prepared in `shared/schema.ts` and `drizzle.config.ts`
-- Environment variable `DATABASE_URL` expected for database connection
+## Admin Padrão (após seed)
 
-**UI Component Library**:
-- Radix UI primitives for 20+ accessible component types (accordion, dialog, dropdown, navigation, etc.)
-- Embla Carousel for image/content carousels
-- Lucide React for iconography
+- **Email**: `admin@doceleveza.com`
+- **Senha**: `admin123`
+- **Role**: `super_admin`
 
-**Development Tools**:
-- Replit-specific plugins for development: runtime error modal, cartographer, and dev banner
-- PostCSS with Tailwind CSS and Autoprefixer for styling
+## Problemas Conhecidos (a corrigir)
 
-**Styling**:
-- Tailwind CSS with custom theme configuration
-- class-variance-authority for component variant management
-- clsx and tailwind-merge for conditional class composition
-
-**Form and Validation**:
-- React Hook Form for form state management
-- Zod for schema validation
-- @hookform/resolvers for integrating Zod with React Hook Form
-
-**Date Handling**: date-fns library for date manipulation and formatting
-
-**Session Management**: connect-pg-simple for PostgreSQL session storage (prepared for when database is active)
-
-**Notes**: 
-- The application has Drizzle ORM configured but may not be using PostgreSQL actively yet
-- Lead capture currently uses in-memory storage, designed to be swapped for database persistence
-- All necessary database configuration is in place for easy migration to PostgreSQL when needed
+1. Detalhe do programa importa PDF estático que pode não existir
+2. Fluxo de pagamento (upload de comprovante) está quebrado
+3. Admin Payments — URL de API errada no queryKey
+4. Configurações admin sem autenticação no GET/PATCH
+5. Senhas armazenadas em texto puro (sem hash)
+6. SESSION_PASSWORD usa valor padrão — deve ser env var

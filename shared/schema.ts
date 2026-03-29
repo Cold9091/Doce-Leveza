@@ -1,17 +1,17 @@
-import { pgTable, text, integer, serial } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const leads = pgTable("leads", {
-  id: serial("id").primaryKey(),
+export const leads = sqliteTable("leads", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
   createdAt: text("created_at").default(new Date().toISOString()),
 });
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
   address: text("address").notNull(),
@@ -19,8 +19,8 @@ export const users = pgTable("users", {
   createdAt: text("created_at").default(new Date().toISOString()),
 });
 
-export const admins = pgTable("admins", {
-  id: serial("id").primaryKey(),
+export const admins = sqliteTable("admins", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
@@ -28,8 +28,8 @@ export const admins = pgTable("admins", {
   createdAt: text("created_at").default(new Date().toISOString()),
 });
 
-export const pathologies = pgTable("pathologies", {
-  id: serial("id").primaryKey(),
+export const pathologies = sqliteTable("pathologies", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -38,8 +38,8 @@ export const pathologies = pgTable("pathologies", {
   price: integer("price").default(0),
 });
 
-export const videos = pgTable("videos", {
-  id: serial("id").primaryKey(),
+export const videos = sqliteTable("videos", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   pathologyId: integer("pathology_id").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -50,8 +50,8 @@ export const videos = pgTable("videos", {
   viewCount: integer("view_count").default(0),
 });
 
-export const ebooks = pgTable("ebooks", {
-  id: serial("id").primaryKey(),
+export const ebooks = sqliteTable("ebooks", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   pathologyId: integer("pathology_id"),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -61,16 +61,16 @@ export const ebooks = pgTable("ebooks", {
   pages: integer("pages").notNull(),
 });
 
-export const consultations = pgTable("consultations", {
-  id: serial("id").primaryKey(),
+export const consultations = sqliteTable("consultations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   datetime: text("datetime").notNull(),
   status: text("status").notNull(),
   notes: text("notes").notNull(),
 });
 
-export const subscriptions = pgTable("subscriptions", {
-  id: serial("id").primaryKey(),
+export const subscriptions = sqliteTable("subscriptions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   plan: text("plan").notNull(),
   status: text("status").notNull(),
@@ -80,8 +80,8 @@ export const subscriptions = pgTable("subscriptions", {
   proofUrl: text("proof_url"),
 });
 
-export const userAccess = pgTable("user_access", {
-  id: serial("id").primaryKey(),
+export const userAccess = sqliteTable("user_access", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   pathologyId: integer("pathology_id").notNull(),
   startDate: text("start_date").notNull(),
@@ -89,8 +89,8 @@ export const userAccess = pgTable("user_access", {
   status: text("status").notNull(),
 });
 
-export const notifications = pgTable("notifications", {
-  id: serial("id").primaryKey(),
+export const notifications = sqliteTable("notifications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   title: text("title").notNull(),
   message: text("message").notNull(),
@@ -99,8 +99,8 @@ export const notifications = pgTable("notifications", {
   createdAt: text("created_at").default(new Date().toISOString()),
 });
 
-export const adminNotifications = pgTable("admin_notifications", {
-  id: serial("id").primaryKey(),
+export const adminNotifications = sqliteTable("admin_notifications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   message: text("message").notNull(),
   type: text("type").notNull(),
@@ -109,21 +109,21 @@ export const adminNotifications = pgTable("admin_notifications", {
   createdAt: text("created_at").default(new Date().toISOString()),
 });
 
-export const paymentProofs = pgTable("payment_proofs", {
-  id: serial("id").primaryKey(),
+export const paymentProofs = sqliteTable("payment_proofs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   pathologyId: integer("pathology_id").notNull(),
   amount: integer("amount").notNull(),
   proofUrl: text("proof_url").notNull(),
-  status: text("status").default("pendente"), // pendente, aprovado, rejeitado
+  status: text("status").default("pendente"),
   adminNotes: text("admin_notes"),
   approvedBy: integer("approved_by"),
   createdAt: text("created_at").default(new Date().toISOString()),
   approvedAt: text("approved_at"),
 });
 
-export const systemSettings = pgTable("system_settings", {
-  id: serial("id").primaryKey(),
+export const systemSettings = sqliteTable("system_settings", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   siteName: text("site_name").default("Doce Leveza"),
   supportEmail: text("support_email").default("suporte@doceleveza.com"),
   supportPhone: text("support_phone").default("(11) 99999-9999"),
@@ -138,7 +138,7 @@ export const systemSettings = pgTable("system_settings", {
   smtpPass: text("smtp_pass"),
 });
 
-// ---- Zod Schemas e Types (sem alterações) ----
+// ---- Zod Schemas e Types ----
 
 export const leadSchema = createInsertSchema(leads).pick({
   name: true,

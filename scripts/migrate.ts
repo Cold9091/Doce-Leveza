@@ -1,9 +1,9 @@
 import "dotenv/config";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { migrate } from "drizzle-orm/libsql/migrator";
 import { db } from "../server/db.js";
 
 async function runMigration() {
-    console.log("🚀 Starting database migration for Supabase PostgreSQL...");
+    console.log("🚀 Starting database migration for Turso...");
 
     try {
         await migrate(db, { migrationsFolder: "./migrations" });

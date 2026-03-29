@@ -1,27 +1,30 @@
 import "dotenv/config";
-import pkg from "pg";
-const { Pool } = pkg;
+import { db } from "../server/db.js";
+import { admins } from "../shared/schema.js";
+import { eq } from "drizzle-orm";
 
 async function createAdmin() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-
   try {
-    const result = await pool.query(
-      `INSERT INTO admins (name, email, password, role)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (email) DO UPDATE SET password = $3
-       RETURNING id, name, email, role`,
-      ["Administrador", "doceleveza@admin.ao", "doceleveza909192", "admin"]
-    );
+    const existing = await db.select().from(admins).where(eq(admins.email, "doceleveza@admin.ao"));
 
-    console.log("✅ Admin criado com sucesso:", result.rows[0]);
+    if (existing.length > 0) {
+      await db.update(admins)
+        .set({ password: "doceleveza909192" })
+        .where(eq(admins.email, "doceleveza@admin.ao"));
+      console.log("✅ Admin atualizado com sucesso.");
+    } else {
+      const [admin] = await db.insert(admins).values({
+        name: "Administrador",
+        email: "doceleveza@admin.ao",
+        password: "doceleveza909192",
+        role: "admin",
+      }).returning();
+      console.log("✅ Admin criado com sucesso:", admin);
+    }
   } catch (error) {
     console.error("❌ Erro ao criar admin:", error);
   } finally {
-    await pool.end();
+    process.exit(0);
   }
 }
 
