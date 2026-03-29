@@ -12,8 +12,8 @@ async function seed() {
         console.log("Creating default system settings...");
         await db.insert(systemSettings).values({
             siteName: "Doce Leveza",
-            supportEmail: "suporte@doceleveza.com",
-            supportPhone: "(11) 99999-9999",
+            supportEmail: null,
+            supportPhone: null,
             maintenanceMode: 0,
             enableSignup: 1
         });

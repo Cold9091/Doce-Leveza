@@ -125,8 +125,8 @@ export const paymentProofs = sqliteTable("payment_proofs", {
 export const systemSettings = sqliteTable("system_settings", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   siteName: text("site_name").default("Doce Leveza"),
-  supportEmail: text("support_email").default("suporte@doceleveza.com"),
-  supportPhone: text("support_phone").default("(11) 99999-9999"),
+  supportEmail: text("support_email"),
+  supportPhone: text("support_phone"),
   maintenanceMode: integer("maintenance_mode").default(0),
   enableSignup: integer("enable_signup").default(1),
   apiBaseUrl: text("api_base_url"),
