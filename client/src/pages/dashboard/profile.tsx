@@ -87,7 +87,12 @@ export default function Profile() {
               </Avatar>
             </div>
             <CardTitle className="text-xl">{user.name}</CardTitle>
-            <CardDescription>Membro desde Nov 2024</CardDescription>
+            <CardDescription>
+              Membro desde{" "}
+              {userInfo?.createdAt
+                ? new Date(userInfo.createdAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })
+                : "—"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
@@ -118,29 +123,53 @@ export default function Profile() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">Assinatura Ativa</CardTitle>
+                  <CardTitle className="text-lg">Assinatura</CardTitle>
                 </div>
-                <Badge variant="default" className="bg-green-500 hover:bg-green-600">Ativa</Badge>
+                {subscription?.status === "ativa" && (
+                  <Badge variant="default" className="bg-green-500 hover:bg-green-600">Ativa</Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col sm:flex-row justify-between gap-4 p-4 rounded-lg bg-muted/50 border">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Plano Atual</p>
-                  <p className="text-lg font-bold">Plano Anual - Reeducação Alimentar</p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>Próxima renovação: 20 Nov 2025</span>
+              {subscription?.status === "ativa" ? (
+                <div className="flex flex-col sm:flex-row justify-between gap-4 p-4 rounded-lg bg-muted/50 border">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Plano Atual</p>
+                    <p className="text-lg font-bold capitalize">{subscription.plan}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      <span>
+                        Próxima renovação:{" "}
+                        {new Date(subscription.renewalDate).toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Link href="/dashboard/assinatura">
+                      <Button variant="secondary" size="sm" className="hover-elevate">
+                        Gerenciar Plano
+                      </Button>
+                    </Link>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+              ) : (
+                <div className="flex flex-col items-center gap-4 p-6 text-center rounded-lg bg-muted/50 border border-dashed">
+                  <CreditCard className="h-10 w-10 text-muted-foreground" />
+                  <div>
+                    <p className="font-semibold text-foreground">Sem assinatura ativa</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Adquira um programa para ter acesso ao conteúdo exclusivo.
+                    </p>
+                  </div>
                   <Link href="/dashboard/assinatura">
-                    <Button variant="secondary" size="sm" className="hover-elevate">
-                      Gerenciar Plano
-                    </Button>
+                    <Button size="sm">Ver Planos</Button>
                   </Link>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 

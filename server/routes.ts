@@ -194,17 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.createUser(validatedData);
 
-      // Create free subscription for new user
-      const subscription = await storage.createSubscription({
-        userId: user.id,
-        plan: "gratuito",
-        status: "ativa",
-        startDate: new Date().toISOString(),
-        renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        paymentMethod: "gratuito",
-      });
-
-      console.log(`✅ User ${user.id} created with free subscription`);
+      console.log(`✅ User ${user.id} created`);
 
       // Don't send password back
       const { password, ...userWithoutPassword } = user;
