@@ -456,7 +456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Subscriptions routes
-  app.get("/api/subscriptions/user/:userId", async (req, res) => {
+  app.get("/api/subscriptions/user/:userId", requireUser, async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       if (isNaN(userId)) {
@@ -808,6 +808,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const updated = await storage.updateSubscription(id, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
       res.json(updated);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -858,17 +861,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/subscriptions/:id", async (req, res) => {
-    try {
-      const success = await storage.deleteSubscription(parseInt(req.params.id));
-      if (!success) {
-        return res.status(404).json({ error: "Subscription not found" });
-      }
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
 
   // Admin - Leads management
   app.delete("/api/admin/leads/:id", async (req, res) => {
@@ -883,7 +875,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users/:userId/access", async (req, res) => {
+  app.get("/api/admin/users/:userId/access", requireAdmin, async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       if (isNaN(userId)) {
@@ -1016,11 +1008,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create or update subscription for the user
       if (proof) {
+        const renewalDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
         const existingSub = await storage.getSubscriptionByUser(proof.userId);
         if (existingSub) {
           await storage.updateSubscription(existingSub.id, {
             status: "ativa",
-            renewalDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            renewalDate,
+            proofUrl: proof.proofUrl,
           });
         } else {
           await storage.createSubscription({
@@ -1028,8 +1022,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             plan: "programa",
             status: "ativa",
             startDate: new Date().toISOString(),
-            renewalDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            renewalDate,
             paymentMethod: "transferencia-bancaria",
+            proofUrl: proof.proofUrl,
           });
         }
 

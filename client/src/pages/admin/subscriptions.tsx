@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Subscription, User, Pathology, UserAccess, AdminNotification } from "@shared/schema";
-import { CreditCard, Trash2, User as UserIcon, Settings, UserCircle, Calendar, Info, Package, ExternalLink, Bell, Check, Search, X, FileText, Image as ImageIcon } from "lucide-react";
+import type { Subscription, User, Pathology, UserAccess, AdminNotification, PaymentProof } from "@shared/schema";
+import { CreditCard, Trash2, User as UserIcon, Settings, Calendar, Info, Package, ExternalLink, Bell, Search, X, FileText, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -14,6 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Tabs,
   TabsContent,
@@ -27,7 +37,6 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 
@@ -38,6 +47,7 @@ export default function AdminSubscriptions() {
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [editingRenewal, setEditingRenewal] = useState<Subscription | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Subscription | null>(null);
 
   const { data: subscriptions, isLoading } = useQuery<Subscription[]>({
     queryKey: ["/api/admin/subscriptions"],
@@ -120,6 +130,23 @@ export default function AdminSubscriptions() {
     enabled: !!selectedSubscriptionUser,
   });
 
+  const { data: allPaymentProofs } = useQuery<PaymentProof[]>({
+    queryKey: ["/api/admin/payments"],
+  });
+
+  const selectedUserProof = useMemo(() => {
+    if (!allPaymentProofs || !selectedSubscriptionUser) return null;
+    const userProofs = allPaymentProofs
+      .filter(p => p.userId === selectedSubscriptionUser.id)
+      .sort((a, b) => b.id - a.id);
+    return userProofs[0] ?? null;
+  }, [allPaymentProofs, selectedSubscriptionUser]);
+
+  const invalidateSubscriptions = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/subscriptions"], refetchType: "all" });
+    queryClient.refetchQueries({ queryKey: ["/api/admin/subscriptions"] });
+  };
+
   const updateAccessMutation = useMutation({
     mutationFn: async (data: { id?: number, pathologyId: number, status: string }) => {
       if (data.id) {
@@ -130,27 +157,35 @@ export default function AdminSubscriptions() {
           pathologyId: data.pathologyId,
           status: data.status,
           startDate: new Date().toISOString(),
-          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
         });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users", selectedSubscriptionUser?.id, "access"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users", selectedSubscriptionUser?.id, "access"], refetchType: "all" });
+      queryClient.refetchQueries({ queryKey: ["/api/admin/users", selectedSubscriptionUser?.id, "access"] });
       setEditingAccess(null);
-      toast({ title: "Sucesso", description: "Status do programa atualizado" });
+      toast({ title: "Sucesso", description: "Acesso ao programa atualizado" });
+    },
+    onError: (err: any) => {
+      toast({ title: "Erro", description: err?.message || "Erro ao atualizar acesso", variant: "destructive" });
     },
   });
 
   const updateSubscriptionMutation = useMutation({
-    mutationFn: async (data: { id: number, status: string }) => {
-      await apiRequest("PATCH", `/api/admin/subscriptions/${data.id}`, { status: data.status });
+    mutationFn: async (data: { id: number; [key: string]: any }) => {
+      await apiRequest("PATCH", `/api/admin/subscriptions/${data.id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/subscriptions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user", selectedSubscriptionUser?.id] });
+      invalidateSubscriptions();
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user", selectedSubscriptionUser?.id], refetchType: "all" });
+      queryClient.refetchQueries({ queryKey: ["/api/subscriptions/user", selectedSubscriptionUser?.id] });
       setEditingSubscription(null);
       setEditingRenewal(null);
       toast({ title: "Sucesso", description: "Assinatura atualizada com sucesso" });
+    },
+    onError: (err: any) => {
+      toast({ title: "Erro", description: err?.message || "Erro ao atualizar assinatura", variant: "destructive" });
     },
   });
 
@@ -159,11 +194,12 @@ export default function AdminSubscriptions() {
       await apiRequest("DELETE", `/api/admin/subscriptions/${id}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/subscriptions"] });
-      toast({
-        title: "Sucesso",
-        description: "Assinatura removida com sucesso",
-      });
+      invalidateSubscriptions();
+      setDeleteTarget(null);
+      toast({ title: "Sucesso", description: "Assinatura removida com sucesso" });
+    },
+    onError: (err: any) => {
+      toast({ title: "Erro", description: err?.message || "Erro ao remover assinatura", variant: "destructive" });
     },
   });
 
@@ -345,15 +381,15 @@ export default function AdminSubscriptions() {
                             variant="destructive"
                             size="icon"
                             className="h-9 w-9"
-                            onClick={() => {
-                              if (confirm("Tem certeza que deseja remover esta assinatura?")) {
-                                deleteMutation.mutate(subscription.id);
-                              }
-                            }}
+                            onClick={() => setDeleteTarget(subscription)}
                             disabled={deleteMutation.isPending}
                             data-testid={`button-delete-subscription-${subscription.id}`}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {deleteMutation.isPending && deleteTarget?.id === subscription.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </div>
@@ -534,45 +570,77 @@ export default function AdminSubscriptions() {
             <TabsContent value="proof" className="m-0">
               <div className="p-6 space-y-4 min-h-[400px]">
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 flex items-center gap-2">
-                  <ImageIcon className="h-3.5 w-3.5" />
+                  <FileText className="h-3.5 w-3.5" />
                   Comprovante de Pagamento
                 </h4>
 
-                {selectedUserSubscription?.proofUrl ? (
-                  <div className="space-y-4">
-                    <div className="border-2 border-dashed rounded-xl overflow-hidden bg-muted/20 aspect-[4/3] flex items-center justify-center relative group">
-                      <img
-                        src={selectedUserSubscription.proofUrl}
-                        alt="Comprovante de Pagamento"
-                        className="max-w-full max-h-full object-contain"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" size="sm" asChild>
-                          <a href={selectedUserSubscription.proofUrl} target="_blank" rel="noopener noreferrer" className="flex gap-2">
-                            <ExternalLink className="h-4 w-4" />
-                            Ver em tamanho real
-                          </a>
-                        </Button>
+                {(() => {
+                  const proofUrl = selectedUserSubscription?.proofUrl || selectedUserProof?.proofUrl;
+                  const proofStatus = selectedUserProof?.status;
+                  const isPdf = proofUrl && !proofUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i);
+
+                  if (proofUrl) {
+                    return (
+                      <div className="space-y-4">
+                        {proofStatus && (
+                          <div className={`px-3 py-1.5 rounded-md text-xs font-semibold w-fit ${
+                            proofStatus === "aprovado" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" :
+                            proofStatus === "rejeitado" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" :
+                            "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                          }`}>
+                            {proofStatus === "aprovado" ? "✓ Aprovado" : proofStatus === "rejeitado" ? "✗ Rejeitado" : "⏳ Pendente"}
+                          </div>
+                        )}
+                        {isPdf ? (
+                          <div className="border-2 border-dashed rounded-xl bg-muted/20 p-8 flex flex-col items-center gap-4">
+                            <FileText className="h-16 w-16 text-primary/40" />
+                            <p className="text-sm text-muted-foreground">Comprovante em PDF</p>
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={proofUrl} target="_blank" rel="noopener noreferrer" className="flex gap-2">
+                                <ExternalLink className="h-4 w-4" />
+                                Abrir PDF
+                              </a>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed rounded-xl overflow-hidden bg-muted/20 aspect-[4/3] flex items-center justify-center relative group">
+                            <img
+                              src={proofUrl}
+                              alt="Comprovante de Pagamento"
+                              className="max-w-full max-h-full object-contain"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Button variant="secondary" size="sm" asChild>
+                                <a href={proofUrl} target="_blank" rel="noopener noreferrer" className="flex gap-2">
+                                  <ExternalLink className="h-4 w-4" />
+                                  Ver em tamanho real
+                                </a>
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        <div className="bg-primary/5 p-4 rounded-lg border border-primary/10 flex gap-3">
+                          <Info className="h-5 w-5 text-primary shrink-0" />
+                          <p className="text-sm text-primary/80 leading-tight">
+                            Este é o último comprovante enviado. Verifique os dados antes de aprovar acessos manuais.
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="bg-primary/5 p-4 rounded-lg border border-primary/10 flex gap-3">
-                      <Info className="h-5 w-5 text-primary shrink-0" />
-                      <p className="text-sm text-primary/80 leading-tight">
-                        Este é o último comprovante enviado pelo aluno. Verifique os dados antes de aprovar acessos manuais.
+                    );
+                  }
+
+                  return (
+                    <div className="flex flex-col items-center justify-center h-[300px] bg-muted/20 border-2 border-dashed rounded-xl text-center p-6">
+                      <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                        <FileText className="h-8 w-8 text-muted-foreground/40" />
+                      </div>
+                      <p className="text-muted-foreground font-medium">Nenhum comprovante enviado</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1 max-w-[200px]">
+                        O aluno ainda não realizou o upload do comprovante.
                       </p>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-[300px] bg-muted/20 border-2 border-dashed rounded-xl text-center p-6">
-                    <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                      <FileText className="h-8 w-8 text-muted-foreground/40" />
-                    </div>
-                    <p className="text-muted-foreground font-medium">Nenhum comprovante enviado</p>
-                    <p className="text-xs text-muted-foreground/60 mt-1 max-w-[200px]">
-                      O aluno ainda não realizou o upload do comprovante de pagamento para esta assinatura.
-                    </p>
-                  </div>
-                )}
+                  );
+                })()}
 
                 <div className="flex items-center gap-3 pt-4">
                   <Button variant="outline" className="flex-1 h-11" onClick={() => setSelectedSubscriptionUser(null)}>
@@ -671,6 +739,29 @@ export default function AdminSubscriptions() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover assinatura</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover a assinatura? Esta ação é irreversível.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+              disabled={deleteMutation.isPending}
+              data-testid="button-confirm-delete"
+            >
+              {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
