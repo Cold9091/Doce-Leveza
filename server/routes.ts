@@ -21,7 +21,7 @@ import {
 } from "../shared/schema.js";
 import { z } from "zod";
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 
 
@@ -578,6 +578,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Cloudinary upload error:", error);
       res.status(500).json({ error: "Falha ao fazer upload da imagem" });
+    }
+  });
+
+  app.post("/api/admin/upload/pdf", requireAdmin, upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "Nenhum ficheiro enviado" });
+      }
+      const allowed = ["application/pdf"];
+      if (!allowed.includes(req.file.mimetype)) {
+        return res.status(400).json({ error: "Apenas ficheiros PDF são permitidos" });
+      }
+      const folder = (req.body.folder as string) || "doce-leveza/ebooks";
+      const publicId = req.body.publicId as string | undefined;
+      const url = await uploadRawToCloudinary(req.file.buffer, folder, publicId);
+      res.json({ url });
+    } catch (error) {
+      console.error("Cloudinary PDF upload error:", error);
+      res.status(500).json({ error: "Falha ao fazer upload do PDF" });
     }
   });
 
