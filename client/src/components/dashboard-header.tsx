@@ -1,6 +1,5 @@
 import { Bell, Calendar, Video, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -139,29 +138,6 @@ export function DashboardHeader({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="w-px h-8 bg-border mx-2 hidden sm:block" />
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="relative h-10 w-10 rounded-full p-0"
-              data-testid="button-avatar"
-            >
-              <Avatar className="h-10 w-10 border-2 border-primary/20">
-                <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" alt={user?.name || "Usuário"} />
-                <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  {(user?.name || "U").charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
-            <DropdownMenuItem>Configurações</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Sair</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </header>
   );
