@@ -455,6 +455,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Student cancel/reschedule consultation
+  app.patch("/api/consultations/:id", requireUser, async (req, res) => {
+    try {
+      const { status, datetime } = req.body;
+      const consultation = await storage.updateConsultation(parseInt(req.params.id), { status, datetime });
+      if (!consultation) {
+        return res.status(404).json({ error: "Consultation not found" });
+      }
+      res.json(consultation);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Subscriptions routes
   app.get("/api/subscriptions/user/:userId", requireUser, async (req, res) => {
     try {
