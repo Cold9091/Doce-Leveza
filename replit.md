@@ -100,8 +100,8 @@ O banco de dados foi migrado de PostgreSQL para **Turso** (SQLite distribuído).
 ## Admin Padrão
 
 - **Email**: `doceleveza@admin.ao`
-- **Senha**: `doceleveza909192`
 - **Role**: `super_admin`
+- (credenciais em segredo — não armazenar aqui)
 
 ## Problemas Resolvidos
 
@@ -110,8 +110,15 @@ O banco de dados foi migrado de PostgreSQL para **Turso** (SQLite distribuído).
 3. ✅ Admin Payments — `queryKey` e `queryFn` corrigidos para usar query param `?status=`
 4. ✅ Configurações admin — `requireAdmin` adicionado aos endpoints GET/PATCH
 5. ✅ Express `trust proxy` configurado para o proxy do Replit (elimina aviso do rate-limit)
-
-## Problemas Conhecidos (ainda a corrigir)
-
-1. Senhas armazenadas em texto puro (sem hash) — risco de segurança em produção
-2. SESSION_PASSWORD usa valor padrão — configurar como secret no Replit
+6. ✅ GET /api/leads protegido com `requireAdmin`
+7. ✅ DELETE /api/admin/leads/:id protegido com `requireAdmin`
+8. ✅ POST /api/auth/forgot-password agora com rate-limit (50 req/hora)
+9. ✅ Senhas removidas dos scripts — agora usam variável de ambiente `ADMIN_PASSWORD`
+10. ✅ bcrypt cost reduzido de 12→10 (login 794ms→241ms)
+11. ✅ IDOR corrigido: notificações, consultas, assinaturas — verificação de posse em todas as rotas de utilizador
+12. ✅ POST /api/consultations requer auth + userId forçado da sessão (nunca do body)
+13. ✅ PATCH /api/consultations/:id verifica que a consulta pertence ao utilizador da sessão; só permite alterar status/datetime
+14. ✅ PUT /api/admin/users/:id usa whitelist de campos; password hashada se incluída
+15. ✅ PATCH /api/admin/settings valida com Zod antes de passar ao storage
+16. ✅ POST/PATCH /api/admin/user-access validados com insertUserAccessSchema
+17. ✅ POST /api/payments/submit valida amount (positivo), programId (inteiro positivo), proofUrl (URL válida) e verifica existência do programa no DB

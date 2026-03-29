@@ -2,6 +2,7 @@ import "dotenv/config";
 import { db, client } from "./db";
 import { admins, systemSettings, pathologies } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 async function seed() {
     console.log("Seeding database...");
@@ -19,20 +20,26 @@ async function seed() {
         });
     }
 
-    // Seed Admin
-    const adminEmail = "doceleveza@admin.ao";
+    // Seed Admin (uses ADMIN_PASSWORD env var)
+    const adminEmail = process.env.ADMIN_EMAIL || "doceleveza@admin.ao";
+    const adminPassword = process.env.ADMIN_PASSWORD;
     const existingAdmin = await db.select().from(admins).where(eq(admins.email, adminEmail));
 
     if (existingAdmin.length === 0) {
-        console.log("Creating default admin user...");
-        await db.insert(admins).values({
-            name: "Administrador",
-            email: adminEmail,
-            password: "doceleveza909192",
-            role: "super_admin",
-            createdAt: new Date().toISOString(),
-        });
-        console.log("Admin created: doceleveza@admin.ao / doceleveza909192");
+        if (!adminPassword) {
+            console.warn("⚠️  ADMIN_PASSWORD not set — skipping admin seed.");
+        } else {
+            console.log("Creating default admin user...");
+            const hashedPassword = await bcrypt.hash(adminPassword, 10);
+            await db.insert(admins).values({
+                name: "Administrador",
+                email: adminEmail,
+                password: hashedPassword,
+                role: "super_admin",
+                createdAt: new Date().toISOString(),
+            });
+            console.log(`✅ Admin created: ${adminEmail}`);
+        }
     } else {
         console.log("Admin already exists.");
     }

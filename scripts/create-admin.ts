@@ -2,24 +2,34 @@ import "dotenv/config";
 import { db } from "../server/db.js";
 import { admins } from "../shared/schema.js";
 import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 async function createAdmin() {
+  const email = process.env.ADMIN_EMAIL || "doceleveza@admin.ao";
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!password) {
+    console.error("❌ ADMIN_PASSWORD env var is required");
+    process.exit(1);
+  }
+
   try {
-    const existing = await db.select().from(admins).where(eq(admins.email, "doceleveza@admin.ao"));
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const existing = await db.select().from(admins).where(eq(admins.email, email));
 
     if (existing.length > 0) {
       await db.update(admins)
-        .set({ password: "doceleveza909192" })
-        .where(eq(admins.email, "doceleveza@admin.ao"));
-      console.log("✅ Admin atualizado com sucesso.");
+        .set({ password: hashedPassword })
+        .where(eq(admins.email, email));
+      console.log("✅ Admin actualizado com sucesso.");
     } else {
       const [admin] = await db.insert(admins).values({
         name: "Administrador",
-        email: "doceleveza@admin.ao",
-        password: "doceleveza909192",
+        email,
+        password: hashedPassword,
         role: "admin",
       }).returning();
-      console.log("✅ Admin criado com sucesso:", admin);
+      console.log("✅ Admin criado:", admin.email);
     }
   } catch (error) {
     console.error("❌ Erro ao criar admin:", error);

@@ -18,6 +18,7 @@ import {
   insertEbookSchema,
   insertConsultationSchema,
   insertSubscriptionSchema,
+  insertUserAccessSchema,
   systemSettingsSchema
 } from "../shared/schema.js";
 import { z } from "zod";
@@ -50,6 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.use("/api/auth/login", authLimiter);
   app.use("/api/admin/login", authLimiter);
+  app.use("/api/auth/forgot-password", authLimiter);
 
   // Configuração de sessão segura
   // Configuração de sessão segura (Iron Session)
@@ -176,17 +178,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/admin/settings", requireAdmin, async (req, res) => {
     try {
-      const settings = await storage.updateSettings(req.body);
+      const validatedData = systemSettingsSchema.partial().parse(req.body);
+      const settings = await storage.updateSettings(validatedData);
       res.json(settings);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
       res.status(500).json({ error: "Internal server error" });
     }
   });
 
   // Notifications
-  app.get("/api/notifications/user/:userId", async (req, res) => {
+  app.get("/api/notifications/user/:userId", requireUser, async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
+      // Users can only read their own notifications
+      if (userId !== req.session.userId) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
       const notifications = await storage.getNotificationsByUser(userId);
       res.json(notifications);
     } catch (error) {
@@ -194,9 +204,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/notifications/:id/read", async (req, res) => {
+  app.patch("/api/notifications/:id/read", requireUser, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      // Verify the notification belongs to the session user before marking as read
+      const userNotifications = await storage.getNotificationsByUser(req.session.userId!);
+      const owned = userNotifications.some(n => n.id === id);
+      if (!owned) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
       await storage.markNotificationRead(id);
       res.json({ success: true });
     } catch (error) {
@@ -471,18 +487,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Consultations routes
-  app.get("/api/consultations/user/:userId", async (req, res) => {
+  app.get("/api/consultations/user/:userId", requireUser, async (req, res) => {
     try {
-      const consultations = await storage.getConsultationsByUser(parseInt(req.params.userId));
+      const userId = parseInt(req.params.userId);
+      // Users can only see their own consultations
+      if (userId !== req.session.userId) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+      const consultations = await storage.getConsultationsByUser(userId);
       res.json(consultations);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   });
 
-  app.post("/api/consultations", async (req, res) => {
+  app.post("/api/consultations", requireUser, async (req, res) => {
     try {
-      const validatedData = insertConsultationSchema.parse(req.body);
+      // Force userId from session — never trust the body
+      const validatedData = insertConsultationSchema.parse({
+        ...req.body,
+        userId: req.session.userId,
+      });
       const consultation = await storage.createConsultation(validatedData);
       res.status(201).json(consultation);
     } catch (error) {
@@ -497,8 +522,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Student cancel/reschedule consultation
   app.patch("/api/consultations/:id", requireUser, async (req, res) => {
     try {
-      const { status, datetime } = req.body;
-      const consultation = await storage.updateConsultation(parseInt(req.params.id), { status, datetime });
+      const consultationId = parseInt(req.params.id);
+      // Verify ownership — users may only modify their own consultations
+      const existing = await storage.getConsultationsByUser(req.session.userId!);
+      const owned = existing.some(c => c.id === consultationId);
+      if (!owned) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+      // Only allow changing status/datetime — no userId override
+      const allowedStatuses = ["cancelada", "pendente", "reagendada"];
+      const updateData: Record<string, string> = {};
+      if (req.body.status && allowedStatuses.includes(req.body.status)) {
+        updateData.status = req.body.status;
+      }
+      if (req.body.datetime && typeof req.body.datetime === "string") {
+        updateData.datetime = req.body.datetime;
+      }
+      const consultation = await storage.updateConsultation(consultationId, updateData);
       if (!consultation) {
         return res.status(404).json({ error: "Consultation not found" });
       }
@@ -514,6 +554,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.userId);
       if (isNaN(userId)) {
         return res.status(400).json({ error: "Invalid user ID" });
+      }
+      // Users can only see their own subscription
+      if (userId !== req.session.userId) {
+        return res.status(403).json({ error: "Forbidden" });
       }
       const subscription = await storage.getSubscriptionByUser(userId);
       res.json(subscription || null);
@@ -598,11 +642,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
-      const user = await storage.updateUser(parseInt(req.params.id), req.body);
+      // Whitelist only safe editable fields — never allow arbitrary mass assignment
+      const { name, phone, address, password } = req.body;
+      const allowed: Record<string, string> = {};
+      if (name && typeof name === "string") allowed.name = name.trim();
+      if (phone && typeof phone === "string") allowed.phone = phone.trim();
+      if (address && typeof address === "string") allowed.address = address.trim();
+      if (password && typeof password === "string" && password.length >= 6) {
+        // Admin setting a new password must always be hashed
+        allowed.password = await bcrypt.hash(password, 10);
+      }
+      if (Object.keys(allowed).length === 0) {
+        return res.status(400).json({ error: "Nenhum campo válido para atualizar" });
+      }
+      const user = await storage.updateUser(parseInt(req.params.id), allowed);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      const { password, ...userWithoutPassword } = user;
+      const { password: _pw, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
@@ -919,9 +976,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/user-access", requireAdmin, async (req, res) => {
     try {
-      const access = await storage.createUserAccess(req.body);
+      const validatedData = insertUserAccessSchema.parse(req.body);
+      const access = await storage.createUserAccess(validatedData);
       res.json(access);
     } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
       res.status(400).json({ message: error.message });
     }
   });
@@ -929,16 +990,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/user-access/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const updated = await storage.updateUserAccess(id, req.body);
+      const validatedData = insertUserAccessSchema.partial().parse(req.body);
+      const updated = await storage.updateUserAccess(id, validatedData);
       res.json(updated);
     } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
       res.status(400).json({ message: error.message });
     }
   });
 
 
   // Admin - Leads management
-  app.delete("/api/admin/leads/:id", async (req, res) => {
+  app.delete("/api/admin/leads/:id", requireAdmin, async (req, res) => {
     try {
       const success = await storage.deleteLead(parseInt(req.params.id));
       if (!success) {
@@ -1004,17 +1069,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payment Proofs - Submit payment proof record
   app.post("/api/payments/submit", requireUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
-      const { programId, amount, proofUrl } = req.body;
+      const userId = req.session.userId!;
 
-      if (!programId) {
-        return res.status(400).json({ error: "ID do programa é obrigatório" });
+      // Strict server-side validation — never trust the frontend
+      const paymentSchema = z.object({
+        programId: z.number().int().positive("ID do programa inválido"),
+        amount: z.number().int().positive("Valor do pagamento deve ser positivo"),
+        proofUrl: z.string().url("URL do comprovativo inválida").min(1, "URL do comprovativo é obrigatória"),
+      });
+
+      const parsed = paymentSchema.safeParse({
+        ...req.body,
+        programId: typeof req.body.programId === "string" ? parseInt(req.body.programId) : req.body.programId,
+        amount: typeof req.body.amount === "string" ? parseInt(req.body.amount) : req.body.amount,
+      });
+
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Dados de pagamento inválidos", details: parsed.error.errors });
       }
-      if (amount === undefined || amount === null) {
-        return res.status(400).json({ error: "Valor do pagamento é obrigatório" });
-      }
-      if (!proofUrl) {
-        return res.status(400).json({ error: "URL do comprovativo é obrigatória" });
+
+      const { programId, amount, proofUrl } = parsed.data;
+
+      // Verify the program actually exists before creating a payment record
+      const pathology = await storage.getPathologyById(programId);
+      if (!pathology) {
+        return res.status(404).json({ error: "Programa não encontrado" });
       }
 
       const paymentProof = await storage.createPaymentProof({
