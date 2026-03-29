@@ -41,14 +41,9 @@ import {
   CalendarCheck,
   Instagram,
   Phone,
-  GraduationCap,
-  Video,
-  Award,
   Utensils,
-  Tag,
-  RefreshCw,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 import { AuthDialog } from "@/components/auth-dialog";
@@ -61,28 +56,6 @@ import professionalImg from "@assets/stock_images/smiling_nutritionist_6abfbe04.
 export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({
-    hours: 5,
-    minutes: 16,
-    seconds: 38,
-  });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        }
-        return prev;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   const ButterflyIcon = () => (
     <svg
@@ -545,112 +518,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Assinatura Anual Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-900 light">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
-          <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 items-center max-w-7xl mx-auto">
-            {/* Left Column - Title */}
-            <motion.div 
-              className="lg:col-span-1 space-y-3 sm:space-y-4 text-center lg:text-left"
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-normal text-white leading-tight">
-                Quanto você precisará <span className="text-primary">Investir</span>
-              </h2>
-              <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
-                Transforme sua saúde com conhecimento científico e construa uma vida mais saudável para o seu futuro!
-              </p>
-            </motion.div>
-
-            {/* Center Column - Pricing Card */}
-            <motion.div 
-              className="lg:col-span-1 flex justify-center"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Card className="bg-white border-gray-200 shadow-2xl w-full max-w-xs aspect-auto lg:aspect-[3/4] flex flex-col p-4 sm:p-6 rounded-md mx-auto">
-                <div className="text-center mb-4">
-                  <Badge className="bg-gray-700 text-white border-gray-600 text-xs uppercase tracking-wide">
-                    Assinatura Anual
-                  </Badge>
-                </div>
-
-                <div className="text-center space-y-5 flex-1 flex flex-col justify-center">
-                  <div className="space-y-2">
-                    <div className="text-sm text-gray-500 line-through">
-                      DE 547.000 Kwanzas
-                    </div>
-                    <div className="text-xs text-gray-600 uppercase tracking-wide">
-                      Por 12x de
-                    </div>
-                    <div className="text-5xl font-heading font-bold text-primary">
-                      29.560
-                    </div>
-                    <div className="text-sm text-gray-600 uppercase tracking-wide">
-                      ou 297.000 Kwanzas à vista
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                    <Clock className="w-4 h-4 text-primary" />
-                    <span>ENCERRA EM:</span>
-                    <span className="font-mono font-semibold">
-                      {String(timeLeft.hours).padStart(2, "0")}:
-                      {String(timeLeft.minutes).padStart(2, "0")}:
-                      {String(timeLeft.seconds).padStart(2, "0")}
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full mt-4"
-                  onClick={() => setDialogOpen(true)}
-                  data-testid="button-cta-subscription"
-                >
-                  Quero Começar Agora
-                </Button>
-              </Card>
-            </motion.div>
-
-            {/* Right Column - Benefits */}
-            <motion.div 
-              className="lg:col-span-1 space-y-3 sm:space-y-4 text-center lg:text-left"
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              {[
-                { icon: GraduationCap, text: "21 aulas científicas", color: "text-blue-400" },
-                { icon: Video, text: "3 mentorias ao vivo na zoom", color: "text-blue-400" },
-                { icon: Award, text: "10 aulas bônus com nutricionistas", color: "text-blue-400" },
-                { icon: Utensils, text: "Plano alimentar especializado", color: "text-blue-400" },
-                { icon: Tag, text: "Cupons de descontos para compras", color: "text-blue-400" },
-                { icon: RefreshCw, text: "1 ano de acesso com atualizações", color: "text-blue-400" },
-                { icon: Clock, text: "+32 horas de conteúdo e materiais", color: "text-blue-400" },
-              ].map((benefit, idx) => (
-                <motion.div
-                  key={idx}
-                  className="flex items-center gap-2 sm:gap-3 justify-center lg:justify-start"
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.5 + idx * 0.1 }}
-                  data-testid={`benefit-${idx + 1}`}
-                >
-                  <benefit.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${benefit.color} flex-shrink-0`} />
-                  <span className="text-white text-sm sm:text-base font-normal">{benefit.text}</span>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* Latest Content Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-background">
