@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "A nova senha deve ter pelo menos 6 caracteres" });
       }
 
-      const hashedNew = await bcrypt.hash(newPassword, 12);
+      const hashedNew = await bcrypt.hash(newPassword, 10);
       await storage.updateUser(userId, { password: hashedNew });
       res.json({ success: true });
     } catch (error) {
@@ -253,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const hashedPassword = await bcrypt.hash(validatedData.password, 12);
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
       const user = await storage.createUser({ ...validatedData, password: hashedPassword });
 
       console.log(`✅ User ${user.id} created`);
