@@ -160,9 +160,9 @@ export default function PathologyDetail() {
     (v) => v.pathologyId === pathology?.id
   );
   const { data: ebooks, isLoading: ebooksLoading } = useQuery<Ebook[]>({
-    queryKey: ["/api/ebooks", { pathologyId: pathology?.id }],
+    queryKey: [`/api/ebooks?pathologyId=${pathology?.id}`],
     enabled: !!pathology,
-    staleTime: 1000 * 60 * 5, // 5 minutos de cache
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: userSubscriptions } = useQuery<any>({
