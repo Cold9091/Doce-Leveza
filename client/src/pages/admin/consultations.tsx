@@ -15,6 +15,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Consultation, User } from "@shared/schema";
 import { Calendar, Trash2, User as UserIcon, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -185,6 +186,34 @@ export default function AdminConsultations() {
   );
 }
 
+function buildWhatsAppLink(phone: string | null | undefined, userName: string, datetime: string): string | null {
+  if (!phone) return null;
+
+  // Normalise Angola phone number → +244XXXXXXXXX
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("244")) {
+    // already has country code
+  } else if (digits.startsWith("0")) {
+    digits = "244" + digits.slice(1);
+  } else {
+    digits = "244" + digits;
+  }
+
+  const date = new Date(datetime);
+  const dateStr = date.toLocaleDateString("pt-AO", { day: "2-digit", month: "long", year: "numeric" });
+  const timeStr = date.toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" });
+
+  const message =
+    `Olá ${userName}! 👋\n\n` +
+    `A sua consulta com a equipa *Doce Leveza* está marcada para:\n` +
+    `📅 *${dateStr}* às *${timeStr}*\n\n` +
+    `Pedimos que chegue com alguns minutos de antecedência.\n` +
+    `Caso precise reagendar, entre em contacto connosco.\n\n` +
+    `Equipa Doce Leveza 💚`;
+
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
 function ConsultationRow({
   consultation,
   user,
@@ -202,6 +231,8 @@ function ConsultationRow({
 }) {
   const formatDateTime = (dt: string) =>
     new Date(dt).toLocaleString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  const whatsappLink = buildWhatsAppLink(user?.phone, user?.name || "Aluno", consultation.datetime);
 
   return (
     <Card data-testid={`card-consultation-${consultation.id}`}>
@@ -233,7 +264,20 @@ function ConsultationRow({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+            {whatsappLink && (
+              <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-green-600 border-green-200 hover:bg-green-50 dark:hover:bg-green-900/20 text-xs h-8"
+                  data-testid={`button-whatsapp-consultation-${consultation.id}`}
+                >
+                  <SiWhatsapp className="mr-1 h-3 w-3" />
+                  Notificar
+                </Button>
+              </a>
+            )}
             {consultation.status === "agendada" && (
               <>
                 <Button
