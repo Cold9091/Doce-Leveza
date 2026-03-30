@@ -1073,7 +1073,8 @@ export default function PathologyDetail() {
                     key={ebook.id}
                     variant="outline"
                     className="w-full justify-start text-left h-auto py-3 px-4 hover:bg-primary/5 hover:border-primary/20 transition-all border-dashed"
-                    onClick={() => handlePdfSelect(ebook)}
+                    data-testid={`button-ebook-${ebook.id}`}
+                    onClick={() => { setSelectedEbook(ebook); setPdfReaderOpen(true); }}
                   >
                     <div className="h-10 w-8 bg-primary/5 rounded border border-primary/10 flex items-center justify-center mr-3">
                       <FileText className="h-5 w-5 text-primary" />
