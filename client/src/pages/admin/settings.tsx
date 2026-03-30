@@ -47,7 +47,7 @@ export default function AdminSettings() {
     const data: Record<string, any> = {};
     formData.forEach((value, key) => {
       if (key === "maintenanceMode" || key === "enableSignup") {
-        data[key] = value === "on";
+        data[key] = value === "on" ? 1 : 0;
       } else if (key === "smtpPort") {
         data[key] = value ? parseInt(value as string) : undefined;
       } else {
@@ -56,8 +56,8 @@ export default function AdminSettings() {
     });
 
     // Manual check for switches as they don't appear in FormData if off
-    if (!formData.has("maintenanceMode")) data.maintenanceMode = false;
-    if (!formData.has("enableSignup")) data.enableSignup = false;
+    if (!formData.has("maintenanceMode")) data.maintenanceMode = 0;
+    if (!formData.has("enableSignup")) data.enableSignup = 0;
 
     mutation.mutate(data);
   };
