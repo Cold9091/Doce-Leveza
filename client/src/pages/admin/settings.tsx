@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings as SettingsIcon, Save, ShieldAlert, Globe, Mail, Phone, Power, Code } from "lucide-react";
+import { Settings as SettingsIcon, Save, ShieldAlert, Globe, Mail, Phone, Power, Code, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -131,6 +131,30 @@ export default function AdminSettings() {
                     <Label htmlFor="supportPhone">Telefone de Suporte</Label>
                     <Input id="supportPhone" name="supportPhone" defaultValue={settings?.supportPhone ?? ""} data-testid="input-support-phone" />
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-green-600" />
+                    Comunidade WhatsApp
+                  </CardTitle>
+                  <CardDescription>Link do grupo ou comunidade WhatsApp exibido no dashboard dos alunos</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Label htmlFor="whatsappCommunityUrl">Link da Comunidade WhatsApp</Label>
+                  <Input
+                    id="whatsappCommunityUrl"
+                    name="whatsappCommunityUrl"
+                    type="url"
+                    placeholder="https://chat.whatsapp.com/..."
+                    defaultValue={settings?.whatsappCommunityUrl ?? ""}
+                    data-testid="input-whatsapp-community-url"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Cole aqui o link de convite do grupo ou comunidade WhatsApp. Aparecerá como botão "Entrar na Comunidade" no dashboard do aluno.
+                  </p>
                 </CardContent>
               </Card>
 

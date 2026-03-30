@@ -136,6 +136,7 @@ export const systemSettings = sqliteTable("system_settings", {
   smtpPort: integer("smtp_port"),
   smtpUser: text("smtp_user"),
   smtpPass: text("smtp_pass"),
+  whatsappCommunityUrl: text("whatsapp_community_url"),
 });
 
 // ---- Zod Schemas e Types ----

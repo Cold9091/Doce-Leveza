@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Activity, BookOpen, Calendar, Video, ArrowRight, Sparkles, TrendingUp, Clock, User, Lock, CheckCircle2 } from "lucide-react";
+import { Activity, BookOpen, Calendar, Video, ArrowRight, Sparkles, TrendingUp, Clock, User, Lock, CheckCircle2, MessageCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import type { Pathology, Ebook, Consultation, Subscription, User as UserType, Video as VideoType } from "@shared/schema";
@@ -43,8 +43,13 @@ export default function Overview() {
   const { data: subscription, isLoading: subscriptionLoading } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 2, // 2 minutos de cache
-    gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  const { data: publicSettings } = useQuery<{ whatsappCommunityUrl: string | null }>({
+    queryKey: ["/api/settings/public"],
+    staleTime: 1000 * 60 * 10,
   });
 
   // Verificar se está carregando dados críticos
@@ -156,6 +161,18 @@ export default function Overview() {
                 Agendar Consulta
               </Button>
             </Link>
+            {publicSettings?.whatsappCommunityUrl && (
+              <a href={publicSettings.whatsappCommunityUrl} target="_blank" rel="noopener noreferrer">
+                <Button
+                  variant="outline"
+                  className="border-green-400/60 text-white bg-green-500/20 hover:bg-green-500/30 backdrop-blur-sm"
+                  data-testid="button-whatsapp-community"
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Entrar na Comunidade
+                </Button>
+              </a>
+            )}
           </div>
         </div>
       </div>

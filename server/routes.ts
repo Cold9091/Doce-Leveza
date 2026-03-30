@@ -166,6 +166,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public settings endpoint (only exposes safe, public-facing fields)
+  app.get("/api/settings/public", async (_req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json({ whatsappCommunityUrl: settings.whatsappCommunityUrl ?? null });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Admin - Settings management
   app.get("/api/admin/settings", requireAdmin, async (_req, res) => {
     try {
