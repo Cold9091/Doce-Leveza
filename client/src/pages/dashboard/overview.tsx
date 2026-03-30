@@ -164,8 +164,8 @@ export default function Overview() {
             {publicSettings?.whatsappCommunityUrl && (
               <a href={publicSettings.whatsappCommunityUrl} target="_blank" rel="noopener noreferrer">
                 <Button
-                  variant="outline"
-                  className="border-green-400/60 text-white bg-green-500/20 hover:bg-green-500/30 backdrop-blur-sm"
+                  variant="secondary"
+                  className="bg-white text-green-600 hover:bg-white/90"
                   data-testid="button-whatsapp-community"
                 >
                   <MessageCircle className="mr-2 h-4 w-4" />
