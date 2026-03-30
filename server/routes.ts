@@ -1074,7 +1074,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Strict server-side validation — never trust the frontend
       const paymentSchema = z.object({
         programId: z.number().int().positive("ID do programa inválido"),
-        amount: z.number().int().positive("Valor do pagamento deve ser positivo"),
+        // amount can be 0 for free programs — only reject negative values
+        amount: z.number().int().nonnegative("Valor do pagamento inválido"),
         proofUrl: z.string().url("URL do comprovativo inválida").min(1, "URL do comprovativo é obrigatória"),
       });
 
