@@ -301,6 +301,7 @@ export default function Home() {
                   src={item.image}
                   alt={item.title}
                   className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent"></div>
                 <div className="relative h-full flex flex-col justify-end p-5 text-white">
@@ -539,6 +540,7 @@ export default function Home() {
                     src={videoImg}
                     alt="Vídeo sobre glicemia"
                     className="w-full h-48 object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
                     <div className="w-14 h-14 rounded-full bg-accent/90 flex items-center justify-center">
@@ -567,6 +569,7 @@ export default function Home() {
                     src={programsImg}
                     alt="Aula sobre emagrecimento"
                     className="w-full h-48 object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute top-4 right-4">
                     <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
@@ -595,6 +598,7 @@ export default function Home() {
                     src={ebookImg}
                     alt="Ebook sobre pressão arterial"
                     className="w-full h-48 object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute top-4 right-4">
                     <div className="w-12 h-12 rounded-full bg-accent/90 flex items-center justify-center">
@@ -757,6 +761,7 @@ export default function Home() {
                             src={testimonial.image}
                             alt={testimonial.name}
                             className="w-16 h-16 rounded-full object-cover"
+                            loading="lazy"
                           />
                           
                           <div className="flex gap-1">
@@ -837,6 +842,7 @@ export default function Home() {
                 alt="Dra. Angelina"
                 className="w-full rounded-lg shadow-xl"
                 data-testid="img-instructor"
+                loading="lazy"
               />
             </div>
           </div>

@@ -10,27 +10,37 @@ import { DashboardHeader } from "@/components/dashboard-header";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Loader2 } from "lucide-react";
+import { lazy, Suspense } from "react";
 
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
-import Overview from "@/pages/dashboard/overview";
-import Pathologies from "@/pages/dashboard/pathologies";
-import PathologyDetail from "@/pages/dashboard/pathology-detail";
-import Library from "@/pages/dashboard/library";
-import Consultations from "@/pages/dashboard/consultations";
-import Settings from "@/pages/dashboard/settings";
-import Profile from "@/pages/dashboard/profile";
-import Subscription from "@/pages/dashboard/subscription";
-import Assinaturas from "@/pages/dashboard/assinaturas";
-import AdminDashboard from "@/pages/admin/dashboard";
-import AdminUsers from "@/pages/admin/users";
-import AdminPathologies from "@/pages/admin/pathologies";
-import AdminVideos from "@/pages/admin/videos";
-import AdminEbooks from "@/pages/admin/ebooks";
-import AdminConsultations from "@/pages/admin/consultations";
-import AdminSubscriptions from "@/pages/admin/subscriptions";
-import AdminPayments from "@/pages/admin/payments";
-import AdminSettings from "@/pages/admin/settings";
+
+const Overview = lazy(() => import("@/pages/dashboard/overview"));
+const Pathologies = lazy(() => import("@/pages/dashboard/pathologies"));
+const PathologyDetail = lazy(() => import("@/pages/dashboard/pathology-detail"));
+const Library = lazy(() => import("@/pages/dashboard/library"));
+const Consultations = lazy(() => import("@/pages/dashboard/consultations"));
+const Settings = lazy(() => import("@/pages/dashboard/settings"));
+const Profile = lazy(() => import("@/pages/dashboard/profile"));
+const Subscription = lazy(() => import("@/pages/dashboard/subscription"));
+const Assinaturas = lazy(() => import("@/pages/dashboard/assinaturas"));
+const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
+const AdminUsers = lazy(() => import("@/pages/admin/users"));
+const AdminPathologies = lazy(() => import("@/pages/admin/pathologies"));
+const AdminVideos = lazy(() => import("@/pages/admin/videos"));
+const AdminEbooks = lazy(() => import("@/pages/admin/ebooks"));
+const AdminConsultations = lazy(() => import("@/pages/admin/consultations"));
+const AdminSubscriptions = lazy(() => import("@/pages/admin/subscriptions"));
+const AdminPayments = lazy(() => import("@/pages/admin/payments"));
+const AdminSettings = lazy(() => import("@/pages/admin/settings"));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
 
 function ProtectedRoute({ children, type = "user" }: { children: React.ReactNode, type?: "user" | "admin" }) {
   const endpoint = type === "admin" ? "/api/admin/me" : "/api/auth/me";
@@ -112,6 +122,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 
 function Router() {
   return (
+    <Suspense fallback={<PageLoader />}>
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard">
@@ -278,6 +289,7 @@ function Router() {
       </Route>
       <Route component={NotFound} />
     </Switch>
+    </Suspense>
   );
 }
 
