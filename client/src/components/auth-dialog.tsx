@@ -82,16 +82,15 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
 
   const signupMutation = useMutation({
     mutationFn: async (data: SignupData) => {
-      return await apiRequest("POST", "/api/auth/signup", data);
+      const res = await apiRequest("POST", "/api/auth/signup", data);
+      return await res.json();
     },
-    onSuccess: () => {
-      setSignupSuccess(true);
+    onSuccess: (response: any) => {
       toast({ title: "Conta criada com sucesso!", description: "Bem-vindo ao DOCE LEVEZA." });
-      setTimeout(() => {
-        onOpenChange(false);
-        setSignupSuccess(false);
-        signupForm.reset();
-      }, 2000);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      onOpenChange(false);
+      signupForm.reset();
+      window.location.href = "/dashboard";
     },
     onError: (error: any) => {
       toast({

@@ -311,6 +311,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`✅ User ${user.id} created`);
 
+      // Iniciar sessão automaticamente após registo
+      req.session.userId = user.id;
+      await req.session.save();
+
       // Notify admins of new registration
       storage.createAdminNotification({
         title: "Novo utilizador registado",
@@ -322,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Don't send password back
       const { password, ...userWithoutPassword } = user;
 
-      res.status(201).json({ success: true, data: userWithoutPassword });
+      res.status(201).json({ success: true, data: { ...userWithoutPassword, role: "user" } });
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({
