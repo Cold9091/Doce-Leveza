@@ -407,13 +407,6 @@ export default function Home() {
                 icon: Baby,
                 price: 85000,
               },
-              {
-                title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
-                desc: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
-                image: "https://images.unsplash.com/photo-1516307364728-25b36c5f400f?w=800&h=450&fit=crop",
-                icon: Users,
-                price: 85000,
-              },
             ].map((pathology, idx) => (
               <motion.div
                 key={idx}
@@ -874,7 +867,7 @@ export default function Home() {
                 </div>
                 <div className="space-y-3">
                   <h3 className="font-heading font-bold text-xl text-foreground">
-                    Assinar Acesso Anual
+                    Assinar Acesso Mensal/Trimensal
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
                     Conteúdos exclusivos e acompanhamento contínuo.
