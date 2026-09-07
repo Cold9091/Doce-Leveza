@@ -84,7 +84,8 @@ export default function Pathologies() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {pathologies.map((pathology) => {
-          const imageUrl = pathologyImageMap[pathology.slug] || pathologyImageMap["programa-perder-peso"];
+          const fallbackImageUrl = pathologyImageMap[pathology.slug] || pathologyImageMap["programa-perder-peso"];
+          const imageUrl = pathology.imageUrl || fallbackImageUrl;
           const hasAccess = hasAccessToProgram(pathology.id);
           const lockedByCurrentPlan = !!activePlan && activePlan.type !== "ilimitado" && activePlan.pathologyId !== pathology.id;
 
@@ -94,6 +95,11 @@ export default function Pathologies() {
                 src={imageUrl}
                 alt={pathology.title}
                 className="absolute inset-0 w-full h-full object-cover"
+                onError={(event) => {
+                  if (event.currentTarget.src !== fallbackImageUrl) {
+                    event.currentTarget.src = fallbackImageUrl;
+                  }
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent"></div>
 
