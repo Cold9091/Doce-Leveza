@@ -203,7 +203,7 @@ export default function Home() {
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-cta-hero"
               >
-                Assinar Acesso Anual
+                Assinar Acesso Mensal
               </Button>
               
               <Button
@@ -405,13 +405,6 @@ export default function Home() {
                 desc: "Nutrição equilibrada para a mãe e o bebé durante a perda de peso.",
                 image: "https://images.unsplash.com/photo-1525253086316-d0c936c814f8?w=800&h=450&fit=crop",
                 icon: Baby,
-                price: 85000,
-              },
-              {
-                title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
-                desc: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
-                image: "https://images.unsplash.com/photo-1516307364728-25b36c5f400f?w=800&h=450&fit=crop",
-                icon: Users,
                 price: 85000,
               },
             ].map((pathology, idx) => (
