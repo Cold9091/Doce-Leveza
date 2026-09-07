@@ -154,10 +154,10 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-[100dvh] bg-background">
       {/* Hero Section */}
       <section
-        className="relative min-h-[80vh] sm:min-h-screen flex items-center justify-center bg-cover overflow-hidden bg-[75%_center] sm:bg-[65%_center] lg:bg-center"
+        className="relative min-h-[680px] sm:min-h-[760px] lg:min-h-[min(860px,100dvh)] flex items-center justify-center bg-cover overflow-hidden bg-[67%_center] sm:bg-[65%_center] lg:bg-center"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), url('https://res.cloudinary.com/dl90hjhoj/image/upload/v1763480802/Brown_Yellow_Modern_Museum_Presentation_2_xizdht.svg')`,
         }}
@@ -165,10 +165,10 @@ export default function Home() {
       >
         {/* Header com Botão Entrar (apenas no Hero) */}
         <div className="absolute top-0 left-0 right-0 z-10">
-          <div className="container mx-auto px-3 sm:px-6 lg:px-12 py-4 sm:py-6">
+          <div className="site-container py-4 sm:py-6">
             <div className="flex justify-end items-center">
               <Button
-                className="backdrop-blur-md bg-white/10 border border-white/40 text-white hover:bg-white/20 transition-all duration-300 font-medium text-xs sm:text-sm tracking-wider px-4 sm:px-8 py-2 rounded-full uppercase whitespace-nowrap h-8 sm:h-9"
+                className="min-h-11 backdrop-blur-md bg-white/10 border border-white/40 text-white hover:bg-white/20 transition-all duration-300 font-medium text-xs sm:text-sm tracking-wider px-5 sm:px-7 py-2 rounded-full uppercase whitespace-nowrap"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-header-login"
               >
@@ -177,29 +177,29 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12 xl:px-16 py-12 sm:py-16 lg:py-20">
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
-            <div className="pl-0 sm:pl-4 lg:pl-16 max-w-[65%] sm:max-w-[55%] md:max-w-[50%] lg:max-w-none" data-testid="hero-content">
+        <div className="site-container py-24 sm:py-28 lg:py-32">
+          <div className="grid lg:grid-cols-[minmax(0,640px)_1fr] gap-8 lg:gap-12 items-center">
+            <div className="max-w-[42rem]" data-testid="hero-content">
             {/* Logo acima do texto */}
             <div 
               className="mb-3 sm:mb-4 lg:mb-6 animate-in fade-in slide-in-from-top-4 duration-700" 
               data-testid="logo-header"
             >
-              <img src={logoImage} alt="Doce Leveza" className="h-10 sm:h-14 lg:h-16 xl:h-20 w-auto" />
+              <img src={logoImage} alt="Doce Leveza" className="h-12 sm:h-16 lg:h-20 w-auto max-w-[78vw] object-contain object-left" />
             </div>
             
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white leading-tight sm:leading-snug animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 mb-3 sm:mb-4 lg:mb-5">
+            <h1 className="text-[clamp(2rem,5vw,4.25rem)] font-heading font-bold text-white leading-[1.04] tracking-[-0.035em] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 mb-4 sm:mb-5 lg:mb-6">
               Cuida da tua saúde com orientação nutricional profissional
             </h1>
 
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-200 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 mb-4 sm:mb-5 lg:mb-6">
+            <p className="max-w-[38rem] text-sm sm:text-base lg:text-lg text-white/80 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 mb-6 sm:mb-7 lg:mb-8">
               Vídeos, aulas, ebooks e programas especializados para Diabetes, Emagrecimento,
               Hipertensão, Gastrite, Amamentação e Terceira Idade — tudo num único lugar.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-start animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
               <Button
-                className="bg-accent hover:bg-accent/90 hover:scale-105 transition-all duration-300 text-accent-foreground font-semibold text-xs sm:text-sm px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
+                className="min-h-12 bg-accent hover:bg-accent/90 hover:scale-[1.02] transition-all duration-300 text-accent-foreground font-semibold text-xs sm:text-sm px-5 sm:px-6 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-cta-hero"
               >
@@ -207,7 +207,7 @@ export default function Home() {
               </Button>
               
               <Button
-                className="backdrop-blur-md bg-white/20 border-2 border-white text-white hover:bg-white/30 hover:scale-105 transition-all duration-300 font-semibold text-xs sm:text-sm px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
+                className="min-h-12 backdrop-blur-md bg-white/15 border border-white/70 text-white hover:bg-white/25 hover:scale-[1.02] transition-all duration-300 font-semibold text-xs sm:text-sm px-5 sm:px-6 rounded-full uppercase whitespace-nowrap w-full sm:w-auto"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-members-hero"
               >
@@ -224,9 +224,9 @@ export default function Home() {
             {[...Array(30)].map((_, i) => (
               <div
                 key={i}
-                className="inline-flex items-center gap-2 mx-4 sm:mx-6"
+                className="inline-flex items-center gap-2 mx-3 sm:mx-6 opacity-80"
               >
-                <img src={logoImage} alt="Doce Leveza" className="h-8 sm:h-10 w-auto" />
+                <img src={logoImage} alt="Doce Leveza" className="h-7 sm:h-9 w-auto" />
               </div>
             ))}
           </div>
@@ -235,16 +235,16 @@ export default function Home() {
 
       {/* Como Podemos Ajudarte Section */}
       <section
-        className="py-12 sm:py-16 lg:py-20 bg-background"
+        className="section-space bg-background"
         data-testid="section-help"
       >
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground">
+        <div className="site-container">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 sm:gap-6 mb-8 sm:mb-10">
+            <h2 className="section-heading text-[clamp(1.8rem,3vw,3rem)] leading-tight font-heading text-foreground">
               Como podemos ajudar-te?
             </h2>
             <Button
-              className="bg-accent text-accent-foreground hover:bg-accent/90 text-xs sm:text-sm px-4 sm:px-6 whitespace-nowrap w-full md:w-auto"
+              className="min-h-11 bg-accent text-accent-foreground hover:bg-accent/90 text-xs sm:text-sm px-5 sm:px-6 whitespace-nowrap w-full md:w-auto"
               onClick={() => setDialogOpen(true)}
               data-testid="button-contact-consultant"
             >
@@ -252,7 +252,7 @@ export default function Home() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {[
               {
                 title: "Vídeo Aulas",
@@ -294,7 +294,7 @@ export default function Home() {
                   y: -5,
                   transition: { duration: 0.3 }
                 }}
-                className="relative overflow-hidden rounded-md group aspect-[2/3]"
+                className="relative overflow-hidden rounded-xl group aspect-[4/5] sm:aspect-[3/4]"
                 data-testid={`help-card-${idx + 1}`}
               >
                 <img
@@ -304,8 +304,8 @@ export default function Home() {
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent"></div>
-                <div className="relative h-full flex flex-col justify-end p-5 text-white">
-                  <h3 className="text-lg font-normal mb-2">
+                <div className="relative h-full flex flex-col justify-end p-5 sm:p-6 text-white">
+                  <h3 className="text-lg sm:text-xl font-heading font-semibold mb-2">
                     {item.title}
                   </h3>
                   <p className="text-xs text-white/90 mb-4 line-clamp-2">
@@ -314,7 +314,7 @@ export default function Home() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs text-white border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/40 self-start"
+                    className="min-h-11 text-xs text-white border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:border-white/40 self-start"
                     data-testid={`button-learn-more-${idx + 1}`}
                     onClick={() => setDialogOpen(true)}
                   >
@@ -328,10 +328,10 @@ export default function Home() {
       </section>
 
       {/* Programas Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-background">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+      <section className="section-space bg-background">
+        <div className="site-container">
           <motion.div 
-            className="mb-12"
+            className="mb-8 sm:mb-12"
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -345,13 +345,13 @@ export default function Home() {
             >
               <Badge
                 variant="outline"
-                className="mb-4 text-xs uppercase tracking-wide border-border bg-muted text-white"
+                className="mb-4 text-xs uppercase tracking-[0.16em] border-primary/20 bg-primary/10 text-primary"
               >
                 PROGRAMA
               </Badge>
             </motion.div>
             <motion.h2 
-              className="text-3xl lg:text-4xl font-heading text-foreground mb-3"
+              className="text-[clamp(1.9rem,4vw,3rem)] leading-tight font-heading text-foreground mb-3"
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -370,7 +370,7 @@ export default function Home() {
             </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
             {[
               {
                 title: "Reeducação Alimentar para Perda de Peso (R3)",
@@ -434,9 +434,9 @@ export default function Home() {
                       transition={{ duration: 0.4 }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                    <div className="absolute top-4 left-4">
+                    <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                       <motion.div 
-                        className="w-12 h-12 rounded-full bg-accent/90 flex items-center justify-center"
+                        className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-accent/90 flex items-center justify-center"
                         whileHover={{ 
                           scale: 1.15,
                           rotate: 5,
@@ -447,15 +447,15 @@ export default function Home() {
                       </motion.div>
                     </div>
                     {/* Badge de Preço */}
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-primary text-primary-foreground font-bold text-sm px-3 py-1 shadow-lg">
+                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
+                      <Badge className="bg-primary text-primary-foreground font-bold text-xs sm:text-sm px-2.5 sm:px-3 py-1 shadow-lg">
                         {pathology.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
                       </Badge>
                     </div>
                   </div>
-                  <CardContent className="p-6 flex-1 flex flex-col">
+                  <CardContent className="p-5 sm:p-6 flex-1 flex flex-col">
                     <motion.h3 
-                      className="font-heading font-bold text-lg text-card-foreground mb-2"
+                      className="font-heading font-bold text-base sm:text-lg leading-snug text-card-foreground mb-2"
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       transition={{ delay: idx * 0.15 + 0.3 }}
@@ -476,7 +476,7 @@ export default function Home() {
                     >
                       <Button
                         variant="default"
-                        className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-bold"
+                        className="min-h-11 w-full bg-accent text-accent-foreground hover:bg-accent/90 font-bold"
                         onClick={() => setDialogOpen(true)}
                         data-testid={`button-view-content-${idx + 1}`}
                       >
@@ -501,7 +501,7 @@ export default function Home() {
               whileTap={{ scale: 0.95 }}
             >
               <Button
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm px-12 py-2.5 rounded-full uppercase"
+                className="min-h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-sm px-8 sm:px-12 rounded-full uppercase"
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-cta-pathologies"
               >
@@ -514,10 +514,10 @@ export default function Home() {
 
 
       {/* Latest Content Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-background">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+      <section className="section-space bg-background">
+        <div className="site-container">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground mb-3 sm:mb-4">
+            <h2 className="text-[clamp(1.9rem,4vw,3rem)] leading-tight font-heading font-bold text-foreground mb-3 sm:mb-4">
               Últimos conteúdos <span className="text-accent">publicados</span>
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-2xl mx-auto px-4">
@@ -525,14 +525,14 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 max-w-6xl mx-auto mb-8 sm:mb-12">
             <Card className="overflow-hidden border-card-border bg-card hover-elevate" data-testid="content-card-1">
               <CardContent className="p-0">
                 <div className="relative">
                   <img
                     src={videoImg}
                     alt="Vídeo sobre glicemia"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-52 sm:h-56 object-cover"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
@@ -541,7 +541,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="p-6 space-y-3">
+                <div className="p-5 sm:p-6 space-y-3">
                   <Badge variant="outline" className="text-xs uppercase">
                     Vídeo
                   </Badge>
@@ -561,7 +561,7 @@ export default function Home() {
                   <img
                     src={programsImg}
                     alt="Aula sobre emagrecimento"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-52 sm:h-56 object-cover"
                     loading="lazy"
                   />
                   <div className="absolute top-4 right-4">
@@ -570,7 +570,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="p-6 space-y-3">
+                <div className="p-5 sm:p-6 space-y-3">
                   <Badge variant="outline" className="text-xs uppercase">
                     Aula
                   </Badge>
@@ -590,7 +590,7 @@ export default function Home() {
                   <img
                     src={ebookImg}
                     alt="Ebook sobre pressão arterial"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-52 sm:h-56 object-cover"
                     loading="lazy"
                   />
                   <div className="absolute top-4 right-4">
@@ -599,7 +599,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="p-6 space-y-3">
+                <div className="p-5 sm:p-6 space-y-3">
                   <Badge variant="outline" className="text-xs uppercase">
                     Ebook
                   </Badge>
@@ -628,8 +628,8 @@ export default function Home() {
       </section>
 
       {/* Como Funciona Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-background">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+      <section className="section-space bg-background">
+        <div className="site-container">
           <div className="text-center mb-8 sm:mb-12">
             <Badge
               variant="outline"
@@ -637,13 +637,13 @@ export default function Home() {
             >
               VENHA E TRANSFORME O SEU CORPO
             </Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground">
+            <h2 className="text-[clamp(1.9rem,4vw,3rem)] leading-tight font-heading font-bold text-foreground">
               <span className="text-accent">Como funciona</span> o DOCE
               LEVEZA?
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-8">
             {[
               {
                 icon: PlayCircle,
@@ -688,7 +688,7 @@ export default function Home() {
             ].map((feature, idx) => (
               <Card
                 key={idx}
-                className="border-card-border bg-card hover-elevate p-6 text-center"
+                className="border-card-border bg-card hover-elevate p-5 sm:p-6 text-center"
                 data-testid={`feature-card-${idx + 1}`}
               >
                 <div className="flex justify-center mb-4">
@@ -707,18 +707,18 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-background">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
-          <div className="grid lg:grid-cols-[1fr_1.8fr] gap-6 sm:gap-8 lg:gap-10 items-start">
+      <section className="section-space bg-background">
+        <div className="site-container">
+          <div className="grid lg:grid-cols-[minmax(260px,1fr)_minmax(0,1.8fr)] gap-8 lg:gap-10 items-start">
             <div className="space-y-4 sm:space-y-6">
               <Badge
                 variant="outline"
-                className="text-xs uppercase tracking-wide border-border bg-muted text-white"
+                className="text-xs uppercase tracking-[0.16em] border-primary/20 bg-primary/10 text-primary"
               >
                 DEPOIMENTOS
               </Badge>
               
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground">
+              <h2 className="text-[clamp(1.9rem,4vw,3rem)] leading-tight font-heading text-foreground">
                 Já são{" "}
                 <span className="text-accent">centanas de pessoas</span>
                 mudaram de vida com os programas da DOCE LEVEZA:
@@ -726,7 +726,7 @@ export default function Home() {
 
               <Button
                 size="default"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-xs sm:text-sm px-4 sm:px-6 rounded-full uppercase w-full sm:w-fit"
+                className="min-h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-xs sm:text-sm px-4 sm:px-6 rounded-full uppercase w-full sm:w-fit"
                 onClick={() => setDialogOpen(true)}
                 data-testid="button-cta-testimonials"
               >
@@ -744,7 +744,7 @@ export default function Home() {
               >
                 <CarouselContent className="-ml-4">
                   {testimonials.map((testimonial, idx) => (
-                    <CarouselItem key={idx} className="pl-4 basis-[240px] lg:basis-[260px]">
+                    <CarouselItem key={idx} className="pl-4 basis-[min(82vw,300px)] sm:basis-[260px] lg:basis-[280px]">
                       <Card
                         className="border-card-border bg-card hover-elevate max-h-[400px]"
                         data-testid={`testimonial-card-${idx + 1}`}
@@ -780,11 +780,11 @@ export default function Home() {
                 </CarouselContent>
                 <div className="flex justify-center gap-2 mt-8">
                   <CarouselPrevious
-                    className="static translate-y-0"
+                    className="static h-11 w-11 translate-y-0"
                     data-testid="button-carousel-prev-testimonials"
                   />
                   <CarouselNext
-                    className="static translate-y-0"
+                    className="static h-11 w-11 translate-y-0"
                     data-testid="button-carousel-next-testimonials"
                   />
                 </div>
@@ -795,11 +795,11 @@ export default function Home() {
       </section>
 
       {/* Instructor Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-background">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+      <section className="section-space bg-background">
+        <div className="site-container">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center max-w-6xl mx-auto">
             <div className="space-y-4 sm:space-y-6">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground">
+              <h2 className="text-[clamp(1.9rem,4vw,3rem)] leading-tight font-heading font-bold text-foreground">
                 Sobre a <span className="text-accent">Dra. Angelina</span>
               </h2>
 
@@ -839,7 +839,7 @@ export default function Home() {
               <img
                 src="https://res.cloudinary.com/dl90hjhoj/image/upload/v1763811045/Gemini_Generated_Image_rrkg61rrkg61rrkg_u05e5v.png"
                 alt="Dra. Angelina"
-                className="w-full rounded-lg shadow-xl"
+                className="w-full max-h-[560px] object-cover object-center rounded-xl shadow-xl"
                 data-testid="img-instructor"
                 loading="lazy"
               />
@@ -849,10 +849,10 @@ export default function Home() {
       </section>
 
       {/* Start Here Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-muted/30">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+      <section className="section-space bg-muted/30">
+        <div className="site-container">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground mb-3 sm:mb-4">
+            <h2 className="text-[clamp(1.9rem,4vw,3rem)] leading-tight font-heading font-bold text-foreground mb-3 sm:mb-4">
               Começa a tua jornada <span className="text-accent">com leveza</span>
             </h2>
           </div>
@@ -874,7 +874,7 @@ export default function Home() {
                   </p>
                 </div>
                 <Button
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
+                  className="min-h-11 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
                   onClick={() => setDialogOpen(true)}
                   data-testid="button-subscribe"
                 >
@@ -899,7 +899,7 @@ export default function Home() {
                   </p>
                 </div>
                 <Button
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
+                  className="min-h-11 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
                   onClick={() => setDialogOpen(true)}
                   data-testid="button-pathology-content"
                 >
@@ -924,7 +924,7 @@ export default function Home() {
                   </p>
                 </div>
                 <Button
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
+                  className="min-h-11 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold"
                   onClick={() => setDialogOpen(true)}
                   data-testid="button-book-appointment"
                 >
@@ -937,9 +937,9 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-background">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground text-center mb-8 sm:mb-12">
+      <section className="section-space bg-background">
+        <div className="site-container">
+          <h2 className="text-[clamp(1.9rem,4vw,3rem)] leading-tight font-heading font-bold text-foreground text-center mb-8 sm:mb-12">
             Ficou com alguma <span className="text-accent">dúvida?</span>
           </h2>
 
@@ -950,7 +950,7 @@ export default function Home() {
                 contato conosco:
               </p>
 
-              <Card className="border-card-border bg-card p-6 hover-elevate">
+              <Card className="border-card-border bg-card p-5 sm:p-6 hover-elevate">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                     <MessageCircle className="w-8 h-8 text-accent" />
@@ -966,7 +966,7 @@ export default function Home() {
                 </div>
               </Card>
 
-              <Card className="border-card-border bg-card p-6 hover-elevate">
+              <Card className="border-card-border bg-card p-5 sm:p-6 hover-elevate">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                     <Mail className="w-8 h-8 text-accent" />
@@ -1025,7 +1025,7 @@ export default function Home() {
                 <AccordionItem
                   key={idx}
                   value={`faq-${idx + 1}`}
-                  className="border-card-border bg-card rounded-lg px-6"
+                  className="border-card-border bg-card rounded-lg px-4 sm:px-6"
                   data-testid={`accordion-faq-${idx + 1}`}
                 >
                   <AccordionTrigger className="hover:no-underline py-4 text-left">
@@ -1044,10 +1044,10 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 sm:py-12 bg-card border-t border-border">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-12">
+      <footer className="py-10 sm:py-14 bg-card border-t border-border">
+        <div className="site-container">
           <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 max-w-4xl mx-auto">
-            <img src={logoImage} alt="Doce Leveza" className="h-16 sm:h-20 w-auto" data-testid="img-footer-logo" />
+            <img src={logoImage} alt="Doce Leveza" className="h-14 sm:h-20 w-auto max-w-[80vw] object-contain" data-testid="img-footer-logo" />
             
             <p className="text-center text-muted-foreground">
               Doce Leveza — Nutrição com leveza, clareza e ciência.
@@ -1058,7 +1058,7 @@ export default function Home() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
+                className="flex min-h-11 items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
                 data-testid="link-instagram"
               >
                 <Instagram className="w-5 h-5" />
@@ -1069,7 +1069,7 @@ export default function Home() {
                 href="https://wa.me/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
+                className="flex min-h-11 items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
                 data-testid="link-whatsapp"
               >
                 <Phone className="w-5 h-5" />
@@ -1078,7 +1078,7 @@ export default function Home() {
               
               <a
                 href="mailto:contato@doceleveza.com"
-                className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
+                className="flex min-h-11 items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
                 data-testid="link-email"
               >
                 <Mail className="w-5 h-5" />
@@ -1089,7 +1089,7 @@ export default function Home() {
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
               <a
                 href="#"
-                className="hover:text-accent transition-colors"
+                className="inline-flex min-h-11 items-center hover:text-accent transition-colors"
                 data-testid="link-privacy"
               >
                 Política de Privacidade
@@ -1097,7 +1097,7 @@ export default function Home() {
               <span>|</span>
               <a
                 href="#"
-                className="hover:text-accent transition-colors"
+                className="inline-flex min-h-11 items-center hover:text-accent transition-colors"
                 data-testid="link-terms"
               >
                 Termos de Uso
@@ -1105,7 +1105,7 @@ export default function Home() {
               <span>|</span>
               <a
                 href="#"
-                className="hover:text-accent transition-colors"
+                className="inline-flex min-h-11 items-center hover:text-accent transition-colors"
                 data-testid="link-support"
               >
                 Suporte
