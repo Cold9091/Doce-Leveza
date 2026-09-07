@@ -48,4 +48,3 @@ expertMode = true
 [userenv]
 
 [userenv.development]
-TURSO_DATABASE_URL = "file:local.db"

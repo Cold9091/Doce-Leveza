@@ -1,1 +1,2 @@
 - [Precedência e privacidade dos planos](plan-entitlement-rules.md) — ilimitado prevalece; links de WhatsApp e bónus só saem após validar o acesso activo.
+- [Ligação Turso por ambiente](turso-environment-precedence.md) — uma variável development pode sobrepor o Secret partilhado e ligar silenciosamente a local.db.
