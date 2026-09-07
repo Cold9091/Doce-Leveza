@@ -32,17 +32,17 @@ export default function Overview() {
     gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
   });
 
-  const userId = user?.id || 1;
+  const userId = user?.id;
   const { data: consultations, isLoading: consultationsLoading } = useQuery<Consultation[]>({
     queryKey: ["/api/consultations/user", userId],
-    enabled: !!user?.id,
+    enabled: !!userId,
     staleTime: 1000 * 60 * 2, // 2 minutos de cache
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
 
   const { data: subscription, isLoading: subscriptionLoading } = useQuery<Subscription>({
     queryKey: ["/api/subscriptions/user", userId],
-    enabled: !!user?.id,
+    enabled: !!userId,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
   });
@@ -53,6 +53,8 @@ export default function Overview() {
   });
   const { data: activePlan } = useQuery<{ type?: string; whatsappUrl?: string | null } | null>({
     queryKey: ["/api/user/active-plan"],
+    enabled: !!userId,
+    refetchInterval: 30 * 1000,
   });
 
   // Verificar se está carregando dados críticos
@@ -79,7 +81,9 @@ export default function Overview() {
   const upcomingConsultations = consultations?.filter(c => c.status === "agendada") || [];
 
   // Logic for active program info
-  const activeSubscription = subscription?.status === "ativa" || subscription?.status === "por_programa";
+  const activeSubscription =
+    (subscription?.status === "ativa" || subscription?.status === "por_programa") &&
+    new Date(subscription.renewalDate) > new Date();
   const firstPathology = pathologies?.[0];
 
   const stats = [

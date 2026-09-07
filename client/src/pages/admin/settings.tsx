@@ -27,6 +27,7 @@ export default function AdminSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/public"] });
       toast({
         title: "Sucesso",
         description: "Configurações atualizadas com sucesso.",

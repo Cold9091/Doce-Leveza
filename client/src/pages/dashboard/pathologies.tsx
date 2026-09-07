@@ -34,6 +34,8 @@ export default function Pathologies() {
   });
   const { data: activePlan } = useQuery<{ pathologyId: number | null; type?: string; expiryDate?: string; expiresAt?: string } | null>({
     queryKey: ["/api/user/active-plan"],
+    enabled: !!user?.id,
+    refetchInterval: 30 * 1000,
   });
 
   // user-specific access entries, fetched via user endpoint
@@ -48,7 +50,10 @@ export default function Pathologies() {
   const hasAccessToProgram = (programId: number) => {
     // Assinatura anual/total: status "ativa" dá acesso a todos os programas
     if (activePlan?.type === "ilimitado") return true;
-    if (subscription?.status === "ativa") return true;
+    if (
+      subscription?.status === "ativa" &&
+      new Date(subscription.renewalDate) > new Date()
+    ) return true;
     // Acesso individual por programa: verifica o registo com status "ativo" e não expirado
     return userAccess.some(a => {
       if (a.pathologyId !== programId) return false;

@@ -178,13 +178,18 @@ export default function PathologyDetail() {
   });
   const { data: activePlan } = useQuery<{ pathologyId: number | null; type?: string; expiryDate?: string; expiresAt?: string; bonusContentUrl?: string | null } | null>({
     queryKey: ["/api/user/active-plan"],
+    enabled: !!user?.id,
+    refetchInterval: 30 * 1000,
   });
 
   const isUnlocked = (pathologyId?: number) => {
     if (!pathologyId) return true;
     // Assinatura anual/total concede acesso a tudo
     if (activePlan?.type === "ilimitado") return true;
-    if (userSubscriptions?.status === "ativa") return true;
+    if (
+      userSubscriptions?.status === "ativa" &&
+      new Date(userSubscriptions.renewalDate) > new Date()
+    ) return true;
     // Verificar acesso individual com status "ativo" e não expirado
     if (userAccess) {
       return userAccess.some(a => {

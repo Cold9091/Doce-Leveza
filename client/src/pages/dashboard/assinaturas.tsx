@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import type { Pathology } from "@shared/schema";
+import type { Pathology, User as UserType } from "@shared/schema";
 import { useState } from "react";
 import { PaymentDialog } from "@/components/payment-dialog";
 import { CheckCircle2, Lock, ShoppingCart } from "lucide-react";
@@ -25,9 +25,14 @@ const planLabel = (plan: ProgramPlan) =>
 export default function Assinaturas() {
   const [selectedPlan, setSelectedPlan] = useState<ProgramPlan | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<Pathology | null>(null);
+  const { data: user } = useQuery<UserType>({ queryKey: ["/api/auth/me"] });
   const { data: pathologies = [], isLoading } = useQuery<Pathology[]>({ queryKey: ["/api/pathologies"] });
   const { data: plans = [] } = useQuery<ProgramPlan[]>({ queryKey: ["/api/plans"] });
-  const { data: activePlan } = useQuery<ProgramPlan | null>({ queryKey: ["/api/user/active-plan"] });
+  const { data: activePlan } = useQuery<ProgramPlan | null>({
+    queryKey: ["/api/user/active-plan"],
+    enabled: !!user?.id,
+    refetchInterval: 30 * 1000,
+  });
 
   const activeNonUnlimited = !!activePlan && activePlan.type !== "ilimitado";
   const activeProgramId = activePlan?.pathologyId;

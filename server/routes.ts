@@ -63,6 +63,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // Dashboard responses are user-specific and change after admin actions.
+  // Prevent browser/CDN caches from serving outdated API data.
+  app.use("/api", (_req, res, next) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    next();
+  });
+
   // Middlewares de Proteção
   const requireUser = (req: Request, res: Response, next: NextFunction) => {
     if (!req.session.userId) {
@@ -653,7 +662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const plan = await storage.getPlanById(subscription.planId);
-      if (!plan) {
+      if (!plan || plan.active !== 1) {
         return res.json(null);
       }
 

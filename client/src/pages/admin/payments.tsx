@@ -60,6 +60,11 @@ export default function AdminPayments() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/payments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/active-plan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/access"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ebooks"] });
       setTimeout(() => refetch(), 300);
     },
     onError: (error) => {
@@ -76,6 +81,9 @@ export default function AdminPayments() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/payments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/active-plan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/access"] });
       setTimeout(() => refetch(), 300);
     },
     onError: (error) => {

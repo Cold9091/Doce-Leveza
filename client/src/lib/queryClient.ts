@@ -46,8 +46,11 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      // Dashboard data can be changed from the admin area or another device.
+      // Always refresh when a screen is reopened or the user returns to the app.
+      refetchOnMount: "always",
+      refetchOnWindowFocus: "always",
+      staleTime: 30 * 1000,
       retry: false,
     },
     mutations: {
