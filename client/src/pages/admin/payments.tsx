@@ -13,7 +13,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import type { PaymentProof, Pathology, User, Plan } from "@shared/schema";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, ExternalLink } from "lucide-react";
 
 interface PaymentProofWithDetails extends PaymentProof {
   program?: Pathology;
@@ -192,6 +192,12 @@ export default function AdminPayments() {
                           {proof.createdAt ? new Date(proof.createdAt).toLocaleDateString("pt-BR") : "—"}
                         </TableCell>
                         <TableCell className="space-x-2">
+                          <Button size="sm" variant="outline" asChild>
+                            <a href={proof.proofUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4 mr-1" />
+                              Ver comprovativo
+                            </a>
+                          </Button>
                           {proof.status === "pendente" && (
                             <>
                               <Button

@@ -623,10 +623,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/subscriptions/cancel", requireUser, async (req, res) => {
+    try {
+      const current = await storage.getSubscriptionByUser(req.session.userId!);
+      if (!current) {
+        return res.status(404).json({ error: "Assinatura não encontrada" });
+      }
+      if (current.status === "inativa") {
+        return res.status(400).json({ error: "A assinatura já está cancelada" });
+      }
+
+      const cancelled = await storage.cancelUserSubscription(req.session.userId!);
+      res.json({ success: true, subscription: cancelled });
+    } catch (error) {
+      console.error("Cancel subscription error:", error);
+      res.status(500).json({ error: "Não foi possível cancelar a assinatura" });
+    }
+  });
+
   app.get("/api/user/active-plan", requireUser, async (req, res) => {
     try {
       const subscription = await storage.getSubscriptionByUser(req.session.userId!);
-      if (!subscription?.planId || new Date(subscription.renewalDate) <= new Date()) {
+      if (
+        !subscription?.planId ||
+        !["ativa", "por_programa"].includes(subscription.status) ||
+        new Date(subscription.renewalDate) <= new Date()
+      ) {
         return res.json(null);
       }
 

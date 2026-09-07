@@ -1,12 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, CreditCard, Calendar } from "lucide-react";
+import { Check, CreditCard, Calendar, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { Subscription as SubscriptionType, User as UserType } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Subscription() {
+  const { toast } = useToast();
   const { data: user } = useQuery<UserType>({
     queryKey: ["/api/auth/me"],
     staleTime: 1000 * 60 * 2,
@@ -26,6 +29,32 @@ export default function Subscription() {
     startDate: "-",
     renewalDate: "-",
     paymentMethod: "-",
+  };
+
+  const cancelMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/subscriptions/cancel", {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/active-plan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/access"] });
+      toast({
+        title: "Assinatura cancelada",
+        description: "O acesso aos conteúdos do plano foi desactivado.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Não foi possível cancelar",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCancel = () => {
+    if (window.confirm("Tem certeza que deseja cancelar a assinatura? O acesso aos conteúdos será desactivado imediatamente.")) {
+      cancelMutation.mutate();
+    }
   };
 
   const benefits = [
@@ -143,8 +172,14 @@ export default function Subscription() {
                 <Button variant="outline" data-testid="button-change-plan">
                   Mudar Plano
                 </Button>
-                <Button variant="destructive" data-testid="button-cancel-subscription">
-                  Cancelar Assinatura
+                <Button
+                  variant="destructive"
+                  data-testid="button-cancel-subscription"
+                  onClick={handleCancel}
+                  disabled={cancelMutation.isPending || currentPlan.status === "inativa"}
+                >
+                  {cancelMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {currentPlan.status === "inativa" ? "Assinatura cancelada" : "Cancelar Assinatura"}
                 </Button>
               </div>
             </CardContent>

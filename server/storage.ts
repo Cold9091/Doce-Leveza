@@ -92,6 +92,7 @@ export interface IStorage {
   createSubscription(data: InsertSubscription): Promise<Subscription>;
   updateSubscription(id: number, data: Partial<Subscription>): Promise<Subscription | null>;
   deleteSubscription(id: number): Promise<boolean>;
+  cancelUserSubscription(userId: number): Promise<Subscription | null>;
 
   // User Access
   getUserAccess(userId: number): Promise<UserAccess[]>;
@@ -406,6 +407,32 @@ export class DatabaseStorage implements IStorage {
   async deleteSubscription(id: number): Promise<boolean> {
     const [deleted] = await db.delete(subscriptions).where(eq(subscriptions.id, id)).returning();
     return !!deleted;
+  }
+
+  async cancelUserSubscription(userId: number): Promise<Subscription | null> {
+    return db.transaction(async (tx) => {
+      const [subscription] = await tx
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, userId))
+        .orderBy(desc(subscriptions.id))
+        .limit(1);
+
+      if (!subscription) return null;
+
+      const [cancelled] = await tx
+        .update(subscriptions)
+        .set({ status: "inativa" })
+        .where(eq(subscriptions.id, subscription.id))
+        .returning();
+
+      await tx
+        .update(userAccess)
+        .set({ status: "inativo" })
+        .where(eq(userAccess.userId, userId));
+
+      return cancelled || null;
+    });
   }
 
   // User Access
