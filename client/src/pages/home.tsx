@@ -241,27 +241,27 @@ export default function Home() {
         <div className="container mx-auto px-3 sm:px-6 lg:px-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground">
-              Como podemos ajudarte?
+              Como podemos ajudar-te?
             </h2>
             <Button
               className="bg-accent text-accent-foreground hover:bg-accent/90 text-xs sm:text-sm px-4 sm:px-6 whitespace-nowrap w-full md:w-auto"
               onClick={() => setDialogOpen(true)}
               data-testid="button-contact-consultant"
             >
-              Fale agora com um consultor
+              Fale agora com um profissional
             </Button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[
               {
-                title: "Aulas em Vídeo",
+                title: "Vídeo Aulas",
                 subtitle: "Bloco 1",
                 desc: "Conteúdos semanais sobre alimentação, hábitos saudáveis e prevenção.",
                 image: videoImg,
               },
               {
-                title: "Ebooks e Guias",
+                title: "Ebooks e Guias Praticos",
                 subtitle: "Bloco 2",
                 desc: "Materiais práticos para aplicares no dia a dia.",
                 image: ebookImg,
@@ -273,7 +273,7 @@ export default function Home() {
                 image: programsImg,
               },
               {
-                title: "Acompanhamento Profissional",
+                title: "Acompanhamento Personalizado",
                 subtitle: "Bloco 4",
                 desc: "Conteúdos criados pela Dra. Angelina, com linguagem simples e prática.",
                 image: professionalImg,
@@ -373,35 +373,35 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[
               {
-                title: "Programa de reeducação alimentar para perder de peso",
-                desc: "Plano completo para atingir o seu peso ideal de forma saudável.",
+                title: "Reeducação Alimentar para Perda de Peso (R3)",
+                desc: "Plano completo para atingir o peso ideal de forma saudável.",
                 image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=450&fit=crop",
                 icon: TrendingDown,
                 price: 85000,
               },
               {
-                title: "Programa de reeducação alimentar para perder de peso na diabetes",
+                title: "Reeducação Alimentar para Perda de Peso em Pacientes Diabéticos (RD)",
                 desc: "Orientações específicas para o controlo da glicémia e perda de peso.",
                 image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=450&fit=crop",
                 icon: Activity,
                 price: 110000,
               },
               {
-                title: "Programa de reeducação alimentar para perder de peso na hipertensão",
+                title: "⁠Reeducação Alimentar para Perda de Peso em Pacientes com Hipertensão (RS)",
                 desc: "Estratégias para equilibrar a pressão arterial enquanto perde peso.",
                 image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&h=450&fit=crop",
                 icon: HeartPulse,
                 price: 110000,
               },
               {
-                title: "Programa de reeducação alimentar para perder de peso na gastrite",
+                title: "⁠Reeducação Alimentar para Perda de Peso em Pacientes com Gastrite (RG)",
                 desc: "Alimentação leve e curativa para o sistema digestivo.",
                 image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=450&fit=crop",
                 icon: Utensils,
                 price: 85000,
               },
               {
-                title: "Programa de reeducação alimentar para perder de peso na amamentação",
+                title: "Reeducação Alimentar para Perda de Peso em Pacientes que amamentam (RA)",
                 desc: "Nutrição equilibrada para a mãe e o bebé durante a perda de peso.",
                 image: "https://images.unsplash.com/photo-1525253086316-d0c936c814f8?w=800&h=450&fit=crop",
                 icon: Baby,
@@ -582,7 +582,7 @@ export default function Home() {
                     Aula
                   </Badge>
                   <h3 className="font-heading font-bold text-lg text-card-foreground">
-                    Plano alimentar para emagrecimento sustentável
+                    Plano alimentar para emagrecimento
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     Aprende a criar um plano alimentar equilibrado para resultados duradouros.
@@ -654,17 +654,17 @@ export default function Home() {
             {[
               {
                 icon: PlayCircle,
-                title: "21 aulas científicas",
+                title: "aulas científicas",
                 desc: "práticas e de fáceis entendimento para transformar a sua saúde.",
               },
               {
                 icon: Users,
-                title: "3 mentorias ao vivo",
+                title: " mentorias ao vivo",
                 desc: "com a Dra. Angelina.",
               },
               {
                 icon: Gift,
-                title: "10 aulas bônus",
+                title: "aulas bônus",
                 desc: "com profissionais da especialização em nutrição.",
               },
               {
@@ -679,12 +679,12 @@ export default function Home() {
               },
               {
                 icon: Calendar,
-                title: "1 ano de acesso",
+                title: "Acesso mensal e trimensal",
                 desc: "para você rever as aulas quantas vezes quiser + atualizações durante todo o período.",
               },
               {
                 icon: Shield,
-                title: "7 dias de garantia",
+                title: "Garantia",
                 desc: "com 100% de reembolso e acesso imediato.",
               },
               {
@@ -727,8 +727,8 @@ export default function Home() {
               
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground">
                 Já são{" "}
-                <span className="text-accent">milhares de pessoas</span> que
-                mudaram de vida com o DOCE LEVEZA:
+                <span className="text-accent">centanas de pessoas</span>
+                mudaram de vida com os programas da DOCE LEVEZA:
               </h2>
 
               <Button
@@ -827,12 +827,18 @@ export default function Home() {
               </div>
 
               <Button
+                asChild
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base px-8 py-6 rounded-lg uppercase"
-                onClick={() => setDialogOpen(true)}
                 data-testid="button-about-instructor"
               >
-                Conhecer melhor
+                <a
+                  href="https://www.instagram.com/nutri_angelinadesales/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Conhecer melhor
+                </a>
               </Button>
             </div>
 
