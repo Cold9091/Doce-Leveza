@@ -85,7 +85,7 @@ export default function AdminPathologies() {
   });
   const openPlanDialog = (plan?: ProgramPlan, pathologyId: number | null = null) => {
     setEditingPlan(plan || null);
-    setPlanDraft(plan ? { pathologyId: plan.pathologyId, type: plan.type, price: plan.price, durationDays: plan.durationDays, whatsappUrl: plan.whatsappUrl || null, bonusContentUrl: plan.bonusContentUrl || null, active: plan.active } : { ...emptyPlan(), pathologyId, type: pathologyId === null ? "ilimitado" : "mensal" });
+    setPlanDraft(plan ? { pathologyId: plan.pathologyId, type: plan.type, price: plan.price, durationDays: plan.durationDays, whatsappUrl: plan.whatsappUrl || null, bonusContentUrl: plan.bonusContentUrl || null, active: plan.active } : { ...emptyPlan(), pathologyId, type: pathologyId === null ? "ilimitado" : "mensal", durationDays: pathologyId === null ? 365 : 30 });
     setPlanDialogOpen(true);
   };
 
@@ -413,7 +413,13 @@ export default function AdminPathologies() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div><CardTitle>Planos e ofertas</CardTitle><p className="text-sm text-muted-foreground mt-1">Defina preço, duração, links de WhatsApp e bónus por plano.</p></div>
-          <Button variant="outline" onClick={() => openPlanDialog(undefined, null)} data-testid="button-add-unlimited-plan">Configurar oferta ilimitada</Button>
+          <Button
+            variant="outline"
+            onClick={() => openPlanDialog(plans.find(plan => plan.type === "ilimitado" && plan.pathologyId === null), null)}
+            data-testid="button-add-unlimited-plan"
+          >
+            Configurar oferta ilimitada
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {pathologies?.map(pathology => {
@@ -433,7 +439,7 @@ export default function AdminPathologies() {
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editingPlan ? "Editar plano" : "Novo plano"}</DialogTitle><DialogDescription>Os links são usados para a comunidade e o bónus do programa.</DialogDescription></DialogHeader>
           <div className="space-y-3">
-            <label className="text-sm font-medium">Tipo de plano<select className="mt-1 w-full rounded-md border bg-background p-2" value={planDraft.type} onChange={e => setPlanDraft({ ...planDraft, type: e.target.value as ProgramPlan["type"], durationDays: e.target.value === "trimestral" ? 90 : e.target.value === "ilimitado" ? 0 : 30 })} disabled={planDraft.pathologyId === null}><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="ilimitado">Ilimitado</option></select></label>
+            <label className="text-sm font-medium">Tipo de plano<select className="mt-1 w-full rounded-md border bg-background p-2" value={planDraft.type} onChange={e => setPlanDraft({ ...planDraft, type: e.target.value as ProgramPlan["type"], durationDays: e.target.value === "trimestral" ? 90 : e.target.value === "ilimitado" ? 365 : 30 })} disabled={planDraft.pathologyId === null}><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="ilimitado">Ilimitado</option></select></label>
             <label className="text-sm font-medium">Preço (Kz)<Input type="number" value={planDraft.price} onChange={e => setPlanDraft({ ...planDraft, price: Number(e.target.value) })} /></label>
             <label className="text-sm font-medium">Duração (dias)<Input type="number" value={planDraft.durationDays} disabled={planDraft.type === "ilimitado"} onChange={e => setPlanDraft({ ...planDraft, durationDays: Number(e.target.value) })} /></label>
             <label className="text-sm font-medium">URL da comunidade WhatsApp<Input value={planDraft.whatsappUrl || ""} onChange={e => setPlanDraft({ ...planDraft, whatsappUrl: e.target.value || null })} placeholder="https://chat.whatsapp.com/..." /></label>

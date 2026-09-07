@@ -844,16 +844,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/plans", requireAdmin, async (req, res) => {
     try {
-      const data = insertPlanSchema.parse(req.body);
+      const normalizedBody = {
+        ...req.body,
+        whatsappUrl: req.body.whatsappUrl?.trim() || null,
+        bonusContentUrl: req.body.bonusContentUrl?.trim() || null,
+        durationDays: req.body.type === "ilimitado" && (!req.body.durationDays || req.body.durationDays < 1)
+          ? 365
+          : req.body.durationDays,
+      };
+      const data = insertPlanSchema.parse(normalizedBody);
       if (data.pathologyId != null && !await storage.getPathologyById(data.pathologyId)) {
         return res.status(400).json({ error: "Programa não encontrado" });
       }
+
+      if (data.type === "ilimitado") {
+        const existingUnlimited = (await storage.getPlans()).find(
+          (plan) => plan.type === "ilimitado" && plan.pathologyId === null
+        );
+        if (existingUnlimited) {
+          const updated = await storage.updatePlan(existingUnlimited.id, data);
+          return res.status(200).json(updated);
+        }
+      }
+
       res.status(201).json(await storage.createPlan(data));
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Validation error", details: error.errors });
       }
-      res.status(500).json({ error: "Internal server error" });
+      console.error("Create plan error:", error);
+      res.status(500).json({ error: "Não foi possível guardar o plano", details: error?.message });
     }
   });
 
@@ -888,16 +908,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       if (!await storage.getPlanById(id)) return res.status(404).json({ error: "Plano não encontrado" });
-      const data = insertPlanSchema.parse(req.body);
+      const data = insertPlanSchema.parse({
+        ...req.body,
+        whatsappUrl: req.body.whatsappUrl?.trim() || null,
+        bonusContentUrl: req.body.bonusContentUrl?.trim() || null,
+        durationDays: req.body.type === "ilimitado" && (!req.body.durationDays || req.body.durationDays < 1)
+          ? 365
+          : req.body.durationDays,
+      });
       if (data.pathologyId != null && !await storage.getPathologyById(data.pathologyId)) {
         return res.status(400).json({ error: "Programa não encontrado" });
       }
       res.json(await storage.updatePlan(id, data));
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Validation error", details: error.errors });
       }
-      res.status(500).json({ error: "Internal server error" });
+      console.error("Update plan error:", error);
+      res.status(500).json({ error: "Não foi possível actualizar o plano", details: error?.message });
     }
   });
 
