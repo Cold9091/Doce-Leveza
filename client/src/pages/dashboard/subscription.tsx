@@ -88,7 +88,9 @@ export default function Subscription() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>{currentPlan.plan || currentPlan.name}</CardTitle>
+                  <CardTitle>
+                    {"plan" in currentPlan ? currentPlan.plan : currentPlan.name}
+                  </CardTitle>
                   <CardDescription>
                     Próxima renovação:{" "}
                     {currentPlan?.renewalDate

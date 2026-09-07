@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { db, client } from "./db";
-import { admins, systemSettings, pathologies } from "@shared/schema";
+import { admins, systemSettings, pathologies, plans, type InsertPlan } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
@@ -104,6 +104,35 @@ async function seed() {
     } else {
         const count = await db.select().from(pathologies);
         console.log(`✅ Pathologies already exist: ${count.length} programs found`);
+    }
+
+    // Seed plan choices for every program. Existing plans are preserved.
+    const allPathologies = await db.select().from(pathologies);
+    const existingPlans = await db.select().from(plans);
+    const planRows: InsertPlan[] = allPathologies.flatMap((pathology) => [
+        {
+            pathologyId: pathology.id,
+            type: "mensal" as const,
+            price: pathology.price ?? 0,
+            durationDays: 30,
+            active: 1,
+        },
+        {
+            pathologyId: pathology.id,
+            type: "trimestral" as const,
+            price: pathology.price ?? 0,
+            durationDays: 90,
+            active: 1,
+        },
+    ]).filter((candidate) => !existingPlans.some(
+        (plan) => plan.pathologyId === candidate.pathologyId && plan.type === candidate.type,
+    ));
+    if (!existingPlans.some((plan) => plan.pathologyId === null && plan.type === "ilimitado")) {
+        planRows.push({ pathologyId: null, type: "ilimitado", price: 7500, durationDays: 365, active: 1 });
+    }
+    if (planRows.length > 0) {
+        await db.insert(plans).values(planRows);
+        console.log(`✅ Created ${planRows.length} default plans`);
     }
 
     console.log("Seeding completed.");

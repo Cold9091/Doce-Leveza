@@ -129,7 +129,7 @@ export default function Profile() {
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <Avatar className="h-24 w-24 border-4 border-primary/10">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={"avatar" in user ? user.avatar : undefined} alt={user.name} />
                 <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
             </div>

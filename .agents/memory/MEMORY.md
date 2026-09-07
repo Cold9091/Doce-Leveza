@@ -1,0 +1,1 @@
+- [Precedência e privacidade dos planos](plan-entitlement-rules.md) — ilimitado prevalece; links de WhatsApp e bónus só saem após validar o acesso activo.

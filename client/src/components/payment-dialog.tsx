@@ -23,11 +23,13 @@ import {
   X,
 } from "lucide-react";
 import type { Pathology } from "@shared/schema";
+import type { ProgramPlan } from "@/pages/dashboard/assinaturas";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PaymentDialogProps {
   program: Pathology;
+  plan: ProgramPlan;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -43,7 +45,7 @@ const BANK_DETAILS = {
 const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
 const ACCEPTED_LABEL = "PDF, JPG ou PNG (máx. 5MB)";
 
-export function PaymentDialog({ program, isOpen, onOpenChange }: PaymentDialogProps) {
+export function PaymentDialog({ program, plan, isOpen, onOpenChange }: PaymentDialogProps) {
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
@@ -112,7 +114,8 @@ export function PaymentDialog({ program, isOpen, onOpenChange }: PaymentDialogPr
         credentials: "include",
         body: JSON.stringify({
           programId: program.id,
-          amount: program.price ?? 0,
+          planId: plan.id,
+          amount: plan.price,
           proofUrl,
         }),
       });
@@ -175,9 +178,15 @@ export function PaymentDialog({ program, isOpen, onOpenChange }: PaymentDialogPr
                   </span>
                 </div>
                 <div className="flex justify-between items-start gap-2">
+                  <span className="text-xs sm:text-sm text-muted-foreground">Plano:</span>
+                  <span className="font-medium text-xs sm:text-sm text-right">
+                    {plan.type === "trimestral" ? "Trimestral" : plan.type === "ilimitado" ? "Acesso ilimitado" : "Mensal"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
                   <span className="text-xs sm:text-sm text-muted-foreground">Valor:</span>
                   <span className="text-base sm:text-lg font-bold text-primary">
-                    {(program.price ?? 0).toLocaleString()} Kz
+                     {plan.price.toLocaleString()} Kz
                   </span>
                 </div>
               </div>

@@ -1,0 +1,62 @@
+Com base no diagnóstico que já fizeste deste projecto, precisamos de implementar um fluxo de planos real, porque hoje "Mensal" e "Trimestral" existem só na landing page, sem estrutura no banco. Ajusta o que já existe (pathologies, subscriptions, user_access, payment_proofs, system_settings) em vez de recriar tudo do zero.
+
+## Objectivo do fluxo
+
+1. Utilizador cria conta (fluxo actual de signup mantém-se).
+2. Depois de criar conta, escolhe um programa (o que hoje chamamos "pathology").
+3. Depois escolhe o tipo de acesso a esse programa:
+   - Plano Mensal (preço próprio)
+   - Plano Trimestral (preço próprio, diferente do Mensal)
+4. Consoante o plano escolhido, o utilizador recebe um link de comunidade de WhatsApp diferente:
+   - Plano Mensal → Link de WhatsApp A
+   - Plano Trimestral → Link de WhatsApp B
+5. Depois de pagar (aprovação do comprovativo), TODOS os outros programas ficam bloqueados/inactivos para esse utilizador — ele só pode usar o programa que pagou, até o acesso expirar.
+6. Deve existir a possibilidade de o administrador criar um "programa promocional de acesso ilimitado", preço fixo 7.500 Kz, que dá acesso a tudo (equivalente ao actual conceito de assinatura `ativa`, mas tratado como um programa/plano normal e visível no catálogo).
+7. Cada programa pago dá acesso a um conteúdo bónus exclusivo — implementar como um botão "Conteúdo Bónus" dentro da página do programa (`pathology-detail.tsx`), que abre um link de canal privado configurável por programa.
+
+## O que fazer, tecnicamente
+
+### 1. Criar entidade real de Planos
+- Nova tabela `plans` (ou similar) com: `id`, `pathologyId` (a que programa pertence, ou `null` se for plano global tipo o promocional), `type` (`mensal` | `trimestral` | `ilimitado`), `price`, `durationDays` (30, 90, ou o que definires para o ilimitado), `whatsappUrl` (o link específico deste plano), `bonusContentUrl` (link do conteúdo bónus), `active` (boolean).
+- Substituir o texto livre em `subscriptions.plan` por uma referência real (`planId`) a esta tabela.
+
+### 2. Ligar o pagamento ao plano, não só ao programa
+- Em `payment_proofs`, adicionar `planId`.
+- Ao aprovar o pagamento (`PUT /api/admin/payments/:id/approve`):
+  - Usar `plan.durationDays` para definir a `expiryDate` do `user_access` (em vez do valor fixo de 365 dias que existe hoje).
+  - Gravar em `subscriptions` qual o `planId` activo do utilizador.
+  - Devolver ao frontend/gravar no utilizador qual o `whatsappUrl` correspondente ao plano pago (não usar mais só o `system_settings.whatsappCommunityUrl` genérico — isso deve passar a ser fallback, não a regra).
+
+### 3. Implementar a exclusividade entre programas
+- Ao aprovar um pagamento de um programa/plano para um utilizador, marcar como `inactive`/bloqueado (campo `status` em `user_access`) qualquer outro acesso activo que esse mesmo utilizador tenha a outros programas.
+- No frontend (`pathologies.tsx`, `pathology-detail.tsx`), programas diferentes do que está activo devem aparecer visivelmente bloqueados (ex: cadeado + texto "Disponível apenas após término do seu plano actual"), não apenas ocultos.
+- Excepção: se o plano activo for o "ilimitado" (7.500 Kz), todos os programas devem continuar acessíveis.
+
+### 4. Programa promocional de acesso ilimitado
+- No painel `/admin/programas`, permitir marcar um programa como "ilimitado" (ou criar como plano do tipo `ilimitado` ligado a um pseudo-programa "Acesso Total").
+- Preço fixo sugerido de 7.500 Kz (mas editável pelo admin, para o caso de mudar no futuro).
+- Ao ser comprado, deve conceder acesso a todos os `pathologies` activos e não deve ser bloqueado por nenhuma outra compra.
+
+### 5. Conteúdo bónus
+- Adicionar campo `bonusContentUrl` ao plano (ou ao programa, se preferires que o bónus seja igual independente do plano — decide e documenta a escolha).
+- Em `pathology-detail.tsx`, mostrar o botão "Conteúdo Bónus" apenas se o `user_access` do utilizador para aquele programa estiver `ativo` e não expirado.
+- O botão deve simplesmente abrir o `bonusContentUrl` numa nova aba (link de canal privado do Telegram/WhatsApp/etc.).
+
+### 6. Corrigir o problema do preço não validado
+- Ao criar o `payment_proof`, o backend deve buscar o preço real do `planId` seleccionado e gravar esse valor como `amount` — não confiar no valor enviado pelo frontend.
+
+### 7. Migração
+- Criar uma migration que:
+  - Cria a tabela `plans`;
+  - Para cada `pathology` existente, gera automaticamente um plano Mensal e um plano Trimestral com preço igual ao `pathologies.price` actual (como valor de partida, ajustável depois no admin);
+  - Cria o plano/programa promocional "ilimitado" a 7.500 Kz.
+
+## Não fazer nesta etapa
+- Não mexer no fluxo de signup/login.
+- Não implementar pagamento automático (mantém o fluxo actual de comprovativo + aprovação manual).
+- Não apagar os campos antigos (`plan`, `status` texto livre) ainda — só passar a preencher também os novos campos, para não quebrar nada em produção. Podemos limpar isso depois de confirmar que está tudo a funcionar.
+
+No final, mostra-me:
+1. Quais ficheiros/tabelas foram criados ou alterados;
+2. Como ficou o fluxo de aprovação de pagamento passo a passo;
+3. Onde ficou a lógica que bloqueia os outros programas.

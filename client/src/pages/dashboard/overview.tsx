@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Activity, BookOpen, Calendar, Video, ArrowRight, Sparkles, TrendingUp, Clock, User, Lock, CheckCircle2, MessageCircle } from "lucide-react";
+import { Activity, BookOpen, Calendar, Video as VideoIcon, ArrowRight, Sparkles, TrendingUp, Clock, User, Lock, CheckCircle2, MessageCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import type { Pathology, Ebook, Consultation, Subscription, User as UserType, Video as VideoType } from "@shared/schema";
@@ -26,7 +26,7 @@ export default function Overview() {
     gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
   });
 
-  const { data: videos, isLoading: videosLoading } = useQuery<Video[]>({
+  const { data: videos, isLoading: videosLoading } = useQuery<VideoType[]>({
     queryKey: ["/api/videos"],
     staleTime: 1000 * 60 * 10, // 10 minutos de cache
     gcTime: 1000 * 60 * 30, // 30 minutos garbage collection
@@ -50,6 +50,9 @@ export default function Overview() {
   const { data: publicSettings } = useQuery<{ whatsappCommunityUrl: string | null }>({
     queryKey: ["/api/settings/public"],
     staleTime: 1000 * 60 * 10,
+  });
+  const { data: activePlan } = useQuery<{ type?: string; whatsappUrl?: string | null } | null>({
+    queryKey: ["/api/user/active-plan"],
   });
 
   // Verificar se está carregando dados críticos
@@ -93,7 +96,7 @@ export default function Overview() {
       title: "Vídeos Disponíveis",
       value: videos?.length || 0,
       subtitle: "para assistir",
-      icon: Video,
+      icon: VideoIcon,
       gradient: "from-emerald-500 to-emerald-600",
       bgGradient: "from-emerald-500/10 to-emerald-600/5",
       testId: "stat-videos",
@@ -161,8 +164,8 @@ export default function Overview() {
                 Agendar Consulta
               </Button>
             </Link>
-            {publicSettings?.whatsappCommunityUrl && (
-              <a href={publicSettings.whatsappCommunityUrl} target="_blank" rel="noopener noreferrer">
+            {(activePlan?.whatsappUrl || publicSettings?.whatsappCommunityUrl) && (
+              <a href={activePlan?.whatsappUrl || publicSettings?.whatsappCommunityUrl || "#"} target="_blank" rel="noopener noreferrer">
                 <Button
                   variant="secondary"
                   className="bg-white text-green-600 hover:bg-white/90"
@@ -244,7 +247,7 @@ export default function Overview() {
           <CardHeader className="flex flex-row items-center justify-between gap-2 pb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-emerald-500/10">
-                <Video className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <VideoIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <CardTitle className="text-base sm:text-lg">Continue Assistindo</CardTitle>
             </div>
@@ -274,7 +277,7 @@ export default function Overview() {
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
                       <span>{video.duration}</span>
-                      {video.viewCount > 0 && (
+                      {(video.viewCount ?? 0) > 0 && (
                         <span className="text-emerald-600 dark:text-emerald-400">
                           {video.viewCount} {video.viewCount === 1 ? "visualização" : "visualizações"}
                         </span>

@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import type { PaymentProof, Pathology, User } from "@shared/schema";
+import type { PaymentProof, Pathology, User, Plan } from "@shared/schema";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
@@ -43,6 +43,14 @@ export default function AdminPayments() {
     queryKey: ["/api/pathologies"],
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 15,
+  });
+  const { data: plans = [] } = useQuery<Plan[]>({
+    queryKey: ["/api/admin/plans"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/plans", { credentials: "include" });
+      if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
+      return res.json();
+    },
   });
 
   // Approve mutation
@@ -78,6 +86,8 @@ export default function AdminPayments() {
   const getProgram = (pathologyId: number) => {
     return pathologies.find((p) => p.id === pathologyId);
   };
+  const getPlan = (planId: number | null) => plans.find((plan) => plan.id === planId);
+  const planLabel = (plan?: Plan) => plan?.type === "trimestral" ? "Trimestral" : plan?.type === "ilimitado" ? "Ilimitado" : plan?.type === "mensal" ? "Mensal" : null;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -157,7 +167,7 @@ export default function AdminPayments() {
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Usuário</TableHead>
-                    <TableHead>Programa</TableHead>
+                    <TableHead>Programa / Plano</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Data</TableHead>
@@ -167,15 +177,19 @@ export default function AdminPayments() {
                 <TableBody>
                   {proofs.map((proof) => {
                     const program = getProgram(proof.pathologyId);
+                    const plan = getPlan(proof.planId);
                     return (
                       <TableRow key={proof.id}>
                         <TableCell className="font-mono text-sm">{proof.id}</TableCell>
                         <TableCell className="font-medium">User #{proof.userId}</TableCell>
-                        <TableCell>{program?.title || "Desconhecido"}</TableCell>
+                        <TableCell>
+                          <div>{program?.title || (plan?.type === "ilimitado" ? "Acesso a todos os programas" : "Desconhecido")}</div>
+                          {planLabel(plan) && <span className="text-xs text-muted-foreground">{planLabel(plan)}</span>}
+                        </TableCell>
                         <TableCell className="font-bold">{proof.amount} Kz</TableCell>
-                        <TableCell>{getStatusBadge(proof.status)}</TableCell>
+                        <TableCell>{getStatusBadge(proof.status || "pendente")}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {new Date(proof.createdAt).toLocaleDateString("pt-BR")}
+                          {proof.createdAt ? new Date(proof.createdAt).toLocaleDateString("pt-BR") : "—"}
                         </TableCell>
                         <TableCell className="space-x-2">
                           {proof.status === "pendente" && (

@@ -8,6 +8,20 @@
       "when": 1770822129346,
       "tag": "0000_new_black_panther",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770822129347,
+      "tag": "0001_add_payment_proofs",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770822129348,
+      "tag": "0002_add_plans",
+      "breakpoints": true
     }
   ]
 }

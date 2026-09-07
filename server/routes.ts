@@ -14,6 +14,7 @@ import {
   loginSchema,
   adminLoginSchema,
   insertPathologySchema,
+  insertPlanSchema,
   insertVideoSchema,
   insertEbookSchema,
   insertConsultationSchema,
@@ -76,6 +77,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ success: false, error: "Acesso negado. Apenas administradores." });
     }
     next();
+  };
+
+  const canAccessProgram = async (userId: number, pathologyId: number): Promise<boolean> => {
+    const subscription = await storage.getSubscriptionByUser(userId);
+    const subscriptionIsCurrent = !!subscription && new Date(subscription.renewalDate) > new Date();
+    if (subscriptionIsCurrent && subscription.status === "ativa") return true;
+
+    const accesses = await storage.getUserAccess(userId);
+    return accesses.some((access) =>
+      access.pathologyId === pathologyId &&
+      access.status === "ativo" &&
+      new Date(access.expiryDate) > new Date()
+    );
   };
 
   // Rotas de Auth - Sessão
@@ -435,21 +449,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Active plan choices are public; payment values are always resolved again on submit.
+  app.get("/api/plans", async (_req, res) => {
+    try {
+      const catalogPlans = (await storage.getActivePlans()).map(
+        ({ whatsappUrl: _whatsappUrl, bonusContentUrl: _bonusContentUrl, ...plan }) => plan
+      );
+      res.json(catalogPlans);
+    } catch (_error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Videos routes
-  app.get("/api/videos", async (_req, res) => {
+  app.get("/api/videos", requireUser, async (req, res) => {
     try {
       const videos = await storage.getVideos();
-      res.json(videos);
+      const allowed = await Promise.all(
+        videos.map(async (video) => canAccessProgram(req.session.userId!, video.pathologyId))
+      );
+      res.json(videos.filter((_video, index) => allowed[index]));
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   });
 
-  app.get("/api/videos/:id", async (req, res) => {
+  app.get("/api/videos/:id", requireUser, async (req, res) => {
     try {
       const video = await storage.getVideoById(parseInt(req.params.id));
       if (!video) {
         return res.status(404).json({ error: "Video not found" });
+      }
+      if (!(await canAccessProgram(req.session.userId!, video.pathologyId))) {
+        return res.status(403).json({ error: "Sem acesso a este programa" });
       }
       res.json(video);
     } catch (error) {
@@ -457,11 +489,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/videos/:id/view", async (req, res) => {
+  app.post("/api/videos/:id/view", requireUser, async (req, res) => {
     try {
       const video = await storage.getVideoById(parseInt(req.params.id));
       if (!video) {
         return res.status(404).json({ error: "Video not found" });
+      }
+      if (!(await canAccessProgram(req.session.userId!, video.pathologyId))) {
+        return res.status(403).json({ error: "Sem acesso a este programa" });
       }
       const updatedVideo = await storage.updateVideo(video.id, {
         viewCount: (video.viewCount || 0) + 1
@@ -473,7 +508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Ebooks routes
-  app.get("/api/ebooks", async (req, res) => {
+  app.get("/api/ebooks", requireUser, async (req, res) => {
     try {
       const pathologyId = req.query.pathologyId ? parseInt(req.query.pathologyId as string) : undefined;
       let ebooks;
@@ -482,17 +517,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         ebooks = await storage.getEbooks();
       }
-      res.json(ebooks);
+      const allowed = await Promise.all(
+        ebooks.map(async (ebook) =>
+          ebook.pathologyId === null || canAccessProgram(req.session.userId!, ebook.pathologyId)
+        )
+      );
+      res.json(ebooks.filter((_ebook, index) => allowed[index]));
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   });
 
-  app.get("/api/ebooks/:id", async (req, res) => {
+  app.get("/api/ebooks/:id", requireUser, async (req, res) => {
     try {
       const ebook = await storage.getEbookById(parseInt(req.params.id));
       if (!ebook) {
         return res.status(404).json({ error: "Ebook not found" });
+      }
+      if (ebook.pathologyId !== null && !(await canAccessProgram(req.session.userId!, ebook.pathologyId))) {
+        return res.status(403).json({ error: "Sem acesso a este programa" });
       }
       res.json(ebook);
     } catch (error) {
@@ -575,6 +618,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const subscription = await storage.getSubscriptionByUser(userId);
       res.json(subscription || null);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/user/active-plan", requireUser, async (req, res) => {
+    try {
+      const subscription = await storage.getSubscriptionByUser(req.session.userId!);
+      if (!subscription?.planId || new Date(subscription.renewalDate) <= new Date()) {
+        return res.json(null);
+      }
+
+      const plan = await storage.getPlanById(subscription.planId);
+      if (!plan) {
+        return res.json(null);
+      }
+
+      res.json({
+        ...plan,
+        startDate: subscription.startDate,
+        expiryDate: subscription.renewalDate,
+        expiresAt: subscription.renewalDate,
+        subscriptionStatus: subscription.status,
+      });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
@@ -762,6 +829,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ success: true });
     } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin - Plans management
+  app.get("/api/admin/plans", requireAdmin, async (_req, res) => {
+    try {
+      res.json(await storage.getPlans());
+    } catch (_error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/plans", requireAdmin, async (req, res) => {
+    try {
+      const data = insertPlanSchema.parse(req.body);
+      if (data.pathologyId != null && !await storage.getPathologyById(data.pathologyId)) {
+        return res.status(400).json({ error: "Programa não encontrado" });
+      }
+      res.status(201).json(await storage.createPlan(data));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/plans/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const existing = await storage.getPlanById(id);
+      if (!existing) return res.status(404).json({ error: "Plano não encontrado" });
+      const changes = z.object({
+        pathologyId: z.number().int().positive().nullable().optional(),
+        type: z.enum(["mensal", "trimestral", "ilimitado"]).optional(),
+        price: z.number().int().nonnegative().optional(),
+        durationDays: z.number().int().nonnegative().optional(),
+        whatsappUrl: z.string().url().nullable().optional(),
+        bonusContentUrl: z.string().url().nullable().optional(),
+        active: z.number().int().min(0).max(1).optional(),
+      }).parse(req.body);
+      const data = insertPlanSchema.parse({ ...existing, ...changes });
+      if (data.pathologyId != null && !await storage.getPathologyById(data.pathologyId)) {
+        return res.status(400).json({ error: "Programa não encontrado" });
+      }
+      res.json(await storage.updatePlan(id, changes));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.put("/api/admin/plans/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (!await storage.getPlanById(id)) return res.status(404).json({ error: "Plano não encontrado" });
+      const data = insertPlanSchema.parse(req.body);
+      if (data.pathologyId != null && !await storage.getPathologyById(data.pathologyId)) {
+        return res.status(400).json({ error: "Programa não encontrado" });
+      }
+      res.json(await storage.updatePlan(id, data));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/plans/:id", requireAdmin, async (req, res) => {
+    try {
+      if (!await storage.deletePlan(parseInt(req.params.id))) {
+        return res.status(404).json({ error: "Plano não encontrado" });
+      }
+      res.json({ success: true });
+    } catch (_error) {
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -1035,7 +1181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(userId)) {
         return res.status(400).json({ error: "Invalid user ID" });
       }
-      const access = await storage.getUserAccess(userId);
+      const access = await storage.getUserAccess(userId!);
       res.json(access);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
@@ -1045,7 +1191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // exposed endpoint for current user to fetch own access records
   app.get("/api/user/access", requireUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       const access = await storage.getUserAccess(userId);
       res.json(access);
     } catch (error) {
@@ -1085,43 +1231,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session.userId!;
 
-      // Strict server-side validation — never trust the frontend
+      // The client selects a plan only. Amount and program are resolved from it.
       const paymentSchema = z.object({
-        programId: z.number().int().positive("ID do programa inválido"),
-        // amount can be 0 for free programs — only reject negative values
-        amount: z.number().int().nonnegative("Valor do pagamento inválido"),
+        planId: z.number().int().positive("ID do plano inválido"),
         proofUrl: z.string().url("URL do comprovativo inválida").min(1, "URL do comprovativo é obrigatória"),
       });
 
       const parsed = paymentSchema.safeParse({
         ...req.body,
-        programId: typeof req.body.programId === "string" ? parseInt(req.body.programId) : req.body.programId,
-        amount: typeof req.body.amount === "string" ? parseInt(req.body.amount) : req.body.amount,
+        planId: typeof req.body.planId === "string" ? parseInt(req.body.planId) : req.body.planId,
       });
 
       if (!parsed.success) {
         return res.status(400).json({ error: "Dados de pagamento inválidos", details: parsed.error.errors });
       }
 
-      const { programId, amount, proofUrl } = parsed.data;
-
-      // Verify the program actually exists before creating a payment record
-      const pathology = await storage.getPathologyById(programId);
-      if (!pathology) {
-        return res.status(404).json({ error: "Programa não encontrado" });
+      const { planId, proofUrl } = parsed.data;
+      const plan = await storage.getPlanById(planId);
+      if (!plan || plan.active !== 1) {
+        return res.status(404).json({ error: "Plano não encontrado ou indisponível" });
+      }
+      if (plan.type !== "ilimitado" && plan.pathologyId == null) {
+        return res.status(400).json({ error: "Plano sem programa associado" });
       }
 
       const paymentProof = await storage.createPaymentProof({
         userId,
-        pathologyId: programId,
-        amount,
+        // Legacy column remains required. Zero identifies a global unlimited plan.
+        pathologyId: plan.pathologyId ?? 0,
+        planId: plan.id,
+        amount: plan.price,
         proofUrl,
         status: "pendente",
       });
 
       storage.createAdminNotification({
         title: "Novo comprovante de pagamento",
-        message: `Utilizador #${userId} enviou comprovante para o programa #${programId} (${amount} Kz). Aguarda verificação.`,
+        message: `Utilizador #${userId} enviou comprovante para o plano #${plan.id} (${plan.price} Kz). Aguarda verificação.`,
         type: "payment",
         relatedId: paymentProof.id,
       }).catch(() => {});
@@ -1173,63 +1319,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid payment ID" });
       }
 
-      const proof = await storage.approvePaymentProof(paymentId, adminId || 1);
+      const pendingProof = await storage.getPaymentProofById(paymentId);
+      if (!pendingProof) return res.status(404).json({ error: "Pagamento não encontrado" });
+      if (pendingProof.status !== "pendente") return res.status(400).json({ error: "Este pagamento já foi processado" });
+      if (!pendingProof.planId) return res.status(400).json({ error: "Pagamento legado sem plano associado" });
+      const plan = await storage.getPlanById(pendingProof.planId);
+      if (!plan) return res.status(400).json({ error: "Plano associado não encontrado" });
 
+      const proof = await storage.approvePlanPayment(paymentId, adminId || 1, plan);
       if (proof) {
-        const renewalDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-        const startDate = new Date().toISOString();
-
-        // Create/update a user_access record for the specific program paid
-        const existingAccess = await storage.getUserAccess(proof.userId);
-        const accessForPathology = existingAccess.find(a => a.pathologyId === proof.pathologyId);
-        if (accessForPathology) {
-          await storage.updateUserAccess(accessForPathology.id, {
-            status: "ativo",
-            startDate,
-            expiryDate: renewalDate,
-          });
-        } else {
-          await storage.createUserAccess({
-            userId: proof.userId,
-            pathologyId: proof.pathologyId,
-            status: "ativo",
-            startDate,
-            expiryDate: renewalDate,
-          });
-        }
-
-        // Track subscription for admin visibility (status "por_programa" ≠ "ativa",
-        // so it does NOT grant blanket access to all programs on the frontend)
-        const existingSub = await storage.getSubscriptionByUser(proof.userId);
-        if (existingSub) {
-          await storage.updateSubscription(existingSub.id, {
-            status: "por_programa",
-            renewalDate,
-            proofUrl: proof.proofUrl,
-          });
-        } else {
-          await storage.createSubscription({
-            userId: proof.userId,
-            plan: "programa",
-            status: "por_programa",
-            startDate,
-            renewalDate,
-            paymentMethod: "transferencia-bancaria",
-            proofUrl: proof.proofUrl,
-          });
-        }
-
         // Notify the user their payment was approved
         storage.createNotification({
           userId: proof.userId,
           title: "Pagamento aprovado!",
-          message: "O seu comprovante foi verificado e já tens acesso ao programa. Bom estudo!",
+          message: plan.type === "ilimitado"
+            ? "O seu comprovante foi verificado e já tens acesso a todos os programas. Bom estudo!"
+            : "O seu comprovante foi verificado e já tens acesso ao programa. Bom estudo!",
           type: "content",
         }).catch(() => {});
       }
 
+      if (!proof) return res.status(409).json({ error: "Este pagamento já foi processado" });
       res.json(proof);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message === "ACTIVE_UNLIMITED_PLAN") {
+        return res.status(409).json({ error: "O utilizador já possui um plano ilimitado activo" });
+      }
       console.error("Approve payment error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
@@ -1272,6 +1387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fixed: number[] = [];
 
       for (const proof of approvedProofs) {
+        if (proof.planId || proof.pathologyId === 0) continue;
         // Ensure a user_access record exists for this pathology
         const existingAccess = await storage.getUserAccess(proof.userId);
         const accessForPathology = existingAccess.find(a => a.pathologyId === proof.pathologyId);
@@ -1295,12 +1411,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Fix subscription status if it's "ativa" (blanket access) → should be "por_programa"
         const sub = await storage.getSubscriptionByUser(proof.userId);
-        if (sub && sub.status === "ativa") {
+        if (sub && !sub.planId && sub.status === "ativa") {
           await storage.updateSubscription(sub.id, { status: "por_programa" });
         }
       }
 
-      res.json({ success: true, fixedUsers: [...new Set(fixed)], totalProofs: approvedProofs.length });
+      res.json({ success: true, fixedUsers: Array.from(new Set(fixed)), totalProofs: approvedProofs.length });
     } catch (error) {
       console.error("Migrate access error:", error);
       res.status(500).json({ error: "Internal server error" });

@@ -20,48 +20,42 @@ export default function Pathologies() {
     gcTime: 1000 * 60 * 10,
   });
 
-  const { data: pathologies, isLoading } = useQuery<Pathology[]>({
+  const { data: pathologies = [], isLoading } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
     staleTime: 1000 * 60 * 3, // 3 minutos de cache
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
-    onSuccess(data) {
-      console.log("dashboard: fetched pathologies", data);
-    },
   });
 
-  const userId = user?.id || 1;
   const { data: subscription } = useQuery<Subscription>({
-    queryKey: ["/api/subscriptions/user", userId],
+    queryKey: ["/api/subscriptions/user", user?.id],
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 2, // 2 minutos de cache
     gcTime: 1000 * 60 * 10, // 10 minutos garbage collection
   });
+  const { data: activePlan } = useQuery<{ pathologyId: number | null; type?: string; expiryDate?: string; expiresAt?: string } | null>({
+    queryKey: ["/api/user/active-plan"],
+  });
 
   // user-specific access entries, fetched via user endpoint
-  const { data: userAccess } = useQuery<any[]>({
+  const { data: userAccess = [] } = useQuery<any[]>({
     queryKey: ["/api/user/access"],
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
-    onSuccess(data) {
-      console.log("dashboard: user access records", data);
-    },
   });
 
   // controle de acesso por programa
   const hasAccessToProgram = (programId: number) => {
     // Assinatura anual/total: status "ativa" dá acesso a todos os programas
+    if (activePlan?.type === "ilimitado") return true;
     if (subscription?.status === "ativa") return true;
     // Acesso individual por programa: verifica o registo com status "ativo" e não expirado
-    if (userAccess) {
-      return userAccess.some(a => {
-        if (a.pathologyId !== programId) return false;
-        if (a.status !== "ativo") return false;
-        if (a.expiryDate && new Date(a.expiryDate) < new Date()) return false;
-        return true;
-      });
-    }
-    return false;
+    return userAccess.some(a => {
+      if (a.pathologyId !== programId) return false;
+      if (a.status !== "ativo") return false;
+      if (a.expiryDate && new Date(a.expiryDate) < new Date()) return false;
+      return true;
+    });
   };
 
   if (isLoading) {
@@ -89,9 +83,10 @@ export default function Pathologies() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {pathologies?.map((pathology) => {
+        {pathologies.map((pathology) => {
           const imageUrl = pathologyImageMap[pathology.slug] || pathologyImageMap["programa-perder-peso"];
           const hasAccess = hasAccessToProgram(pathology.id);
+          const lockedByCurrentPlan = !!activePlan && activePlan.type !== "ilimitado" && activePlan.pathologyId !== pathology.id;
 
           const cardContent = (
             <div className={`relative overflow-hidden rounded-md group aspect-[2/3] transition-all ${hasAccess ? 'hover-elevate active-elevate-2 cursor-pointer' : 'opacity-75 grayscale-[0.5]'}`}>
@@ -124,7 +119,7 @@ export default function Pathologies() {
                     } self-start`}
                   data-testid={`button-pathology-${pathology.slug}`}
                 >
-                  {hasAccess ? "Acessar Programa" : `Comprar por ${(pathology.price || 0).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}`}
+                  {hasAccess ? "Acessar Programa" : lockedByCurrentPlan ? "Programa bloqueado" : "Ver planos"}
                 </Button>
               </div>
             </div>
@@ -140,11 +135,7 @@ export default function Pathologies() {
             );
           }
 
-          return (
-            <div key={pathology.id} onClick={() => alert(`Para acessar o ${pathology.title}, o valor é ${(pathology.price || 0).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}. Redirecionando para pagamento...`)}>
-              {cardContent}
-            </div>
-          );
+          return <Link key={pathology.id} href="/dashboard/assinaturas"><a data-testid={`card-pathology-${pathology.slug}`}>{cardContent}{lockedByCurrentPlan && <p className="mt-2 text-xs text-muted-foreground">Disponível apenas após término do seu plano actual</p>}</a></Link>;
         })}
       </div>
     </div>

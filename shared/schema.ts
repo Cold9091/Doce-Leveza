@@ -38,6 +38,17 @@ export const pathologies = sqliteTable("pathologies", {
   price: integer("price").default(0),
 });
 
+export const plans = sqliteTable("plans", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  pathologyId: integer("pathology_id"),
+  type: text("type", { enum: ["mensal", "trimestral", "ilimitado"] }).notNull(),
+  price: integer("price").notNull(),
+  durationDays: integer("duration_days").notNull(),
+  whatsappUrl: text("whatsapp_url"),
+  bonusContentUrl: text("bonus_content_url"),
+  active: integer("active").notNull().default(1),
+});
+
 export const videos = sqliteTable("videos", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   pathologyId: integer("pathology_id").notNull(),
@@ -72,6 +83,7 @@ export const consultations = sqliteTable("consultations", {
 export const subscriptions = sqliteTable("subscriptions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
+  planId: integer("plan_id"),
   plan: text("plan").notNull(),
   status: text("status").notNull(),
   startDate: text("start_date").notNull(),
@@ -113,6 +125,7 @@ export const paymentProofs = sqliteTable("payment_proofs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   pathologyId: integer("pathology_id").notNull(),
+  planId: integer("plan_id"),
   amount: integer("amount").notNull(),
   proofUrl: text("proof_url").notNull(),
   status: text("status").default("pendente"),
@@ -189,6 +202,24 @@ export type AdminUser = typeof admins.$inferSelect;
 export type InsertAdminUser = typeof admins.$inferInsert;
 export type Pathology = typeof pathologies.$inferSelect;
 export type InsertPathology = typeof pathologies.$inferInsert;
+export type Plan = typeof plans.$inferSelect;
+export type InsertPlan = typeof plans.$inferInsert;
+export const insertPlanSchema = createInsertSchema(plans).omit({ id: true }).extend({
+  type: z.enum(["mensal", "trimestral", "ilimitado"]),
+  price: z.number().int().nonnegative("O preço não pode ser negativo"),
+  durationDays: z.number().int().nonnegative("A duração não pode ser negativa"),
+  pathologyId: z.number().int().positive().nullable().optional(),
+  whatsappUrl: z.string().url("URL do WhatsApp inválida").nullable().optional(),
+  bonusContentUrl: z.string().url("URL do conteúdo bónus inválida").nullable().optional(),
+  active: z.number().int().min(0).max(1).optional(),
+}).superRefine((plan, ctx) => {
+  if (plan.type === "ilimitado" && plan.pathologyId != null) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["pathologyId"], message: "O plano ilimitado não pode ser associado a um programa" });
+  }
+  if (plan.type && plan.type !== "ilimitado" && plan.pathologyId == null) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["pathologyId"], message: "Selecione um programa para este plano" });
+  }
+});
 export type Video = Omit<typeof videos.$inferSelect, "resources"> & { resources?: string[] };
 export type InsertVideo = Omit<typeof videos.$inferInsert, "resources"> & { resources?: string[] };
 export type Ebook = Omit<typeof ebooks.$inferSelect, "tags"> & { tags: string[] };

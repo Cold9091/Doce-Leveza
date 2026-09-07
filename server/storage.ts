@@ -6,6 +6,8 @@ import {
   type SignupData,
   type Pathology,
   type InsertPathology,
+  type Plan,
+  type InsertPlan,
   type Video,
   type Ebook,
   type Consultation,
@@ -25,10 +27,10 @@ import {
   type PaymentProof,
   type InsertPaymentProof,
   users, videos, ebooks, consultations, subscriptions, userAccess, leads, admins, notifications, adminNotifications, systemSettings, paymentProofs,
-  pathologies
+  pathologies, plans
 } from "../shared/schema.js";
 import { db } from "./db.js";
-import { eq, desc, sql } from "drizzle-orm";
+import { and, eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Leads
@@ -51,6 +53,14 @@ export interface IStorage {
   createPathology(data: InsertPathology): Promise<Pathology>;
   updatePathology(id: number, data: Partial<Pathology>): Promise<Pathology | null>;
   deletePathology(id: number): Promise<boolean>;
+
+  // Plans
+  getPlans(): Promise<Plan[]>;
+  getActivePlans(): Promise<Plan[]>;
+  getPlanById(id: number): Promise<Plan | null>;
+  createPlan(data: InsertPlan): Promise<Plan>;
+  updatePlan(id: number, data: Partial<Plan>): Promise<Plan | null>;
+  deletePlan(id: number): Promise<boolean>;
 
   // Videos
   getVideos(): Promise<Video[]>;
@@ -87,6 +97,7 @@ export interface IStorage {
   getUserAccess(userId: number): Promise<UserAccess[]>;
   createUserAccess(data: any): Promise<UserAccess>;
   updateUserAccess(id: number, data: any): Promise<UserAccess | null>;
+  approvePlanPayment(id: number, adminId: number, plan: Plan): Promise<PaymentProof | null>;
 
   // Notifications
   getNotificationsByUser(userId: number): Promise<Notification[]>;
@@ -109,6 +120,7 @@ export interface IStorage {
 
   // Payment Proofs
   createPaymentProof(data: InsertPaymentProof): Promise<PaymentProof>;
+  getPaymentProofById(id: number): Promise<PaymentProof | null>;
   getPaymentProofs(status?: string): Promise<PaymentProof[]>;
   getPaymentProofsByUser(userId: number): Promise<PaymentProof[]>;
   approvePaymentProof(id: number, adminId: number): Promise<PaymentProof>;
@@ -189,6 +201,35 @@ export class DatabaseStorage implements IStorage {
   async deletePathology(id: number): Promise<boolean> {
     const [deleted] = await db.delete(pathologies).where(eq(pathologies.id, id)).returning();
     return !!deleted;
+  }
+
+  // Plans
+  async getPlans(): Promise<Plan[]> {
+    return await db.select().from(plans);
+  }
+
+  async getActivePlans(): Promise<Plan[]> {
+    return await db.select().from(plans).where(eq(plans.active, 1));
+  }
+
+  async getPlanById(id: number): Promise<Plan | null> {
+    const [plan] = await db.select().from(plans).where(eq(plans.id, id));
+    return plan || null;
+  }
+
+  async createPlan(data: InsertPlan): Promise<Plan> {
+    const [plan] = await db.insert(plans).values(data).returning();
+    return plan;
+  }
+
+  async updatePlan(id: number, data: Partial<Plan>): Promise<Plan | null> {
+    const [plan] = await db.update(plans).set(data).where(eq(plans.id, id)).returning();
+    return plan || null;
+  }
+
+  async deletePlan(id: number): Promise<boolean> {
+    const [disabled] = await db.update(plans).set({ active: 0 }).where(eq(plans.id, id)).returning();
+    return !!disabled;
   }
 
   // Videos
@@ -343,7 +384,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSubscriptionByUser(userId: number): Promise<Subscription | null> {
-    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId));
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .orderBy(desc(subscriptions.id))
+      .limit(1);
     return subscription || null;
   }
 
@@ -478,6 +524,11 @@ export class DatabaseStorage implements IStorage {
     return proof;
   }
 
+  async getPaymentProofById(id: number): Promise<PaymentProof | null> {
+    const [proof] = await db.select().from(paymentProofs).where(eq(paymentProofs.id, id));
+    return proof || null;
+  }
+
   async getPaymentProofs(status?: string): Promise<PaymentProof[]> {
     if (status) {
       return await db.select().from(paymentProofs).where(eq(paymentProofs.status, status));
@@ -500,6 +551,99 @@ export class DatabaseStorage implements IStorage {
       .where(eq(paymentProofs.id, id))
       .returning();
     return proof;
+  }
+
+  async approvePlanPayment(id: number, adminId: number, plan: Plan): Promise<PaymentProof | null> {
+    return db.transaction(async (tx) => {
+      if (plan.type !== "ilimitado") {
+        const [currentSubscription] = await tx
+          .select()
+          .from(subscriptions)
+          .where(eq(subscriptions.userId, (
+            await tx.select({ userId: paymentProofs.userId }).from(paymentProofs).where(eq(paymentProofs.id, id)).limit(1)
+          )[0]?.userId ?? -1))
+          .orderBy(desc(subscriptions.id))
+          .limit(1);
+
+        if (
+          currentSubscription?.planId &&
+          new Date(currentSubscription.renewalDate) > new Date()
+        ) {
+          const [currentPlan] = await tx
+            .select()
+            .from(plans)
+            .where(eq(plans.id, currentSubscription.planId))
+            .limit(1);
+          if (currentPlan?.type === "ilimitado") {
+            throw new Error("ACTIVE_UNLIMITED_PLAN");
+          }
+        }
+      }
+
+      const [proof] = await tx
+        .update(paymentProofs)
+        .set({
+          status: "aprovado",
+          approvedBy: adminId,
+          approvedAt: new Date().toISOString(),
+        })
+        .where(and(eq(paymentProofs.id, id), eq(paymentProofs.status, "pendente")))
+        .returning();
+
+      if (!proof) return null;
+
+      const startDate = new Date().toISOString();
+      const renewalDate = new Date(Date.now() + plan.durationDays * 24 * 60 * 60 * 1000).toISOString();
+      const existingAccess = await tx.select().from(userAccess).where(eq(userAccess.userId, proof.userId));
+
+      if (plan.type !== "ilimitado") {
+        for (const access of existingAccess) {
+          if (access.status === "ativo" && access.pathologyId !== plan.pathologyId) {
+            await tx.update(userAccess).set({ status: "inativo" }).where(eq(userAccess.id, access.id));
+          }
+        }
+
+        const selectedAccess = existingAccess.find((access) => access.pathologyId === plan.pathologyId);
+        if (selectedAccess) {
+          await tx
+            .update(userAccess)
+            .set({ status: "ativo", startDate, expiryDate: renewalDate })
+            .where(eq(userAccess.id, selectedAccess.id));
+        } else {
+          await tx.insert(userAccess).values({
+            userId: proof.userId,
+            pathologyId: plan.pathologyId!,
+            status: "ativo",
+            startDate,
+            expiryDate: renewalDate,
+          });
+        }
+      }
+
+      const [existingSubscription] = await tx
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, proof.userId))
+        .orderBy(desc(subscriptions.id))
+        .limit(1);
+      const subscriptionData = {
+        planId: plan.id,
+        plan: plan.type,
+        status: plan.type === "ilimitado" ? "ativa" : "por_programa",
+        startDate,
+        renewalDate,
+        paymentMethod: "transferencia-bancaria",
+        proofUrl: proof.proofUrl,
+      };
+
+      if (existingSubscription) {
+        await tx.update(subscriptions).set(subscriptionData).where(eq(subscriptions.id, existingSubscription.id));
+      } else {
+        await tx.insert(subscriptions).values({ userId: proof.userId, ...subscriptionData });
+      }
+
+      return proof;
+    });
   }
 
   async rejectPaymentProof(id: number, adminNotes: string): Promise<PaymentProof> {

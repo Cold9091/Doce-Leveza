@@ -23,18 +23,71 @@ import { insertPathologySchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 
+type ProgramPlan = {
+  id: number;
+  pathologyId: number | null;
+  type: "mensal" | "trimestral" | "ilimitado";
+  price: number;
+  durationDays: number;
+  whatsappUrl?: string | null;
+  bonusContentUrl?: string | null;
+  active: number;
+};
+
+const emptyPlan = (): Omit<ProgramPlan, "id"> => ({
+  pathologyId: null, type: "mensal", price: 0, durationDays: 30,
+  whatsappUrl: null, bonusContentUrl: null, active: 1,
+});
+
 export default function AdminPathologies() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPathology, setEditingPathology] = useState<Pathology | null>(null);
   const [coverPreview, setCoverPreview] = useState<string>("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [planDialogOpen, setPlanDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<ProgramPlan | null>(null);
+  const [planDraft, setPlanDraft] = useState<Omit<ProgramPlan, "id">>(emptyPlan());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const { data: pathologies, isLoading } = useQuery<Pathology[]>({
     queryKey: ["/api/pathologies"],
   });
+  const { data: plans = [] } = useQuery<ProgramPlan[]>({
+    queryKey: ["/api/admin/plans"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/plans", { credentials: "include" });
+      if (!response.ok) throw new Error("Não foi possível carregar os planos");
+      return response.json();
+    },
+  });
+  const savePlanMutation = useMutation({
+    mutationFn: async (data: Omit<ProgramPlan, "id">) => {
+      if (editingPlan) return apiRequest("PUT", `/api/admin/plans/${editingPlan.id}`, data);
+      return apiRequest("POST", "/api/admin/plans", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/plans"] });
+      setPlanDialogOpen(false);
+      setEditingPlan(null);
+      toast({ title: "Sucesso", description: "Plano guardado com sucesso" });
+    },
+    onError: (err: any) => toast({ title: "Erro", description: err.message || "Não foi possível guardar o plano", variant: "destructive" }),
+  });
+  const deletePlanMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/plans/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/plans"] });
+    },
+  });
+  const openPlanDialog = (plan?: ProgramPlan, pathologyId: number | null = null) => {
+    setEditingPlan(plan || null);
+    setPlanDraft(plan ? { pathologyId: plan.pathologyId, type: plan.type, price: plan.price, durationDays: plan.durationDays, whatsappUrl: plan.whatsappUrl || null, bonusContentUrl: plan.bonusContentUrl || null, active: plan.active } : { ...emptyPlan(), pathologyId, type: pathologyId === null ? "ilimitado" : "mensal" });
+    setPlanDialogOpen(true);
+  };
 
   const form = useForm<InsertPathology>({
     resolver: zodResolver(insertPathologySchema),
@@ -357,6 +410,39 @@ export default function AdminPathologies() {
           </DialogContent>
         </Dialog>
       </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div><CardTitle>Planos e ofertas</CardTitle><p className="text-sm text-muted-foreground mt-1">Defina preço, duração, links de WhatsApp e bónus por plano.</p></div>
+          <Button variant="outline" onClick={() => openPlanDialog(undefined, null)} data-testid="button-add-unlimited-plan">Configurar oferta ilimitada</Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {pathologies?.map(pathology => {
+            const programPlans = plans.filter(plan => plan.pathologyId === pathology.id);
+            return <div key={pathology.id} className="rounded-lg border p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2"><p className="font-medium">{pathology.title}</p><Button size="sm" variant="outline" onClick={() => openPlanDialog(undefined, pathology.id)}>Adicionar plano</Button></div>
+              <div className="mt-3 space-y-2">{programPlans.length ? programPlans.map(plan => <div className="flex flex-wrap items-center justify-between gap-2 text-sm" key={plan.id}>
+                <span><Badge variant={plan.active ? "default" : "secondary"}>{plan.type === "trimestral" ? "Trimestral" : "Mensal"}</Badge> <strong className="ml-2">{plan.price.toLocaleString()} Kz</strong> · {plan.durationDays} dias</span>
+                <span className="flex gap-2"><Button size="sm" variant="ghost" onClick={() => openPlanDialog(plan)}>Editar</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => deletePlanMutation.mutate(plan.id)}>Remover</Button></span>
+              </div>) : <p className="text-sm text-muted-foreground">Sem planos configurados.</p>}</div>
+            </div>;
+          })}
+          {plans.filter(plan => plan.pathologyId === null).map(plan => <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-center justify-between" key={plan.id}><span><strong>Oferta ilimitada</strong> — {plan.price.toLocaleString()} Kz</span><Button size="sm" variant="outline" onClick={() => openPlanDialog(plan)}>Editar</Button></div>)}
+        </CardContent>
+      </Card>
+      <Dialog open={planDialogOpen} onOpenChange={setPlanDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{editingPlan ? "Editar plano" : "Novo plano"}</DialogTitle><DialogDescription>Os links são usados para a comunidade e o bónus do programa.</DialogDescription></DialogHeader>
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Tipo de plano<select className="mt-1 w-full rounded-md border bg-background p-2" value={planDraft.type} onChange={e => setPlanDraft({ ...planDraft, type: e.target.value as ProgramPlan["type"], durationDays: e.target.value === "trimestral" ? 90 : e.target.value === "ilimitado" ? 0 : 30 })} disabled={planDraft.pathologyId === null}><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="ilimitado">Ilimitado</option></select></label>
+            <label className="text-sm font-medium">Preço (Kz)<Input type="number" value={planDraft.price} onChange={e => setPlanDraft({ ...planDraft, price: Number(e.target.value) })} /></label>
+            <label className="text-sm font-medium">Duração (dias)<Input type="number" value={planDraft.durationDays} disabled={planDraft.type === "ilimitado"} onChange={e => setPlanDraft({ ...planDraft, durationDays: Number(e.target.value) })} /></label>
+            <label className="text-sm font-medium">URL da comunidade WhatsApp<Input value={planDraft.whatsappUrl || ""} onChange={e => setPlanDraft({ ...planDraft, whatsappUrl: e.target.value || null })} placeholder="https://chat.whatsapp.com/..." /></label>
+            <label className="text-sm font-medium">URL do bónus<Input value={planDraft.bonusContentUrl || ""} onChange={e => setPlanDraft({ ...planDraft, bonusContentUrl: e.target.value || null })} placeholder="https://..." /></label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!planDraft.active} onChange={e => setPlanDraft({ ...planDraft, active: e.target.checked ? 1 : 0 })} /> Plano activo</label>
+          </div>
+          <DialogFooter><Button onClick={() => savePlanMutation.mutate(planDraft)} disabled={savePlanMutation.isPending}>{savePlanMutation.isPending ? "A guardar..." : "Guardar plano"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

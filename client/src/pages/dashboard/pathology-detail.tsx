@@ -176,10 +176,14 @@ export default function PathologyDetail() {
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 2,
   });
+  const { data: activePlan } = useQuery<{ pathologyId: number | null; type?: string; expiryDate?: string; expiresAt?: string; bonusContentUrl?: string | null } | null>({
+    queryKey: ["/api/user/active-plan"],
+  });
 
   const isUnlocked = (pathologyId?: number) => {
     if (!pathologyId) return true;
     // Assinatura anual/total concede acesso a tudo
+    if (activePlan?.type === "ilimitado") return true;
     if (userSubscriptions?.status === "ativa") return true;
     // Verificar acesso individual com status "ativo" e não expirado
     if (userAccess) {
@@ -192,6 +196,10 @@ export default function PathologyDetail() {
     }
     return false;
   };
+  const activeAccessForProgram = activePlan?.type === "ilimitado" ||
+    (activePlan?.pathologyId === pathology?.id &&
+      (!activePlan?.expiryDate || new Date(activePlan.expiryDate) > new Date()) &&
+      (!activePlan?.expiresAt || new Date(activePlan.expiresAt) > new Date()));
 
   const filteredEbooks = ebooks?.filter(e => isUnlocked(e.pathologyId ?? undefined));
 
@@ -485,7 +493,7 @@ export default function PathologyDetail() {
       title: pdf.title,
       description: "Material de apoio para estudo",
       pages: pdf.pages,
-      downloadUrl: pdf.url,
+      downloadUrl: pdf.url || "",
       coverUrl: "",
       tags: ["Material de Apoio"],
       pathologyId: pathology?.id || null,
@@ -944,6 +952,11 @@ export default function PathologyDetail() {
           </a>
         </Link>
         <div className="flex items-center gap-2">
+          {activeAccessForProgram && activePlan?.bonusContentUrl && (
+            <a href={activePlan.bonusContentUrl} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" data-testid="button-program-bonus">Aceder ao Bónus</Button>
+            </a>
+          )}
           {pathologyVideos && pathologyVideos.length > 0 && (
             <Button
               className="w-full sm:w-auto shadow-lg shadow-primary/20"
