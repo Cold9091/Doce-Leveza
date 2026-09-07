@@ -407,6 +407,13 @@ export default function Home() {
                 icon: Baby,
                 price: 85000,
               },
+              {
+                title: "Programa de reeducação alimentar para perder de peso na terceira idade (Idosos)",
+                desc: "Cuidados nutricionais específicos para o emagrecimento saudável na longevidade.",
+                image: "https://images.unsplash.com/photo-1516307364728-25b36c5f400f?w=800&h=450&fit=crop",
+                icon: Users,
+                price: 85000,
+              },
             ].map((pathology, idx) => (
               <motion.div
                 key={idx}
@@ -635,7 +642,7 @@ export default function Home() {
               variant="outline"
               className="mb-3 sm:mb-4 text-xs uppercase tracking-wide border-border bg-muted/30"
             >
-              3 SEMANAS PARA TRANSFORMAR O SEU CORPO
+              VENHA E TRANSFORME O SEU CORPO
             </Badge>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground">
               <span className="text-accent">Como funciona</span> o DOCE
