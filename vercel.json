@@ -1,5 +1,6 @@
 {
     "version": 2,
+    "buildCommand": "npm run db:upgrade-plans && npm run build",
     "rewrites": [
         {
             "source": "/api/(.*)",
